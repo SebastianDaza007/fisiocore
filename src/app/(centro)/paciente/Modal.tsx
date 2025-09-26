@@ -14,6 +14,7 @@ interface RegistrarPacienteDialogProps {
   onPacienteRegistrado: () => void;
 }
 
+
 export const RegistrarPacienteDialog: React.FC<RegistrarPacienteDialogProps> = ({
   isOpen,
   onClose,
@@ -177,13 +178,15 @@ export const RegistrarPacienteDialog: React.FC<RegistrarPacienteDialogProps> = (
 
   return (
     <>
+      {/* Overlay que bloquea el fondo */}
       <div 
-        className="fixed inset-0 z-0 flex items-center justify-center p-4 pointer-events-none"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 "
         onClick={onClose}
       >
+        {/* Contenedor del modal */}
         <div 
-          className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
+          className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()} // evita cerrar si hago click dentro
         >
           <div className="border-b border-gray-200 p-6">
             <div className="flex justify-between items-center">
@@ -322,7 +325,7 @@ export const RegistrarPacienteDialog: React.FC<RegistrarPacienteDialogProps> = (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="direccion" className={formStyles.label}>
-                    Domicilio <span className="text-gray-500 text-sm"></span>
+                    Domicilio
                   </label>
                   <input 
                     type="text" 
