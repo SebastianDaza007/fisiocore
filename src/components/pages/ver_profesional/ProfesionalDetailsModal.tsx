@@ -21,8 +21,8 @@ interface Profesional {
     dias_semana: {
       nombre_dia: string;
     };
-    hora_inicio: string;
-    hora_fin: string;
+    hora_inicio: string | Date;
+    hora_fin: string | Date;
     duracion_turno: number;
   }>;
   profesionales_por_obras_sociales: Array<{
@@ -46,13 +46,32 @@ export default function ProfesionalDetailsModal({
 
   if (!profesional) return null;
 
-  const formatTime = (timeString: string) => {
-    const time = new Date(`1970-01-01T${timeString}`);
-    return time.toLocaleTimeString('es-AR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
+  const formatTime = (time: string | Date) => {
+    try {
+      let dateObj: Date;
+
+      if (time instanceof Date) {
+        dateObj = time;
+      } else if (typeof time === 'string') {
+        // Si viene como string, puede ser "HH:mm:ss" o ISO string
+        if (time.includes('T')) {
+          dateObj = new Date(time);
+        } else {
+          dateObj = new Date(`1970-01-01T${time}`);
+        }
+      } else {
+        return 'Hora inválida';
+      }
+
+      return dateObj.toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    } catch (error) {
+      console.error('Error formateando hora:', error, time);
+      return 'Hora inválida';
+    }
   };
 
   const headerContent = (
@@ -188,7 +207,7 @@ export default function ProfesionalDetailsModal({
         </Card>
 
         {/* Información Adicional */}
-        <Card className="shadow-sm">
+        {/* <Card className="shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <i className="pi pi-info-circle text-gray-600"></i>
             <h4 className="text-lg font-semibold text-gray-800 m-0">Estado y Estadísticas</h4>
@@ -210,7 +229,7 @@ export default function ProfesionalDetailsModal({
               <p className="text-lg font-bold text-purple-600 m-0">--</p>
             </div>
           </div>
-        </Card>
+        </Card> */}
       </div>
     </Dialog>
   );
