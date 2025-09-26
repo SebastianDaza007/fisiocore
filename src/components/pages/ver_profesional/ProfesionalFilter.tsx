@@ -10,21 +10,33 @@ interface ProfesionalFilterProps {
   filters: any;
   onGlobalFilterChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRefresh: () => void;
+  onEspecialidadFilterChange: (value: string | null) => void;
+  onEstadoFilterChange: (value: string | null) => void;
+  onClearFilters: () => void;
+  especialidadFilter: string | null;
+  estadoFilter: string | null;
+  availableEspecialidades?: string[];
 }
 
 export default function ProfesionalFilter({
   globalFilterValue,
   filters,
   onGlobalFilterChange,
-  onRefresh
+  onRefresh,
+  onEspecialidadFilterChange,
+  onEstadoFilterChange,
+  onClearFilters,
+  especialidadFilter,
+  estadoFilter,
+  availableEspecialidades = []
 }: ProfesionalFilterProps) {
 
   const especialidadOptions = [
     { label: 'Todas las especialidades', value: null },
-    { label: 'Fisioterapia', value: 'Fisioterapia' },
-    { label: 'Kinesiología', value: 'Kinesiología' },
-    { label: 'Terapia Ocupacional', value: 'Terapia Ocupacional' },
-    { label: 'Fonoaudiología', value: 'Fonoaudiología' }
+    ...availableEspecialidades.map(especialidad => ({
+      label: especialidad,
+      value: especialidad
+    }))
   ];
 
   const estadoOptions = [
@@ -63,9 +75,9 @@ export default function ProfesionalFilter({
           {/* Filtro por especialidad */}
           <div className="w-full sm:w-48">
             <Dropdown
-              value={null}
+              value={especialidadFilter}
               options={especialidadOptions}
-              onChange={() => {}}
+              onChange={(e) => onEspecialidadFilterChange(e.value)}
               placeholder="Especialidad"
               className="w-full"
               showClear
@@ -75,14 +87,22 @@ export default function ProfesionalFilter({
           {/* Filtro por estado */}
           <div className="w-full sm:w-40">
             <Dropdown
-              value={null}
+              value={estadoFilter}
               options={estadoOptions}
-              onChange={() => {}}
+              onChange={(e) => onEstadoFilterChange(e.value)}
               placeholder="Estado"
               className="w-full"
               showClear
             />
           </div>
+
+          {/* Botón limpiar filtros */}
+          <Button
+            icon="pi pi-filter-slash"
+            onClick={onClearFilters}
+            tooltip="Limpiar filtros"
+            className="p-button-outlined p-button-secondary"
+          />
 
           {/* Botón refrescar */}
           <Button

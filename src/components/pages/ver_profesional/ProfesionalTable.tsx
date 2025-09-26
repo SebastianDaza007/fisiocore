@@ -8,6 +8,7 @@ import { Button } from 'primereact/button';
 interface Profesional {
   id_profesional: number;
   matricula_profesional: string;
+  estado: string;
   usuarios: {
     nombre_usuario: string;
     apellido_usuario: string;
@@ -50,22 +51,14 @@ export default function ProfesionalTable({
   onEdit
 }: ProfesionalTableProps) {
 
-  const nombreTemplate = (rowData: Profesional) => {
+  const nombreCompletoTemplate = (rowData: Profesional) => {
     return (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900">
-          {rowData.usuarios.nombre_usuario}
+          {rowData.usuarios.nombre_usuario} {rowData.usuarios.apellido_usuario}
         </span>
         <span className="text-sm text-gray-500">DNI: {rowData.usuarios.dni_usuario}</span>
       </div>
-    );
-  };
-
-  const apellidoTemplate = (rowData: Profesional) => {
-    return (
-      <span className="font-medium text-gray-800">
-        {rowData.usuarios.apellido_usuario}
-      </span>
     );
   };
 
@@ -94,11 +87,12 @@ export default function ProfesionalTable({
     );
   };
 
-  const estadoTemplate = () => {
+  const estadoTemplate = (rowData: Profesional) => {
+    const isActivo = rowData.estado === 'Activo';
     return (
       <Badge
-        value="Activo"
-        severity="success"
+        value={rowData.estado}
+        severity={isActivo ? "success" : "danger"}
         className="text-sm"
       />
     );
@@ -139,23 +133,15 @@ export default function ProfesionalTable({
     >
       <Column
         field="usuarios.nombre_usuario"
-        header="Nombre"
-        body={nombreTemplate}
+        header="Nombre del Profesional"
+        body={nombreCompletoTemplate}
         sortable
-        style={{ minWidth: '180px' }}
-      />
-      <Column
-        field="usuarios.apellido_usuario"
-        header="Apellido"
-        body={apellidoTemplate}
-        sortable
-        style={{ minWidth: '150px' }}
+        style={{ minWidth: '250px' }}
       />
       <Column
         field="especialidades.nombre_especialidad"
         header="Especialidad"
         body={especialidadTemplate}
-        sortable
         style={{ minWidth: '150px' }}
       />
       <Column
@@ -164,6 +150,7 @@ export default function ProfesionalTable({
         style={{ minWidth: '200px' }}
       />
       <Column
+        field="estado"
         header="Estado"
         body={estadoTemplate}
         style={{ minWidth: '100px' }}

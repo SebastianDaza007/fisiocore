@@ -48,7 +48,13 @@ export async function GET() {
       orderBy: { id_profesional: 'desc' },
     });
 
-    return NextResponse.json(profesionales);
+    // Agregar estado computado basado en si tiene horarios
+    const profesionalesConEstado = profesionales.map(profesional => ({
+      ...profesional,
+      estado: profesional.horarios_profesionales.length > 0 ? 'Activo' : 'Inactivo'
+    }));
+
+    return NextResponse.json(profesionalesConEstado);
   } catch (error) {
     console.error('Error al obtener profesionales:', error);
     return NextResponse.json(

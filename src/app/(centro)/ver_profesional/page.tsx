@@ -10,6 +10,7 @@ import ProfesionalDetailsModal from '../../../components/pages/ver_profesional/P
 interface Profesional {
   id_profesional: number;
   matricula_profesional: string;
+  estado: string;
   usuarios: {
     nombre_usuario: string;
     apellido_usuario: string;
@@ -38,10 +39,14 @@ export default function VerProfesionalPage() {
   const [profesionales, setProfesionales] = useState<Profesional[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [especialidadFilter, setEspecialidadFilter] = useState<string | null>(null);
+  const [estadoFilter, setEstadoFilter] = useState<string | null>(null);
   const [selectedProfesional, setSelectedProfesional] = useState<Profesional | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [filters, setFilters] = useState({
     global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+    'especialidades.nombre_especialidad': { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
+    estado: { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
   });
 
   const fetchProfesionales = async () => {
@@ -72,6 +77,32 @@ export default function VerProfesionalPage() {
     setGlobalFilterValue(value);
   };
 
+  const onEspecialidadFilterChange = (value: string | null) => {
+    const _filters = { ...filters };
+    _filters['especialidades.nombre_especialidad'].value = value;
+    setFilters(_filters);
+    setEspecialidadFilter(value);
+  };
+
+  const onEstadoFilterChange = (value: string | null) => {
+    const _filters = { ...filters };
+    _filters['estado'].value = value;
+    setFilters(_filters);
+    setEstadoFilter(value);
+  };
+
+  const onClearFilters = () => {
+    const clearedFilters = {
+      global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      'especialidades.nombre_especialidad': { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
+      estado: { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
+    };
+    setFilters(clearedFilters);
+    setGlobalFilterValue('');
+    setEspecialidadFilter(null);
+    setEstadoFilter(null);
+  };
+
   const handleViewDetails = (profesional: Profesional) => {
     setSelectedProfesional(profesional);
     setShowDetailsModal(true);
@@ -86,8 +117,14 @@ export default function VerProfesionalPage() {
     'usuarios.apellido_usuario',
     'usuarios.dni_usuario',
     'matricula_profesional',
-    'especialidades.nombre_especialidad'
+    'especialidades.nombre_especialidad',
+    'estado'
   ];
+
+  // Get unique specialties from the data
+  const availableEspecialidades = Array.from(
+    new Set(profesionales.map(p => p.especialidades.nombre_especialidad))
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -97,6 +134,12 @@ export default function VerProfesionalPage() {
           filters={filters}
           onGlobalFilterChange={onGlobalFilterChange}
           onRefresh={fetchProfesionales}
+          onEspecialidadFilterChange={onEspecialidadFilterChange}
+          onEstadoFilterChange={onEstadoFilterChange}
+          onClearFilters={onClearFilters}
+          especialidadFilter={especialidadFilter}
+          estadoFilter={estadoFilter}
+          availableEspecialidades={availableEspecialidades}
         />
 
         <Card className="shadow-lg">
