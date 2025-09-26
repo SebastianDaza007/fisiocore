@@ -9,61 +9,69 @@ export type Option = { label: string; value: string };
 
 type Props = {
   onClear: () => void;
+  value: {
+    q: string;
+    especialidadId: string | null;
+    profesionalId: string | null;
+    tipoId: string | null;
+    estadoTurnoId: string | null;
+  };
+  options: {
+    especialidades: Option[];
+    profesionales: Option[];
+    tipos: Option[];
+    estados: Option[];
+  };
+  onChange: (next: Props["value"]) => void;
 };
 
-export default function FiltersBar({ onClear }: Props) {
-  const [q, setQ] = React.useState("");
-  const [especialidad, setEspecialidad] = React.useState<string | null>(null);
-  const [profesional, setProfesional] = React.useState<string | null>(null);
-  const [tipo, setTipo] = React.useState<string | null>(null);
-
-  const opciones: Option[] = [
-    { label: "Todos", value: "" },
-    { label: "Kinesiologo", value: "kinesiologo" },
-    { label: "Fisioterapeuta", value: "fisioterapeuta" },
-  ];
-
-  const profesionales: Option[] = [
-    { label: "Dr. Lautaro Papiruna", value: "papiruna" },
-    { label: "Dra. Musa Rella", value: "rella" },
-  ];
-
-  const tipos: Option[] = [
-    { label: "Tratamiento", value: "tratamiento" },
-    { label: "Otra Consulta", value: "otra" },
-  ];
+export default function FiltersBar({ onClear, value, options, onChange }: Props) {
+  const { q, especialidadId, profesionalId, tipoId, estadoTurnoId } = value;
+  const handleChange = (patch: Partial<Props["value"]>) =>
+    onChange({ ...value, ...patch });
 
   return (
-    <div className="flex flex-wrap gap-2 items-center">
+    <div className="flex flex-wrap gap-2 items-center w-full">
       <span className="p-input-icon-left">
-        <i className="pi pi-search" />
+        <i className="pi pi-search" style={{ left: "1rem" }} />
         <InputText
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => handleChange({ q: e.target.value })}
           placeholder="DNI Paciente"
-          className="h-10"
+          className="h-10 text-gray-800"
+          style={{ paddingLeft: "2.5rem" }}
         />
       </span>
       <Dropdown
-        value={especialidad ?? ""}
-        options={opciones}
-        onChange={(e) => setEspecialidad(e.value as string)}
+        value={especialidadId ?? ""}
+        options={options.especialidades}
+        onChange={(e) => handleChange({ especialidadId: (e.value as string) || null })}
         placeholder="Especialidad"
-        className="min-w-48 h-10"
+        className="min-w-48 h-10 text-gray-800"
       />
       <Dropdown
-        value={profesional ?? ""}
-        options={profesionales}
-        onChange={(e) => setProfesional(e.value as string)}
+        value={profesionalId ?? ""}
+        options={options.profesionales}
+        onChange={(e) => handleChange({ profesionalId: (e.value as string) || null })}
         placeholder="Profesional"
-        className="min-w-48 h-10"
+        className="min-w-48 h-10 text-gray-800"
+        filter
+        filterBy="label"
+        showClear
       />
       <Dropdown
-        value={tipo ?? ""}
-        options={tipos}
-        onChange={(e) => setTipo(e.value as string)}
+        value={tipoId ?? ""}
+        options={options.tipos}
+        onChange={(e) => handleChange({ tipoId: (e.value as string) || null })}
         placeholder="Tipo de Consulta"
-        className="min-w-48 h-10"
+        className="min-w-48 h-10 text-gray-800"
+      />
+      <Dropdown
+        value={estadoTurnoId ?? ""}
+        options={options.estados}
+        onChange={(e) => handleChange({ estadoTurnoId: (e.value as string) || null })}
+        placeholder="Estado del turno"
+        className="min-w-48 h-10 text-gray-800"
       />
       <Button
         label="Limpiar Filtros"
