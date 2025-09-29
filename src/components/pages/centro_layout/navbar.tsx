@@ -14,6 +14,7 @@ type NavbarProps = {
     urlLogin: string;
     urlRegistro: string;
     notificaciones: Notificacion[];
+    onLogout?: () => void;
 };
 
 function capitalizarRuta(ruta: string): string {
@@ -21,10 +22,10 @@ function capitalizarRuta(ruta: string): string {
     return ruta.charAt(0).toUpperCase() + ruta.slice(1);
 }
 
-// Diccionario para títulos personalizados
 const TITULOS: Record<string, string> = {
     "/agendar": "Registrar o Agendar Turnos",
     "/dturno": "Detalle de Turno",
+    "/profesionales": "Listado de profesionales",
 };
 
 export default function DashboardNavbar({
@@ -33,27 +34,27 @@ export default function DashboardNavbar({
     urlLogin,
     urlRegistro,
     notificaciones,
-    }: NavbarProps) {
+    onLogout,
+}: NavbarProps) {
     const pathname = usePathname();
     const segmento = pathname.split("/")[1] || "";
 
-    // Primero busca en el diccionario, si no existe capitaliza la ruta
     const titulo = TITULOS[`/${segmento}`] || capitalizarRuta(segmento);
 
     return (
-        <header className="h-16 bg-teal-500 text-white flex items-center justify-between px-6 shadow">
+        <header className="h-16 text-gray-800 flex items-center justify-between px-6 shadow-sm" style={{ backgroundColor: "#FEF7FF" }}>
         {/* Título dinámico */}
-        <h1 className="text-2xl font-bold">{titulo}</h1>
+        <h1 className="text-3xl font-semibold">{titulo}</h1>
 
         {/* Menús a la derecha */}
         <div className="flex items-center gap-4">
             <NotificationsMenu notificaciones={notificaciones} />
-            <span className="font-medium">{usuario ? "Admin" : ""}</span>
             <UserMenu
             usuario={usuario}
             idUsuario={idUsuario}
             urlLogin={urlLogin}
             urlRegistro={urlRegistro}
+            onLogout={onLogout}
             />
         </div>
         </header>
