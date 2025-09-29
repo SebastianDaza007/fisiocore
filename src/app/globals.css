@@ -1,6 +1,15 @@
+
 @import "tailwindcss";
 @import "primereact/resources/themes/lara-light-teal/theme.css";
 @import "primereact/resources/primereact.min.css";
+
+@layer base {
+  @media (min-width: 1280px) {
+    html {
+      font-size: calc(16px * 0.90);
+    }
+  }
+}
 @import "primeicons/primeicons.css";
 
 :root {

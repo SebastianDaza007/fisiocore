@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -64,9 +65,9 @@ export default function DashboardLayout({
       case 'ADMINISTRATIVO':
         return [
           ...baseItems,
-          { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/agendar", options: null },
-          { icon: "pi-calendar", label: "Turnos", path: "/turnos", options: null },
           { icon: "pi-clipboard", label: "Administrativo", path: "/administrativo", options: null },
+          { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/agendar", options: null },
+          { icon: "pi-calendar", label: "Turnos", path: "/administrativo/turnos/ver", options: null },
         ];
 
       default:
@@ -77,31 +78,10 @@ export default function DashboardLayout({
   // Mostrar loading si está cargando
   if (loading) {
     return (
-<<<<<<< HEAD
-        <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar title="FisioCore" items={sidebarItems} />
-
-        {/* Contenido principal */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-            <DashboardNavbar
-            idUsuario={5}
-            usuario={{ nombre: "Andrea" }}
-            urlLogin="/login"
-            urlRegistro="/registro"
-            notificaciones={[]}
-            />
-
-            <main className="flex-1 h-full overflow-hidden p-0 bg-white">
-            {children}
-            </main>
-        </div>
-=======
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
           <p className="mt-4 text-gray-600">Cargando...</p>
->>>>>>> dev
         </div>
       </div>
     );
