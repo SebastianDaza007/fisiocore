@@ -29,7 +29,7 @@ import DashboardNavbar from "@/components/pages/centro_layout/navbar";
             notificaciones={[]}
             />
 
-            <main className="flex-1 h-full overflow-auto p-0 bg-white">
+            <main className="flex-1 h-full overflow-hidden p-0 bg-white">
             {children}
             </main>
         </div>
