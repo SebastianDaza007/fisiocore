@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { classNames } from "primereact/utils";
 import Image from "next/image";
 
@@ -18,6 +18,7 @@ type SidebarProps = {
 
 export default function Sidebar({ items }: SidebarProps) {
     const router = useRouter();
+    const pathname = usePathname();
 
     return (
         <aside className="text-white h-screen w-60 flex flex-col shadow-lg rounded-tr-4xl mt-1.25" style={{ backgroundColor: "#0C645A", height: "100vh" }} >
@@ -34,18 +35,32 @@ export default function Sidebar({ items }: SidebarProps) {
 
         {/* Lista de opciones */}
         <nav className="mt-6 flex flex-col gap-1 px-2">
-            {items.map((item, index) => (
-            <div
-                key={index}
-                className={classNames(
-                "flex items-center gap-3 py-3 px-4 cursor-pointer transition-all duration-200 ease-in-out rounded-xl hover:bg-[#0F7E72] hover:translate-x-1"
-                )}
-                onClick={() => router.push(item.path)}
-            >
-                <i className={classNames("pi", item.icon)}></i>
-                <span>{item.label}</span>
-            </div>
-            ))}
+            {items.map((item, index) => {
+                const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
+
+                return (
+                    <div
+                        key={index}
+                        className={classNames(
+                            "flex items-center gap-3 py-3 px-4 cursor-pointer transition-all duration-300 ease-out rounded-xl transform",
+                            {
+                                "bg-white/20 backdrop-blur-sm shadow-lg border border-white/30": isActive,
+                                "hover:bg-white/10 hover:backdrop-blur-sm hover:shadow-md hover:border hover:border-white/20": !isActive
+                            }
+                        )}
+                        onClick={() => router.push(item.path)}
+                    >
+                        <i className={classNames("pi", item.icon, "transition-all duration-300", {
+                            "text-white font-bold": isActive,
+                            "text-gray-200": !isActive
+                        })}></i>
+                        <span className={classNames("transition-all duration-300", {
+                            "font-semibold text-white": isActive,
+                            "text-gray-200": !isActive
+                        })}>{item.label}</span>
+                    </div>
+                )
+            })}
         </nav>
         </aside>
     );
