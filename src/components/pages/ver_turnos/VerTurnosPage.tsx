@@ -6,6 +6,7 @@ import FiltersBar from "./FiltersBar";
 import TurnosTable from "./TurnosTable";
 import type { Turno } from "./types";
 import type { Option } from "./FiltersBar";
+import Button from "@/components/common/button";
 
 export default function VerTurnosPage() {
   const [mounted, setMounted] = React.useState(false);
@@ -168,18 +169,23 @@ export default function VerTurnosPage() {
         </div>
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow p-4 text-gray-900">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">{titulo}</h2>
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
+              <h2 className="text-2xl font-semibold text-gray-900">{titulo}</h2>
+              <div className="flex items-center gap-2">
+                <Button label="Agendar turno" icon="pi pi-plus" severity="success" />
+              </div>
             </div>
-            <FiltersBar
-              onClear={() => {
-                setSelectedDate(new Date());
-                setFilters({ q: "", especialidadId: null, profesionalId: null, tipoId: null, estadoTurnoId: null });
-              }}
-              value={filters}
-              options={options}
-              onChange={setFilters}
-            />
+            <div className="bg-gray-50 rounded-lg p-3 mb-1">
+              <FiltersBar
+                onClear={() => {
+                  setSelectedDate(new Date());
+                  setFilters({ q: "", especialidadId: null, profesionalId: null, tipoId: null, estadoTurnoId: null });
+                }}
+                value={filters}
+                options={options}
+                onChange={setFilters}
+              />
+            </div>
           </div>
           <div className="mt-4">
             {loading ? (
