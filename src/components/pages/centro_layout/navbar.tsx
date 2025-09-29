@@ -14,6 +14,7 @@ type NavbarProps = {
     urlLogin: string;
     urlRegistro: string;
     notificaciones: Notificacion[];
+    onLogout?: () => void;
 };
 
 function capitalizarRuta(ruta: string): string {
@@ -33,6 +34,7 @@ export default function DashboardNavbar({
     urlLogin,
     urlRegistro,
     notificaciones,
+    onLogout,
     }: NavbarProps) {
     const pathname = usePathname();
     const segmento = pathname.split("/")[1] || "";
