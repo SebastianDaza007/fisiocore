@@ -6,20 +6,20 @@ const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const { dni, password } = await request.json()
 
-    console.log('🔍 Login attempt:', { usuario: email, passwordLength: password?.length })
+    console.log('🔍 Login attempt:', { dni: dni, passwordLength: password?.length })
 
-    if (!email || !password) {
+    if (!dni || !password) {
       return NextResponse.json(
-        { error: 'Usuario y contraseña son requeridos' },
+        { error: 'DNI y contraseña son requeridos' },
         { status: 400 }
       )
     }
 
-    // Buscar usuario por nombre_usuario con su rol
+    // Buscar usuario por dni_usuario con su rol
     const usuario = await prisma.usuarios.findFirst({
-      where: { nombre_usuario: email },
+      where: { dni_usuario: dni },
       include: {
         roles: true,
         profesionales: true
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!usuario) {
-      console.log('❌ Usuario no encontrado para nombre_usuario:', email)
+      console.log('❌ Usuario no encontrado para DNI:', dni)
       return NextResponse.json(
         { error: 'Credenciales inválidas - Usuario no encontrado' },
         { status: 401 }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     console.log('🔐 Resultado verificación:', { isValidPassword })
 
     if (!isValidPassword) {
-      console.log('❌ Contraseña inválida para usuario:', email)
+      console.log('❌ Contraseña inválida para DNI:', dni)
       return NextResponse.json(
         { error: 'Credenciales inválidas - Contraseña incorrecta' },
         { status: 401 }

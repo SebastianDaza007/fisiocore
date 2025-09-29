@@ -74,7 +74,7 @@ const customIcons = [
 ]
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [dni, setDni] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -107,7 +107,7 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const result = await login(email, password)
+    const result = await login(dni, password)
 
     if (!result.success) {
       setError(result.error || 'Error de login')
@@ -338,23 +338,23 @@ export default function LoginPage() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.7 }}
                 >
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-                      Nombre de usuario
+                  <div className='inputsdellogin'>
+                    <label htmlFor="dni" className="block text-sm font-medium text-white mb-2">
+                      DNI
                     </label>
                     <input
-                      id="email"
-                      name="email"
+                      id="dni"
+                      name="dni"
                       type="text"
                       required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={dni}
+                      onChange={(e) => setDni(e.target.value)}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all duration-200 text-white placeholder-white backdrop-blur-sm"
-                      placeholder="Ingresa tu nombre de usuario"
+                      placeholder="Ingresa tu DNI"
                     />
                   </div>
 
-                  <div>
+                  <div className='inputsdellogin'>
                     <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
                       Contraseña
                     </label>
@@ -365,7 +365,7 @@ export default function LoginPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all duration-200 text-white placeholder-white backdrop-blur-sm"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all duration-200 text-white placeholder-white placeholder-opacity-100 backdrop-blur-sm"
                       placeholder="Ingresa tu contraseña"
                     />
                   </div>

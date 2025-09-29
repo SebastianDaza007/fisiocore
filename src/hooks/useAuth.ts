@@ -56,14 +56,14 @@ export function useAuth() {
     }
   }
 
-  const login = async (email: string, password: string) => {
+  const login = async (dni: string, password: string) => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ dni, password }),
       })
 
       if (response.ok) {

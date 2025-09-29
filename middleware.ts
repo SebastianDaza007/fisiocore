@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+interface JWTPayload {
+  userId: number;
+  email: string;
+  rol: string;
+  nombre: string;
+  apellido: string;
+  profesionalId?: number;
+}
+
 // Configuración de rutas por rol
 const ROLE_ROUTES = {
   ADMIN: ['/admin', '/gerente', '/profesional', '/administrativo', '/paciente'],
@@ -35,7 +44,7 @@ export function middleware(request: NextRequest) {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as JWTPayload
       const userRole = decoded.rol
 
       // Verificar si el usuario tiene acceso a la ruta

@@ -4,13 +4,20 @@ import { useAuth } from "@/hooks/useAuth";
 import Sidebar from "@/components/pages/centro_layout/sidebar";
 import DashboardNavbar from "@/components/pages/centro_layout/navbar";
 
+interface SidebarItem {
+  icon: string;
+  label: string;
+  path: string;
+  options: null;
+}
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const { user, loading, isAuthenticated, logout } = useAuth();
-  const [sidebarItems, setSidebarItems] = useState<any[]>([]);
+  const [sidebarItems, setSidebarItems] = useState<SidebarItem[]>([]);
 
   // Configurar items del sidebar según el rol
   useEffect(() => {
@@ -21,7 +28,7 @@ export default function DashboardLayout({
   }, [user]);
 
   // Función para obtener items del sidebar según el rol
-  const getSidebarItemsByRole = (rol: string) => {
+  const getSidebarItemsByRole = (rol: string): SidebarItem[] => {
     const baseItems = [
       { icon: "pi-users", label: "Pacientes", path: "/paciente", options: null },
     ];
@@ -101,7 +108,7 @@ export default function DashboardLayout({
           onLogout={logout}
         />
 
-        <main className="flex-1 h-full overflow-auto p-0 bg-white">
+        <main className="flex-1 h-full overflow-auto bg-gray-50 p-6">
           {children}
         </main>
       </div>
