@@ -14,9 +14,10 @@ type UserMenuProps = {
     idUsuario?: string | number | null;
     urlLogin: string;
     urlRegistro: string;
+    onLogout?: () => void;
 };
 
-export default function UserMenu({ idUsuario, usuario, urlLogin, urlRegistro }: UserMenuProps) {
+export default function UserMenu({ idUsuario, usuario, urlLogin, urlRegistro, onLogout }: UserMenuProps) {
     const menu = useRef<Menu>(null);
     const router = useRouter();
 
@@ -45,7 +46,7 @@ export default function UserMenu({ idUsuario, usuario, urlLogin, urlRegistro }: 
             {
             label: "Cerrar sesión",
             icon: "pi pi-sign-out",
-            command: () => console.log("Cerrar sesión"),
+            command: () => onLogout ? onLogout() : console.log("Cerrar sesión"),
             },
         ]
         : [
