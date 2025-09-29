@@ -48,26 +48,14 @@ export default function ProfesionalDetailsModal({
 
   const formatTime = (time: string | Date) => {
     try {
-      let dateObj: Date;
-
-      if (time instanceof Date) {
-        dateObj = time;
-      } else if (typeof time === 'string') {
-        // Si viene como string, puede ser "HH:mm:ss" o ISO string
-        if (time.includes('T')) {
-          dateObj = new Date(time);
-        } else {
-          dateObj = new Date(`1970-01-01T${time}`);
+      if (typeof time === 'string') {
+        // Extraer solo HH:mm del formato "HH:mm:ss"
+        const timeParts = time.split(':');
+        if (timeParts.length >= 2) {
+          return `${timeParts[0].padStart(2, '0')}:${timeParts[1].padStart(2, '0')}`;
         }
-      } else {
-        return 'Hora inválida';
       }
-
-      return dateObj.toLocaleTimeString('es-AR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
+      return 'Hora inválida';
     } catch (error) {
       console.error('Error formateando hora:', error, time);
       return 'Hora inválida';

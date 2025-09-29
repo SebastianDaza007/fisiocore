@@ -48,10 +48,29 @@ export async function GET() {
       orderBy: { id_profesional: 'desc' },
     });
 
-    // Agregar estado computado basado en si tiene horarios
+    // Agregar estado computado y convertir horas a string
     const profesionalesConEstado = profesionales.map(profesional => ({
       ...profesional,
-      estado: profesional.horarios_profesionales.length > 0 ? 'Activo' : 'Inactivo'
+      estado: profesional.horarios_profesionales.length > 0 ? 'Activo' : 'Inactivo',
+      horarios_profesionales: profesional.horarios_profesionales.map(horario => {
+        // Extraer solo la parte de tiempo en formato HH:mm:ss
+        const formatTimeToString = (time: Date | string): string => {
+          if (typeof time === 'string') return time;
+          if (time instanceof Date) {
+            const hours = time.getUTCHours().toString().padStart(2, '0');
+            const minutes = time.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = time.getUTCSeconds().toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+          }
+          return '00:00:00';
+        };
+
+        return {
+          ...horario,
+          hora_inicio: formatTimeToString(horario.hora_inicio),
+          hora_fin: formatTimeToString(horario.hora_fin),
+        };
+      })
     }));
 
     return NextResponse.json(profesionalesConEstado);

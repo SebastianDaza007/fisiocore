@@ -47,7 +47,7 @@ export default function ProfesionalFilter({
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
-      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+      <div className="flex flex-col gap-4">
         {/* Título */}
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Listado de Profesionales</h2>
@@ -57,17 +57,17 @@ export default function ProfesionalFilter({
         </div>
 
         {/* Filtros */}
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full lg:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           {/* Búsqueda global */}
-          <div className="flex-1 lg:flex-initial">
+          <div className="flex-1">
             <span className="p-input-icon-left">
               <i className="pi pi-search text-gray-800" style={{ paddingLeft: '1rem' }} />
               <InputText
                 value={globalFilterValue}
                 onChange={onGlobalFilterChange}
                 placeholder="Buscar por nombre, apellido, DNI..."
-                className="w-full lg:w-80"
-                style={{ paddingLeft: '2.5rem' }} 
+                className="w-full"
+                style={{ paddingLeft: '2.5rem' }}
               />
             </span>
           </div>
@@ -99,6 +99,7 @@ export default function ProfesionalFilter({
           {/* Botón limpiar filtros */}
           <Button
             icon="pi pi-filter-slash"
+            label="Limpiar filtros"
             onClick={onClearFilters}
             tooltip="Limpiar filtros"
             className="p-button-outlined p-button-secondary"
