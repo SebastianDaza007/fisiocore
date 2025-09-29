@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { classNames } from "primereact/utils";
 import Image from "next/image";
@@ -17,58 +16,34 @@ type SidebarProps = {
     items: SidebarItem[];
 };
 
-export default function Sidebar({ title, items }: SidebarProps) {
-    const [collapsed, setCollapsed] = useState(false);
+export default function Sidebar({ items }: SidebarProps) {
     const router = useRouter();
 
     return (
-        <aside
-        className={classNames(
-            "bg-gray-900 text-white h-screen transition-all duration-300",
-            collapsed ? "w-16" : "w-50"
-        )}
-        >
-        {/* Encabezado */}
-        <div className="flex items-center justify-between p-4">
-            {/* Vista del logo por siempre digamos */}
-            <div className="flex items-center gap-2">
+        <aside className="text-white h-screen w-60 flex flex-col shadow-lg rounded-tr-4xl mt-1.25" style={{ backgroundColor: "#0C645A", height: "100vh" }} >
+        {/* Logo grande */}
+        <div className="flex items-center justify-center p-6 border-b border-teal-700">
             <Image
-                src="/logo-fc-white.png"
-                alt="Logo"
-                width={ collapsed ? 40 : 32}
-                height={ collapsed ? 40 : 32}
-                className="object-contain"
+            src="/isologotipo-fc-white.png" // logo grande
+            alt="Logo"
+            width={120}
+            height={120}
+            className="object-contain"
             />
-            {/* mostramos el texto cuando esta abierto todo */}
-            {!collapsed && (
-                <span className="font-sans font-bold text-lg">{title}</span>
-            )}
-            </div>
-
-            {/* Botón de colapsar */}
-            <button className="ml-auto" onClick={() => setCollapsed(!collapsed)}>
-            <i
-                className={classNames(
-                "pi",
-                collapsed ? "pi-angle-right" : "pi-angle-left"
-                )}
-            ></i>
-            </button>
         </div>
 
         {/* Lista de opciones */}
-        <nav className="mt-4">
+        <nav className="mt-6 flex flex-col gap-1 px-2">
             {items.map((item, index) => (
             <div
                 key={index}
                 className={classNames(
-                "flex items-center gap-3 py-3 hover:bg-gray-700 cursor-pointer transition-all",
-                collapsed ? "justify-center" : "px-6"
+                "flex items-center gap-3 py-3 px-4 cursor-pointer transition-all duration-200 ease-in-out rounded-xl hover:bg-[#0F7E72] hover:translate-x-1"
                 )}
                 onClick={() => router.push(item.path)}
             >
                 <i className={classNames("pi", item.icon)}></i>
-                {!collapsed && <span>{item.label}</span>}
+                <span>{item.label}</span>
             </div>
             ))}
         </nav>

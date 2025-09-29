@@ -3,15 +3,15 @@ import React from "react";
 import Sidebar from "@/components/pages/centro_layout/sidebar";
 import DashboardNavbar from "@/components/pages/centro_layout/navbar";
 
-    export default function DashboardLayout({
+export default function DashboardLayout({
     children,
-    }: {
+}: {
     children: React.ReactNode;
     }) {
     const sidebarItems = [
-        { icon: "pi-calendar", label: "Turnos", path: "/turnos", options: null },
-        { icon: "pi-calendar-plus", label: "Agendar", path: "/agendar", options: null },
-        { icon: "pi-clock", label: "D turno", path: "/dturno", options: null },
+        { icon: "pi-calendar", label: "Calendario de turnos", path: "/turnos", options: null },
+        { icon: "pi-calendar-plus", label: "Agendar turnos", path: "/agendar", options: null },
+        { icon: "pi-users", label: "Gestionar profesionales", path: "/profesionales", options: null },
     ];
 
     return (
@@ -29,7 +29,7 @@ import DashboardNavbar from "@/components/pages/centro_layout/navbar";
             notificaciones={[]}
             />
 
-            <main className="flex-1 h-full overflow-auto p-0 bg-white">
+            <main className="flex-1 h-full overflow-auto bg-gray-50 p-6">
             {children}
             </main>
         </div>
