@@ -65,7 +65,7 @@ export default function DashboardLayout({
         return [
           ...baseItems,
           { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/agendar", options: null },
-          { icon: "pi-calendar", label: "Turnos", path: "/turnos", options: null },
+          { icon: "pi-calendar", label: "Turnos", path: "/administrativo/turnos/ver", options: null },
           { icon: "pi-clipboard", label: "Administrativo", path: "/administrativo", options: null },
         ];
 
