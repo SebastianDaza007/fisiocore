@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "primereact/resources/themes/lara-light-blue/theme.css";
+@import "primereact/resources/themes/lara-light-teal/theme.css";
 @import "primereact/resources/primereact.min.css";
 @import "primeicons/primeicons.css";
 
@@ -17,7 +17,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #FEF7FF;
     --foreground: #ededed;
   }
 }
@@ -26,4 +26,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.inputsdellogin input::placeholder {
+  color: #ffffff !important;
+  opacity: 1 !important;
 }

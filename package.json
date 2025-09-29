@@ -10,6 +10,13 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcryptjs": "^3.0.2",
+    "framer-motion": "^12.23.22",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
     "next": "15.5.3",
     "pg": "^8.16.3",
     "primeicons": "^7.0.0",
