@@ -60,6 +60,7 @@ export default function DashboardLayout({
           { icon: "pi-calendar", label: "Mi Calendario", path: "/profesional", options: null },
           { icon: "pi-users", label: "Mis Pacientes", path: "/profesional/pacientes", options: null },
           { icon: "pi-file-medical", label: "Historia Clínica", path: "/profesional/historia", options: null },
+          { icon: "pi-calendar", label: "Agenda de Turnos", path: "/profesional/agenda_turnos", options: null },
         ];
 
       case 'ADMINISTRATIVO':
