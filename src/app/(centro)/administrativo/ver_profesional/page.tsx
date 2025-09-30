@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Card } from 'primereact/card';
 import { FilterMatchMode } from 'primereact/api';
-import ProfesionalTable from '../../../components/pages/ver_profesional/ProfesionalTable';
-import ProfesionalFilter from '../../../components/pages/ver_profesional/ProfesionalFilter';
-import ProfesionalDetailsModal from '../../../components/pages/ver_profesional/ProfesionalDetailsModal';
+import { DataTableFilterMeta } from 'primereact/datatable';
+import ProfesionalTable from '../../../../components/pages/ver_profesional/ProfesionalTable';
+import ProfesionalFilter from '../../../../components/pages/ver_profesional/ProfesionalFilter';
+import ProfesionalDetailsModal from '../../../../components/pages/ver_profesional/ProfesionalDetailsModal';
 
 interface Profesional {
   id_profesional: number;
@@ -43,7 +44,7 @@ export default function VerProfesionalPage() {
   const [estadoFilter, setEstadoFilter] = useState<string | null>(null);
   const [selectedProfesional, setSelectedProfesional] = useState<Profesional | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<DataTableFilterMeta>({
     global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
     'especialidades.nombre_especialidad': { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
     estado: { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
@@ -71,28 +72,31 @@ export default function VerProfesionalPage() {
 
   const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const _filters = { ...filters };
-    _filters['global'].value = value;
-    setFilters(_filters);
+    setFilters({
+      ...filters,
+      global: { value, matchMode: FilterMatchMode.CONTAINS }
+    });
     setGlobalFilterValue(value);
   };
 
   const onEspecialidadFilterChange = (value: string | null) => {
-    const _filters = { ...filters };
-    _filters['especialidades.nombre_especialidad'].value = value;
-    setFilters(_filters);
+    setFilters({
+      ...filters,
+      'especialidades.nombre_especialidad': { value, matchMode: FilterMatchMode.EQUALS }
+    });
     setEspecialidadFilter(value);
   };
 
   const onEstadoFilterChange = (value: string | null) => {
-    const _filters = { ...filters };
-    _filters['estado'].value = value;
-    setFilters(_filters);
+    setFilters({
+      ...filters,
+      estado: { value, matchMode: FilterMatchMode.EQUALS }
+    });
     setEstadoFilter(value);
   };
 
   const onClearFilters = () => {
-    const clearedFilters = {
+    const clearedFilters: DataTableFilterMeta = {
       global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
       'especialidades.nombre_especialidad': { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
       estado: { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
@@ -115,10 +119,7 @@ export default function VerProfesionalPage() {
   const globalFilterFields = [
     'usuarios.nombre_usuario',
     'usuarios.apellido_usuario',
-    'usuarios.dni_usuario',
-    'matricula_profesional',
-    'especialidades.nombre_especialidad',
-    'estado'
+    'usuarios.dni_usuario'
   ];
 
   // Get unique specialties from the data

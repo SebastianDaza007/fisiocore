@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable } from 'primereact/datatable';
+import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Badge } from 'primereact/badge';
 import { Button } from 'primereact/button';
@@ -36,7 +36,7 @@ interface Profesional {
 interface ProfesionalTableProps {
   profesionales: Profesional[];
   loading: boolean;
-  filters: any;
+  filters: DataTableFilterMeta;
   globalFilterFields: string[];
   onViewDetails: (profesional: Profesional) => void;
   onEdit: (profesional: Profesional) => void;
@@ -118,19 +118,37 @@ export default function ProfesionalTable({
   };
 
   return (
-    <DataTable
-      value={profesionales}
-      loading={loading}
-      globalFilterFields={globalFilterFields}
-      filters={filters}
-      emptyMessage="No se encontraron profesionales"
-      paginator
-      rows={10}
-      rowsPerPageOptions={[5, 10, 25, 50]}
-      className="p-datatable-gridlines"
-      stripedRows
-      scrollable
-    >
+    <>
+      <style jsx global>{`
+        .profesional-table .p-paginator .p-paginator-current {
+          background-color: transparent !important;
+          color: #1f2937 !important;
+          font-weight: 500;
+        }
+        .profesional-table .p-paginator {
+          color: #1f2937 !important;
+        }
+        .profesional-table .p-paginator .p-paginator-pages .p-paginator-page {
+          color: #1f2937 !important;
+        }
+        .profesional-table .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+          background-color: #0c645a !important;
+          color: white !important;
+        }
+      `}</style>
+      <DataTable
+        value={profesionales}
+        loading={loading}
+        globalFilterFields={globalFilterFields}
+        filters={filters}
+        emptyMessage="No se encontraron profesionales"
+        paginator
+        rows={10}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        className="p-datatable-gridlines profesional-table"
+        stripedRows
+        scrollable
+      >
       <Column
         field="usuarios.nombre_usuario"
         header="Nombre del Profesional"
@@ -162,5 +180,6 @@ export default function ProfesionalTable({
         style={{ minWidth: '120px' }}
       />
     </DataTable>
+    </>
   );
 }
