@@ -1,8 +1,7 @@
 // app/api/profesional/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 
 export async function GET() {
   try {
@@ -19,6 +18,16 @@ export async function GET() {
             nombre_especialidad: true,
           },
         },
+        profesionales_por_obras_sociales: {
+          include: {
+            obras_sociales: {
+              select: {
+                id_obra_social: true,
+                nombre_obra_social: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -27,6 +36,9 @@ export async function GET() {
       id: p.id_profesional,
       nombre: `${p.usuarios.nombre_usuario} ${p.usuarios.apellido_usuario}`,
       especialidad: p.especialidades.nombre_especialidad,
+      obras_sociales: p.profesionales_por_obras_sociales.map(
+        (pos) => pos.obras_sociales
+      ),
     }));
 
     return NextResponse.json(profesionalesFormateados);
@@ -37,6 +49,5 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
   }
 }

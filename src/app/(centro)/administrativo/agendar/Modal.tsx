@@ -180,8 +180,9 @@ export const RegistrarPacienteDialog: React.FC<RegistrarPacienteDialogProps> = (
   return (
     <>
       {/* Overlay que bloquea el fondo */}
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 "
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
         onClick={onClose}
       >
         {/* Contenedor del modal */}

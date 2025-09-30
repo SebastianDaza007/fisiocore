@@ -1,8 +1,7 @@
 // app/api/turnos/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 
 // -------------------- GET: lista de turnos --------------------
 export async function GET() {
@@ -46,7 +45,6 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -93,7 +91,6 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -127,6 +124,5 @@ export async function PUT(req: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
   }
 }

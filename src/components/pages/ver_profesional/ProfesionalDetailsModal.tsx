@@ -48,8 +48,20 @@ export default function ProfesionalDetailsModal({
 
   const formatTime = (time: string | Date) => {
     try {
-      if (typeof time === 'string') {
-        // Extraer solo HH:mm del formato "HH:mm:ss"
+      if (time instanceof Date) {
+        // Si es un objeto Date, extraer las horas y minutos
+        const hours = time.getHours().toString().padStart(2, '0');
+        const minutes = time.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+      } else if (typeof time === 'string') {
+        // Si es un timestamp ISO (ej: "1970-01-01T08:00:00.000Z")
+        if (time.includes('T')) {
+          const dateObj = new Date(time);
+          const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+          const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+          return `${hours}:${minutes}`;
+        }
+        // Si es formato "HH:mm:ss"
         const timeParts = time.split(':');
         if (timeParts.length >= 2) {
           return `${timeParts[0].padStart(2, '0')}:${timeParts[1].padStart(2, '0')}`;

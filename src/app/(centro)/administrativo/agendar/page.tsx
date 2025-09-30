@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RegistrarPacienteDialog } from "../paciente/Modal";
+import { RegistrarPacienteDialog } from "./Modal";
 import { TurnosUI, Turno } from "./turnoscomp";
 
 export default function TurnosPage() {
@@ -16,7 +16,12 @@ export default function TurnosPage() {
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState<{ dni: string; nombre: string; id: number } | null>(null);
   const [loadingPacientes, setLoadingPacientes] = useState(false);
 
-  const [profesionales, setProfesionales] = useState<{ id: number; nombre: string; especialidad: string }[]>([]);
+  const [profesionales, setProfesionales] = useState<{
+    id: number;
+    nombre: string;
+    especialidad: string;
+    obras_sociales: { id_obra_social: number; nombre_obra_social: string }[];
+  }[]>([]);
   const [loadingProfesionales, setLoadingProfesionales] = useState(false);
 
   const [turnos, setTurnos] = useState<Turno[]>([]);
