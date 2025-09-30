@@ -37,7 +37,7 @@ useEffect(() => {
     const res = await fetch("/api/profesional/tipos_consulta");
     const data = await res.json();
     setTiposConsulta(
-      data.map((t: any) => ({
+      data.map((t: { id_tipo_consulta: number; nombre_tipo_consulta: string }) => ({
         value: t.id_tipo_consulta,
         label: t.nombre_tipo_consulta
       }))
@@ -52,7 +52,7 @@ const turnosFiltrados = turnos.filter(t => {
 });
 
   // 📌 Para armar el calendario
-  const dateTemplate = (dateMeta: any) => {
+  const dateTemplate = (dateMeta: { day: number; month: number; year: number }) => {
     const isSelected =
       date &&
       date.getDate() === dateMeta.day &&
@@ -88,7 +88,7 @@ const turnosFiltrados = turnos.filter(t => {
       `/api/profesional/agenda_medico?fecha=${fechaISO}&profesionalId=${user.profesionalId}`
     );
     const data = await res.json();
-    setTurnos(data.filter((t: any) => t.estado_turno_id === 5));
+    setTurnos(data.filter((t: { estado_turno_id: number }) => t.estado_turno_id === 5));
   };
 
   // 📌 Fetch de turnos con polling

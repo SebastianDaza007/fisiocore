@@ -125,25 +125,25 @@ export default function DesarrolloPage() {
             transition={{ delay: 0.6 }}
             className="text-center"
           >
-            <div className="inline-flex items-center gap-2 bg-gray-100 rounded-full px-6 py-3">
-              <div className="flex gap-1">
+            <div className="inline-flex items-center gap-3 bg-gray-100 rounded-full px-8 py-4">
+              <div className="flex gap-1.5">
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
+                  animate={{ scale: [1, 1.3, 1] }}
                   transition={{ repeat: Infinity, duration: 1, delay: 0 }}
-                  className="w-2 h-2 bg-teal-500 rounded-full"
+                  className="w-3 h-3 bg-teal-500 rounded-full"
                 />
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
+                  animate={{ scale: [1, 1.3, 1] }}
                   transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                  className="w-2 h-2 bg-teal-500 rounded-full"
+                  className="w-3 h-3 bg-teal-500 rounded-full"
                 />
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
+                  animate={{ scale: [1, 1.3, 1] }}
                   transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                  className="w-2 h-2 bg-teal-500 rounded-full"
+                  className="w-3 h-3 bg-teal-500 rounded-full"
                 />
               </div>
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-base font-semibold text-gray-700">
                 Proximamente disponible
               </span>
             </div>

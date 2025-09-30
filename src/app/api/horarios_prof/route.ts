@@ -75,7 +75,17 @@ export async function GET() {
 
     console.log(`Encontrados ${turnosOcupados.length} turnos ocupados (confirmados)`);
 
-    const turnosDisponibles: any[] = [];
+    const turnosDisponibles: {
+      id: number;
+      id_horario: number;
+      profesional_id: number;
+      profesional_nombre: string;
+      especialidad: string;
+      dia: string;
+      fecha: string;
+      hora: string;
+      estado: string;
+    }[] = [];
     let idSlot = 1;
 
     horarios.forEach((h) => {
