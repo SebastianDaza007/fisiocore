@@ -39,6 +39,7 @@ export default function DashboardLayout({
         return [
           ...baseItems,
           { icon: "pi-user-plus", label: "Profesionales", path: "/profesional", options: null },
+          { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/turnos", options: null },
           { icon: "pi-calendar-plus", label: "Agendar", path: "/agendar", options: null },
           { icon: "pi-chart-bar", label: "Dashboard", path: "/admin", options: null },
@@ -65,7 +66,7 @@ export default function DashboardLayout({
       case 'ADMINISTRATIVO':
         return [
           ...baseItems,
-          { icon: "pi-clipboard", label: "Administrativo", path: "/administrativo", options: null },
+          { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
           { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/agendar", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/administrativo/turnos/ver", options: null },
         ];
