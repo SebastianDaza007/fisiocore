@@ -30,7 +30,7 @@ export default function VerTurnosPage() {
 
   // Debounce para el campo DNI (q)
   const debouncedQ = React.useMemo(() => {
-    let handler: any;
+    let handler: ReturnType<typeof setTimeout> | null = null;
     let latest = filters.q;
     const subscribers: Array<(v: string) => void> = [];
     const api = {
@@ -43,7 +43,7 @@ export default function VerTurnosPage() {
       },
       set(value: string) {
         latest = value;
-        clearTimeout(handler);
+        if (handler) clearTimeout(handler);
         handler = setTimeout(() => {
           subscribers.forEach((cb) => cb(latest));
         }, 400);
@@ -51,7 +51,6 @@ export default function VerTurnosPage() {
     };
     return api;
     // We want to recreate only when filters.q reference changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.q]);
 
   const [qDebouncedValue, setQDebouncedValue] = React.useState("");
@@ -141,7 +140,11 @@ export default function VerTurnosPage() {
         if (!mounted) return;
         setItems(data.items ?? []);
       } catch (e) {
-        if ((e as any)?.name !== "AbortError") console.error(e);
+        if (e instanceof DOMException && e.name === "AbortError"){
+          // Abort esperado, no logueamos nada
+        } else {
+          console.error(e);
+        }
         if (mounted) {
           setItems([]);
           setErrorMsg("No se pudieron cargar los turnos. Intente nuevamente.");
@@ -156,6 +159,26 @@ export default function VerTurnosPage() {
       controller.abort();
     };
   }, [selectedDate, qDebouncedValue, filters.especialidadId, filters.profesionalId, filters.tipoId, filters.estadoTurnoId]);
+
+   // 🔧 NUEVO: actualizar estado de turno
+  async function handleChangeEstado(id: number, estado: string) {
+    try {
+      const res = await fetch(`/api/turnos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado }),
+      });
+      if (!res.ok) throw new Error("Error al actualizar estado");
+      const data = await res.json();
+
+      // ✅ Actualizar en frontend
+      setItems((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, estado: data.estado } : t))
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <div className="p-4">
@@ -197,7 +220,7 @@ export default function VerTurnosPage() {
                 {errorMsg}
               </div>
             ) : (
-              <TurnosTable items={items} />
+              <TurnosTable items={items} onChangeEstado={handleChangeEstado} />
             )}
           </div>
         </div>
