@@ -1,5 +1,5 @@
 export type Turno = {
-  id: string;
+  id: number;
   pacienteDni: string;
   pacienteNombre: string;
   hora: string; // HH:mm
@@ -7,4 +7,5 @@ export type Turno = {
   profesional: string;
   tipoConsulta: string;
   obraSocial: string;
+  estado: string; // 👈 agregado
 };

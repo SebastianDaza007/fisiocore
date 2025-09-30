@@ -30,7 +30,7 @@ export default function VerTurnosPage() {
 
   // Debounce para el campo DNI (q)
   const debouncedQ = React.useMemo(() => {
-    let handler: any;
+    let handler: ReturnType<typeof setTimeout> | null = null;
     let latest = filters.q;
     const subscribers: Array<(v: string) => void> = [];
     const api = {
@@ -43,15 +43,13 @@ export default function VerTurnosPage() {
       },
       set(value: string) {
         latest = value;
-        clearTimeout(handler);
+        if (handler) clearTimeout(handler);
         handler = setTimeout(() => {
           subscribers.forEach((cb) => cb(latest));
         }, 400);
       },
     };
     return api;
-    // We want to recreate only when filters.q reference changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.q]);
 
   const [qDebouncedValue, setQDebouncedValue] = React.useState("");
@@ -61,7 +59,7 @@ export default function VerTurnosPage() {
     return () => unsub();
   }, [debouncedQ, filters.q]);
 
-  // Set initial date on client to avoid SSR/client mismatch
+  // Set initial date on client
   React.useEffect(() => {
     setMounted(true);
     setSelectedDate(new Date());
@@ -75,7 +73,6 @@ export default function VerTurnosPage() {
       day: "numeric",
     });
     const texto = formatter.format(d);
-    // Capitalizar primera letra del día
     return `Turnos para ${texto.charAt(0).toUpperCase()}${texto.slice(1)}`;
   }, [mounted, selectedDate]);
 
@@ -103,12 +100,10 @@ export default function VerTurnosPage() {
     };
   }, []);
 
-  // Cargar turnos cuando cambie fecha o filtros
-  React.useEffect(() => {
-    let mounted = true;
-    const controller = new AbortController();
-    const load = async () => {
-      setLoading(true);
+  // ⬇️ NUEVO: función load reutilizable
+  const load = React.useCallback(
+    async (showLoading = true) => {
+      if (showLoading) setLoading(true);
       setErrorMsg(null);
       try {
         const params = new URLSearchParams();
@@ -124,10 +119,7 @@ export default function VerTurnosPage() {
         if (filters.tipoId) params.set("tipoId", filters.tipoId);
         if (filters.estadoTurnoId) params.set("estadoTurnoId", filters.estadoTurnoId);
 
-        const res = await fetch(`/api/ver_turnos?${params.toString()}`, {
-          signal: controller.signal,
-          cache: "no-store",
-        });
+        const res = await fetch(`/api/ver_turnos?${params.toString()}`, { cache: "no-store" });
         if (!res.ok) {
           let details = "";
           try {
@@ -138,24 +130,53 @@ export default function VerTurnosPage() {
           throw new Error("Error turnos");
         }
         const data = await res.json();
-        if (!mounted) return;
         setItems(data.items ?? []);
       } catch (e) {
-        if ((e as any)?.name !== "AbortError") console.error(e);
-        if (mounted) {
-          setItems([]);
-          setErrorMsg("No se pudieron cargar los turnos. Intente nuevamente.");
+        if (e instanceof DOMException && e.name === "AbortError") {
+          // nada
+        } else {
+          console.error(e);
         }
+        setItems([]);
+        setErrorMsg("No se pudieron cargar los turnos. Intente nuevamente.");
       } finally {
-        if (mounted) setLoading(false);
+        if (showLoading) setLoading(false);
       }
-    };
-    load();
+    },
+    [selectedDate, qDebouncedValue, filters]
+  );
+
+  // Cargar turnos cuando cambie fecha o filtros
+  React.useEffect(() => {
+    const controller = new AbortController();
+
+    // Primera carga con spinner
+    load(true);
+
+    // Polling cada 3 segundos (sin spinner)
+    const interval = setInterval(() => load(false), 3000);
+
     return () => {
-      mounted = false;
       controller.abort();
+      clearInterval(interval);
     };
-  }, [selectedDate, qDebouncedValue, filters.especialidadId, filters.profesionalId, filters.tipoId, filters.estadoTurnoId]);
+  }, [selectedDate, qDebouncedValue, filters, load]);
+
+  // Actualizar estado de turno
+  async function handleChangeEstado(id: number, estado: string) {
+    try {
+      const res = await fetch(`/api/turnos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado }),
+      });
+      if (!res.ok) throw new Error("Error al actualizar estado");
+      const data = await res.json();
+      setItems((prev) => prev.map((t) => (t.id === id ? { ...t, estado: data.estado } : t)));
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <div className="p-4">
@@ -179,7 +200,13 @@ export default function VerTurnosPage() {
               <FiltersBar
                 onClear={() => {
                   setSelectedDate(new Date());
-                  setFilters({ q: "", especialidadId: null, profesionalId: null, tipoId: null, estadoTurnoId: null });
+                  setFilters({
+                    q: "",
+                    especialidadId: null,
+                    profesionalId: null,
+                    tipoId: null,
+                    estadoTurnoId: null,
+                  });
                 }}
                 value={filters}
                 options={options}
@@ -197,7 +224,7 @@ export default function VerTurnosPage() {
                 {errorMsg}
               </div>
             ) : (
-              <TurnosTable items={items} />
+              <TurnosTable items={items} onChangeEstado={handleChangeEstado} />
             )}
           </div>
         </div>
