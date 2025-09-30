@@ -1,3 +1,4 @@
+// app/api/paciente/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
         telefono_paciente: telefono,
         fecha_nacimiento_paciente: new Date(fechaNacimiento),
         direccion_paciente: direccion || null,
-        obra_social_id: obraSocialExistente.id_obra_social, // obligatorio
+        obra_social_id: obraSocialExistente.id_obra_social,
       },
     });
 
