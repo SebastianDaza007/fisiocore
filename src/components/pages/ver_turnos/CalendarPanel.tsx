@@ -60,7 +60,13 @@ export default function CalendarPanel({ value, onChange }: Props) {
     setLocale("es-turnos");
   }, []);
 
-  const dateTemplate = (date: any) => {
+  const dateTemplate = (date: {
+    day: number;
+    month: number;
+    year: number;
+    today: boolean;
+    otherMonth: boolean;
+  }) => {
     const isToday = date.today;
     const isOtherMonth = date.otherMonth;
     const isSelected =

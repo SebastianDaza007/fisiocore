@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // -------------------- Función para generar slots --------------------
 function generarSlots(horaInicio: Date, horaFin: Date, duracionMinutos: number) {
@@ -46,6 +44,9 @@ function getProximaFecha(diaSemana: string): string {
 // -------------------- Route GET --------------------
 export async function GET() {
   try {
+    const ahora = new Date();
+    const horaLimite = new Date(ahora.getTime() + 60 * 60 * 1000); // 60 minutos después
+
     const horarios = await prisma.horarios_profesionales.findMany({
       include: {
         dias_semana: true,
@@ -74,7 +75,17 @@ export async function GET() {
 
     console.log(`Encontrados ${turnosOcupados.length} turnos ocupados (confirmados)`);
 
-    const turnosDisponibles: any[] = [];
+    const turnosDisponibles: {
+      id: number;
+      id_horario: number;
+      profesional_id: number;
+      profesional_nombre: string;
+      especialidad: string;
+      dia: string;
+      fecha: string;
+      hora: string;
+      estado: string;
+    }[] = [];
     let idSlot = 1;
 
     horarios.forEach((h) => {
@@ -82,10 +93,16 @@ export async function GET() {
       const slots = generarSlots(h.hora_inicio, h.hora_fin, h.duracion_turno || 30);
 
       slots.forEach((hora) => {
+        // Validar que el turno sea al menos 60 minutos después de la hora actual
+        const fechaHoraTurno = new Date(`${fecha}T${hora}`);
+        if (fechaHoraTurno <= horaLimite) {
+          return; // Saltar este slot (muy próximo o pasado)
+        }
+
         const estaOcupado = turnosOcupados.some(turno => {
           const turnoFecha = turno.fecha_turno.toISOString().split('T')[0];
           const turnoHora = turno.hora_turno.toTimeString().substring(0, 5);
-          
+
           return turno.profesional_id === h.profesional_id &&
                  turnoFecha === fecha &&
                  turnoHora === hora;
@@ -109,11 +126,16 @@ export async function GET() {
 
     console.log(`Generados ${turnosDisponibles.length} slots disponibles (solo Lunes-Viernes)`);
 
+    // Ordenar por fecha y hora (más próximos primero)
+    turnosDisponibles.sort((a, b) => {
+      const fechaA = new Date(`${a.fecha}T${a.hora}`);
+      const fechaB = new Date(`${b.fecha}T${b.hora}`);
+      return fechaA.getTime() - fechaB.getTime();
+    });
+
     return NextResponse.json(turnosDisponibles);
   } catch (error) {
     console.error("Error al generar turnos disponibles:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

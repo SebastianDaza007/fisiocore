@@ -37,7 +37,7 @@ useEffect(() => {
     const res = await fetch("/api/profesional/tipos_consulta");
     const data = await res.json();
     setTiposConsulta(
-      data.map((t: any) => ({
+      data.map((t: { id_tipo_consulta: number; nombre_tipo_consulta: string }) => ({
         value: t.id_tipo_consulta,
         label: t.nombre_tipo_consulta
       }))
@@ -52,7 +52,7 @@ const turnosFiltrados = turnos.filter(t => {
 });
 
   // 📌 Para armar el calendario
-  const dateTemplate = (dateMeta: any) => {
+  const dateTemplate = (dateMeta: { day: number; month: number; year: number }) => {
     const isSelected =
       date &&
       date.getDate() === dateMeta.day &&
@@ -80,24 +80,26 @@ const turnosFiltrados = turnos.filter(t => {
 
   const displayedDate = date ?? new Date();
 
-  // 📌 Fetch de turnos
- useEffect(() => {
-  if (!date || !user?.profesionalId) return;
-
+  // 📌 Función reutilizable para fetch de turnos
   const fetchTurnos = async () => {
+    if (!date || !user?.profesionalId) return;
     const fechaISO = date.toISOString().split("T")[0];
     const res = await fetch(
       `/api/profesional/agenda_medico?fecha=${fechaISO}&profesionalId=${user.profesionalId}`
     );
     const data = await res.json();
-    setTurnos(data.filter((t: any) => t.estado_turno_id === 5));
+    setTurnos(data.filter((t: { estado_turno_id: number }) => t.estado_turno_id === 5));
   };
 
-  fetchTurnos();
+  // 📌 Fetch de turnos con polling
+  useEffect(() => {
+    if (!date || !user?.profesionalId) return;
 
-  const interval = setInterval(fetchTurnos, 3000); 
-  return () => clearInterval(interval);
-}, [date, user?.profesionalId]);
+    fetchTurnos();
+
+    const interval = setInterval(fetchTurnos, 3000);
+    return () => clearInterval(interval);
+  }, [date, user?.profesionalId]);
 
   // 📌 Pacientes únicos para dropdown
   const pacientesDelDia = Array.from(
@@ -222,13 +224,21 @@ const atenderTurno = async (idTurno: number) => {
                 />
                 </div>
 
-              <div className="ml-8 w-1/3">
-                <Button 
-                  icon="pi pi-filter-slash" 
+              <div className="ml-8 w-1/3 flex gap-2">
+                <Button
+                  icon="pi pi-filter-slash"
                   label="Limpiar filtros"
                   severity="secondary"
                   className="p-button-outlined"
                   onClick={() => {setSelectedPaciente(null); setSelectedTipo(null)} }
+                />
+                <Button
+                  icon="pi pi-refresh"
+                  severity="info"
+                  className="p-button-outlined"
+                  onClick={fetchTurnos}
+                  tooltip="Refrescar turnos"
+                  tooltipOptions={{ position: 'bottom' }}
                 />
               </div>
             </div>
@@ -256,7 +266,11 @@ const atenderTurno = async (idTurno: number) => {
                 <Button
                   icon="pi pi-check"
                   className="p-button-outlined p-button-text"
-                  onClick={() => atenderTurno(rowData.id)}
+                  onClick={() => {
+                    if (window.confirm('¿Confirmar que el paciente fue atendido?')) {
+                      atenderTurno(rowData.id);
+                    }
+                  }}
                 />
                 </div>
               )}

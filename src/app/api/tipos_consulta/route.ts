@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 // -------------------- POST: crear tipo de consulta --------------------
 export async function POST(req: NextRequest) {
@@ -48,7 +47,6 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -71,6 +69,5 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
   }
 }

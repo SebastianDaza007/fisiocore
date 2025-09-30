@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RegistrarPacienteDialog } from "../paciente/Modal";
+import { RegistrarPacienteDialog } from "./Modal";
 import { TurnosUI, Turno } from "./turnoscomp";
 
 export default function TurnosPage() {
@@ -16,7 +16,12 @@ export default function TurnosPage() {
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState<{ dni: string; nombre: string; id: number } | null>(null);
   const [loadingPacientes, setLoadingPacientes] = useState(false);
 
-  const [profesionales, setProfesionales] = useState<{ id: number; nombre: string; especialidad: string }[]>([]);
+  const [profesionales, setProfesionales] = useState<{
+    id: number;
+    nombre: string;
+    especialidad: string;
+    obras_sociales: { id_obra_social: number; nombre_obra_social: string }[];
+  }[]>([]);
   const [loadingProfesionales, setLoadingProfesionales] = useState(false);
 
   const [turnos, setTurnos] = useState<Turno[]>([]);
@@ -36,7 +41,12 @@ export default function TurnosPage() {
         const res = await fetch("/api/paciente");
         if (res.ok) {
           const data = await res.json();
-          const pacientesFormateados = data.map((p: any) => ({
+          const pacientesFormateados = data.map((p: {
+            id_paciente: number;
+            dni_paciente: string;
+            nombre_paciente: string;
+            apellido_paciente: string;
+          }) => ({
             id: p.id_paciente,
             dni: p.dni_paciente,
             nombre: `${p.nombre_paciente} ${p.apellido_paciente}`,
@@ -105,7 +115,14 @@ export default function TurnosPage() {
         if (resSlots.ok) {
           const slotsData = await resSlots.json();
           
-          const turnosFormateados: Turno[] = slotsData.map((s: any, idx: number) => ({
+          const turnosFormateados: Turno[] = slotsData.map((s: {
+            id?: number;
+            fecha: string;
+            hora: string;
+            especialidad: string;
+            profesional_id: number;
+            profesional_nombre?: string;
+          }, idx: number) => ({
             id: s.id || idx + 1,
             fecha: s.fecha,
             hora: s.hora,

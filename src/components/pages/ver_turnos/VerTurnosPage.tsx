@@ -208,6 +208,7 @@ export default function VerTurnosPage() {
                     estadoTurnoId: null,
                   });
                 }}
+                onRefresh={() => load(true)}
                 value={filters}
                 options={options}
                 onChange={setFilters}

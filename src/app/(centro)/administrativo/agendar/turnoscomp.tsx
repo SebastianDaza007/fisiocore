@@ -33,7 +33,12 @@ type TurnosUIProps = {
   setEspecialidadSeleccionada: (val: string) => void;
   profesionalSeleccionado: number | null;
   setProfesionalSeleccionado: (val: number | null) => void;
-  profesionales: { id: number; nombre: string; especialidad: string }[];
+  profesionales: {
+    id: number;
+    nombre: string;
+    especialidad: string;
+    obras_sociales: { id_obra_social: number; nombre_obra_social: string }[];
+  }[];
   loadingProfesionales: boolean;
   obraSocialSeleccionada: string;
   setObraSocialSeleccionada: (val: string) => void;
@@ -80,6 +85,7 @@ export function TurnosUI({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [obrasSociales, setObrasSociales] = useState<ObraSocial[]>([]);
+  const [obrasSocialesFiltradas, setObrasSocialesFiltradas] = useState<ObraSocial[]>([]);
   const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
   const [loadingObras, setLoadingObras] = useState(true);
   const [loadingEspecialidades, setLoadingEspecialidades] = useState(true);
@@ -91,7 +97,10 @@ export function TurnosUI({
       setPacientesFiltrados([]);
     } else {
       setPacientesFiltrados(
-        pacientes.filter((p) => p.nombre.toLowerCase().includes(busquedaLimpia))
+        pacientes.filter((p) =>
+          p.nombre.toLowerCase().includes(busquedaLimpia) ||
+          p.dni.includes(busquedaLimpia)
+        )
       );
     }
   }, [busqueda, pacientes]);
@@ -125,6 +134,20 @@ export function TurnosUI({
     };
     fetchEspecialidades();
   }, []);
+
+  // ------------------- Filtrar obras sociales según profesional seleccionado -------------------
+  useEffect(() => {
+    if (profesionalSeleccionado) {
+      const profesional = profesionales.find((p) => p.id === profesionalSeleccionado);
+      if (profesional && profesional.obras_sociales && profesional.obras_sociales.length > 0) {
+        setObrasSocialesFiltradas(profesional.obras_sociales);
+      } else {
+        setObrasSocialesFiltradas(obrasSociales);
+      }
+    } else {
+      setObrasSocialesFiltradas(obrasSociales);
+    }
+  }, [profesionalSeleccionado, profesionales, obrasSociales]);
 
   // ------------------- Cerrar dropdown de pacientes al hacer click afuera -------------------
   useEffect(() => {
@@ -304,9 +327,14 @@ export function TurnosUI({
                 value={obraSocialSeleccionada}
                 onChange={(e) => setObraSocialSeleccionada(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-700"
+                disabled={!profesionalSeleccionado}
               >
-                <option value="">Seleccione una obra social</option>
-                {obrasSociales.map((obra) => (
+                <option value="">
+                  {profesionalSeleccionado
+                    ? "Seleccione una obra social"
+                    : "Primero seleccione un profesional"}
+                </option>
+                {obrasSocialesFiltradas.map((obra) => (
                   <option key={obra.id_obra_social} value={obra.nombre_obra_social}>
                     {obra.nombre_obra_social}
                   </option>
@@ -394,11 +422,16 @@ export function TurnosUI({
                       (p) => p.id === turno.profesionalId
                     );
                     return (
-                      <tr 
-                        key={turno.id} 
+                      <tr
+                        key={turno.id}
+                        onClick={() => {
+                          if (turno.estado !== "ocupado") {
+                            setTurnoSeleccionado(turno);
+                          }
+                        }}
                         className={`border-b border-gray-100 hover:bg-blue-50 transition-colors ${
                           turnoSeleccionado?.id === turno.id ? 'bg-blue-100' : ''
-                        }`}
+                        } ${turno.estado !== "ocupado" ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                       >
                         <td className="p-3 text-gray-900 text-sm">
                           {turno.fecha}
@@ -428,7 +461,7 @@ export function TurnosUI({
                             disabled={turno.estado === "ocupado"}
                             checked={turnoSeleccionado?.id === turno.id}
                             onChange={() => setTurnoSeleccionado(turno)}
-                            className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                            className="w-4 h-4 text-blue-600 focus:ring-blue-500 pointer-events-none"
                           />
                         </td>
                       </tr>

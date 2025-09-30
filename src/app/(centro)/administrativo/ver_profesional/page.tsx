@@ -53,7 +53,7 @@ export default function VerProfesionalPage() {
   const fetchProfesionales = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/profesional');
+      const response = await fetch('/api/listado_profesionales');
       if (!response.ok) {
         throw new Error('Error al obtener profesionales');
       }

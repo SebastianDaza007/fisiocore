@@ -9,6 +9,7 @@ export type Option = { label: string; value: string };
 
 type Props = {
   onClear: () => void;
+  onRefresh?: () => void;
   value: {
     q: string;
     especialidadId: string | null;
@@ -25,7 +26,7 @@ type Props = {
   onChange: (next: Props["value"]) => void;
 };
 
-export default function FiltersBar({ onClear, value, options, onChange }: Props) {
+export default function FiltersBar({ onClear, onRefresh, value, options, onChange }: Props) {
   const { q, especialidadId, profesionalId, tipoId, estadoTurnoId } = value;
   const handleChange = (patch: Partial<Props["value"]>) =>
     onChange({ ...value, ...patch });
@@ -43,16 +44,17 @@ export default function FiltersBar({ onClear, value, options, onChange }: Props)
         />
       </span>
       <Dropdown
-        value={especialidadId ?? ""}
+        value={especialidadId}
         options={options.especialidades}
-        onChange={(e) => handleChange({ especialidadId: (e.value as string) || null })}
+        onChange={(e) => handleChange({ especialidadId: e.value || null })}
         placeholder="Especialidad"
         className="min-w-48 h-10 text-gray-800 rounded-lg shadow-sm border border-gray-200 focus:outline-none"
+        showClear
       />
       <Dropdown
-        value={profesionalId ?? ""}
+        value={profesionalId}
         options={options.profesionales}
-        onChange={(e) => handleChange({ profesionalId: (e.value as string) || null })}
+        onChange={(e) => handleChange({ profesionalId: e.value || null })}
         placeholder="Profesional"
         className="min-w-48 h-10 text-gray-800 rounded-lg shadow-sm border border-gray-200 focus:outline-none"
         filter
@@ -60,18 +62,20 @@ export default function FiltersBar({ onClear, value, options, onChange }: Props)
         showClear
       />
       <Dropdown
-        value={tipoId ?? ""}
+        value={tipoId}
         options={options.tipos}
-        onChange={(e) => handleChange({ tipoId: (e.value as string) || null })}
+        onChange={(e) => handleChange({ tipoId: e.value || null })}
         placeholder="Tipo de Consulta"
         className="min-w-48 h-10 text-gray-800 rounded-lg shadow-sm border border-gray-200 focus:outline-none"
+        showClear
       />
       <Dropdown
-        value={estadoTurnoId ?? ""}
+        value={estadoTurnoId}
         options={options.estados}
-        onChange={(e) => handleChange({ estadoTurnoId: (e.value as string) || null })}
+        onChange={(e) => handleChange({ estadoTurnoId: e.value || null })}
         placeholder="Estado del turno"
         className="min-w-48 h-10 text-gray-800 rounded-lg shadow-sm border border-gray-200 focus:outline-none"
+        showClear
       />
       <Button
         label="Limpiar Filtros"
@@ -79,7 +83,14 @@ export default function FiltersBar({ onClear, value, options, onChange }: Props)
         onClick={onClear}
         severity="secondary"
       />
-      <Button icon="pi pi-refresh" aria-label="refresh" outlined />
+      {onRefresh && (
+        <Button
+          icon="pi pi-refresh"
+          aria-label="refresh"
+          onClick={onRefresh}
+          outlined
+        />
+      )}
     </div>
   );
 }
