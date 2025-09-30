@@ -19,8 +19,8 @@ function EstadoChip({ estado }: { estado?: string }) {
       return <span className={`${base} bg-green-100 text-green-700`}>Confirmado</span>;
     case "NO ASISTIDO":
       return <span className={`${base} bg-gray-200 text-gray-700`}>No Asistido</span>;
-    case "PRE COMPLETADO":
-      return <span className={`${base} bg-blue-100 text-blue-700`}>Pre Completado</span>;
+    case "EN ESPERA":
+      return <span className={`${base} bg-blue-100 text-blue-700`}>En Espera</span>;
     case "CANCELADO":
       return <span className={`${base} bg-red-100 text-red-700`}>Cancelado</span>;
     case "COMPLETADO":
@@ -45,10 +45,10 @@ export default function TurnosTable({ items = [], onChangeEstado }: Props) {
       },
     },
     {
-      label: "Marcar como Pre Completado",
+      label: "Marcar como En Espera",
       icon: "pi pi-hourglass",
       command: () => {
-        if (selectedTurno) onChangeEstado?.(selectedTurno.id, "PRE COMPLETADO");
+        if (selectedTurno) onChangeEstado?.(selectedTurno.id, "EN ESPERA");
         opRef.current?.hide();
       },
     },
