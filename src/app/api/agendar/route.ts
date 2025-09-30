@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
         fecha_turno: fecha,
         hora_turno: hora,
         estado_turno_id: 1, // default, ajustar según tu lógica
-        asistencia_id: 1,
         tipo_consulta_id: 1,
         fecha_agendamiento_turno: new Date(),
       },

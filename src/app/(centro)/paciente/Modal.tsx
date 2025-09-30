@@ -156,6 +156,7 @@ export const RegistrarPacienteDialog: React.FC<RegistrarPacienteDialogProps> = (
         setTimeout(() => {
           onPacienteRegistrado();
           onClose();
+          window.location.reload();
         }, 2000);
         return;
       } 
