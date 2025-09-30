@@ -26,6 +26,7 @@ const TITULOS: Record<string, string> = {
     "/agendar": "Registrar o Agendar Turnos",
     "/dturno": "Detalle de Turno",
     "/profesionales": "Listado de profesionales",
+    "/administrativo/ver_profesional": "Listado de Profesionales",
 };
 
 export default function DashboardNavbar({
@@ -37,9 +38,11 @@ export default function DashboardNavbar({
     onLogout,
 }: NavbarProps) {
     const pathname = usePathname();
-    const segmento = pathname.split("/")[1] || "";
 
-    const titulo = TITULOS[`/${segmento}`] || capitalizarRuta(segmento);
+    // Buscar título exacto primero, luego por primer segmento
+    const titulo = TITULOS[pathname] ||
+                   TITULOS[`/${pathname.split("/")[1]}`] ||
+                   capitalizarRuta(pathname.split("/")[1] || "");
 
     return (
         <header className="h-16 text-gray-800 flex items-center justify-between px-6 shadow-sm" style={{ backgroundColor: "#FEF7FF" }}>

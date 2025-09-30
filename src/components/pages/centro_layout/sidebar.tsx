@@ -36,7 +36,14 @@ export default function Sidebar({ items }: SidebarProps) {
         {/* Lista de opciones */}
         <nav className="mt-6 flex flex-col gap-1 px-2">
             {items.map((item, index) => {
-                const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
+                // Verificar si hay un ítem más específico que coincida mejor
+                const hasMoreSpecificMatch = items.some(
+                    otherItem => otherItem.path !== item.path &&
+                                 otherItem.path.length > item.path.length &&
+                                 (pathname === otherItem.path || pathname.startsWith(otherItem.path + '/'))
+                );
+
+                const isActive = (pathname === item.path || pathname.startsWith(item.path + '/')) && !hasMoreSpecificMatch;
 
                 return (
                     <div
