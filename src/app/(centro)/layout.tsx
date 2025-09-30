@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -64,9 +65,9 @@ export default function DashboardLayout({
       case 'ADMINISTRATIVO':
         return [
           ...baseItems,
+          { icon: "pi-clipboard", label: "Administrativo", path: "/administrativo", options: null },
           { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/agendar", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/administrativo/turnos/ver", options: null },
-          { icon: "pi-clipboard", label: "Administrativo", path: "/administrativo", options: null },
         ];
 
       default:
