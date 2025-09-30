@@ -127,24 +127,25 @@ export default function HomeAdministradorPage() {
   ];
   const profesionalesHoy = ["Lic. Gómez", "Dra. Torres", "Lic. Ruiz", "Dr. Pérez"];
 
+  // href genérico: reemplazar cada "#" por el path real cuando esté definido
   const cards = [
     {
       title: "Agendar turnos",
-      href: "/agendar",
+      href: "/administrativo/agendar",
       icon: "pi pi-calendar-plus",
       image: "/images/calendario.jpg",
       spanCols: 1,
     },
     {
       title: "Gestionar profesionales",
-      href: "/profesionales",
+      href: "/administrativo/ver_profesional",
       icon: "pi pi-users",
       image: "/images/gestionar%20profesionales.jpg",
       spanCols: 1,
     },
     {
       title: "Calendario de turnos",
-      href: "/turnos",
+      href: "/administrativo/turnos/ver",
       icon: "pi pi-calendar",
       image: "/images/agendar%20turno.jpg",
       spanCols: 2,

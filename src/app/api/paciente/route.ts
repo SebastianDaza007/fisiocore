@@ -1,7 +1,7 @@
+// app/api/paciente/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 // -------------------- POST: crear paciente --------------------
 export async function POST(request: NextRequest) {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         telefono_paciente: telefono,
         fecha_nacimiento_paciente: new Date(fechaNacimiento),
         direccion_paciente: direccion || null,
-        obra_social_id: obraSocialExistente.id_obra_social, // obligatorio
+        obra_social_id: obraSocialExistente.id_obra_social,
       },
     });
 
@@ -67,7 +67,6 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -99,6 +98,5 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
   }
 }

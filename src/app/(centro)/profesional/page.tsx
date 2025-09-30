@@ -125,25 +125,26 @@ export default function HomeAdministradorPage() {
     { id: 3, texto: "Turno 12:00 - Pedro L.", icon: "pi pi-clock" },
   ];
 
+  // href genérico: reemplazar cada "#" por el path real cuando esté definido
   const cards = [
     {
       title: "Ver Turnos",
-      href: "/turnos",
+      href: "/profesional/agenda_turnos",
       icon: "pi pi-calendar-plus",
       image: "/images/calendario.jpg",
       spanCols: 1,
     },
     {
       title: "Historia clinica",
-      href: "/profesionales",
+      href: "/desarrollo",
       icon: "pi pi-users",
       image: "/images/gestionar%20profesionales.jpg",
       spanCols: 1,
     },
     {
-      title: "Calendario de turnos",
-      href: "/turnos",
-      icon: "pi pi-calendar",
+      title: "Ajustes",
+      href: "/ajustes",
+      icon: "pi pi-cog",
       image: "/images/agendar%20turno.jpg",
       spanCols: 2,
     },

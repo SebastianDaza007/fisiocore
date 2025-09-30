@@ -408,35 +408,6 @@ export default function LoginPage() {
                     )}
                   </motion.button>
                 </motion.form>
-
-                {/* Información adicional */}
-                <motion.div
-                  className="mt-8 pt-6 border-t border-white/20"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 1.0 }}
-                >
-                  <p className="text-center text-sm text-green-100 mb-4">Roles disponibles en el sistema:</p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {[
-                      { label: "Administrador", color: "bg-white/20 text-white" },
-                      { label: "Gerente", color: "bg-white/20 text-white" },
-                      { label: "Profesional", color: "bg-white/20 text-white" },
-                      { label: "Administrativo", color: "bg-white/20 text-white" }
-                    ].map((role, index) => (
-                      <motion.span
-                        key={role.label}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${role.color} border border-white/20 backdrop-blur-sm`}
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 1.2 + index * 0.1 }}
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        {role.label}
-                      </motion.span>
-                    ))}
-                  </div>
-                </motion.div>
               </div>
             </div>
           </motion.div>

@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,44 +30,46 @@ export default function DashboardLayout({
   // Función para obtener items del sidebar según el rol
   const getSidebarItemsByRole = (rol: string): SidebarItem[] => {
     const baseItems = [
-      { icon: "pi-users", label: "Pacientes", path: "/paciente", options: null },
+      { icon: "pi-cog", label: "Ajustes", path: "/ajustes", options: null },
     ];
 
     switch (rol) {
       case 'ADMIN':
         return [
-          ...baseItems,
           { icon: "pi-user-plus", label: "Profesionales", path: "/profesional", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/turnos", options: null },
-          { icon: "pi-calendar-plus", label: "Agendar", path: "/agendar", options: null },
+          { icon: "pi-calendar-plus", label: "Agendar", path: "/administrativo/agendar", options: null },
           { icon: "pi-chart-bar", label: "Dashboard", path: "/admin", options: null },
           { icon: "pi-cog", label: "Configuración", path: "/admin/config", options: null },
+          ...baseItems
         ];
 
       case 'GERENTE':
         return [
-          ...baseItems,
-          { icon: "pi-user-plus", label: "Profesionales", path: "/profesional", options: null },
-          { icon: "pi-calendar", label: "Turnos", path: "/turnos", options: null },
-          { icon: "pi-calendar-plus", label: "Agendar", path: "/agendar", options: null },
-          { icon: "pi-chart-bar", label: "Dashboard", path: "/gerente", options: null },
-          { icon: "pi-file-o", label: "Reportes", path: "/gerente/reportes", options: null },
+          { icon: "pi-home", label: "Home", path: "/gerente", options: null },
+          { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
+          { icon: "pi-file-o", label: "Reportes", path: "/desarrollo", options: null },
+          { icon: "pi-chart-bar", label: "Estadisticas", path: "/desarrollo", options: null },
+          ...baseItems
         ];
 
       case 'PROFESIONAL':
         return [
-          { icon: "pi-calendar", label: "Mi Calendario", path: "/profesional", options: null },
-          { icon: "pi-users", label: "Mis Pacientes", path: "/profesional/pacientes", options: null },
-          { icon: "pi-file-medical", label: "Historia Clínica", path: "/profesional/historia", options: null },
+          { icon: "pi-home", label: "Home", path: "/profesional", options: null },
+          { icon: "pi-calendar", label: "Agenda de Turnos", path: "/profesional/agenda_turnos", options: null },
+          { icon: "pi-users", label: "Mis Pacientes", path: "/desarrollo", options: null },
+          { icon: "pi-folder-open", label: "Historia Clinica", path: "/desarrollo", options: null },
+          ...baseItems
         ];
 
       case 'ADMINISTRATIVO':
         return [
-          ...baseItems,
-          { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
-          { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/agendar", options: null },
+          { icon: "pi-home", label: "Home", path: "/administrativo", options: null },
+          { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/administrativo/agendar", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/administrativo/turnos/ver", options: null },
+          { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
+          ...baseItems
         ];
 
       default:
