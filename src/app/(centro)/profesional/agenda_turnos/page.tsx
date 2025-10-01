@@ -7,8 +7,23 @@ import { Divider } from 'primereact/divider';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { useAuth } from "@/hooks/useAuth"; 
+import { useAuth } from "@/hooks/useAuth";
+import { addLocale, locale as setLocale } from 'primereact/api';
 
+// Registrar y fijar Español para PrimeReact antes del primer render
+addLocale('es', {
+  firstDayOfWeek: 1,
+  dayNames: ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],
+  dayNamesShort: ['dom','lun','mar','mié','jue','vie','sáb'],
+  dayNamesMin: ['D','L','M','X','J','V','S'],
+  monthNames: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+  monthNamesShort: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+  today: 'Hoy',
+  clear: 'Limpiar',
+  weekHeader: 'Sm',
+  dateFormat: 'dd/mm/yy'
+});
+setLocale('es');
 
 interface Turno {
   id_turno: number;
@@ -29,27 +44,30 @@ export default function Miagenda() {
   const [date, setDate] = useState<Date | null>(null);
   const [selectedPaciente, setSelectedPaciente] = useState<number | null>(null);
   const [tiposConsulta, setTiposConsulta] = useState<{ value: number; label: string }[]>([]);
-const [selectedTipo, setSelectedTipo] = useState<number | null>(null);
+  const [selectedTipo, setSelectedTipo] = useState<number | null>(null);
 
-// --- Opción 1: traer de la API ---
-useEffect(() => {
-  const fetchTipos = async () => {
-    const res = await fetch("/api/profesional/tipos_consulta");
-    const data = await res.json();
-    setTiposConsulta(
-      data.map((t: { id_tipo_consulta: number; nombre_tipo_consulta: string }) => ({
-        value: t.id_tipo_consulta,
-        label: t.nombre_tipo_consulta
-      }))
-    );
-  };
-  fetchTipos();
-}, []);
-const turnosFiltrados = turnos.filter(t => {
-  const matchPaciente = selectedPaciente ? t.pacientes.id_paciente === selectedPaciente : true;
-  const matchTipo = selectedTipo ? t.tipos_consulta?.id_tipo_consulta === selectedTipo : true;
-  return matchPaciente && matchTipo;
-});
+  // (Localización ya registrada arriba a nivel módulo)
+
+  // --- Opción 1: traer de la API ---
+  useEffect(() => {
+    const fetchTipos = async () => {
+      const res = await fetch("/api/profesional/tipos_consulta");
+      const data = await res.json();
+      setTiposConsulta(
+        data.map((t: { id_tipo_consulta: number; nombre_tipo_consulta: string }) => ({
+          value: t.id_tipo_consulta,
+          label: t.nombre_tipo_consulta
+        }))
+      );
+    };
+    fetchTipos();
+  }, []);
+
+  const turnosFiltrados = turnos.filter(t => {
+    const matchPaciente = selectedPaciente ? t.pacientes.id_paciente === selectedPaciente : true;
+    const matchTipo = selectedTipo ? t.tipos_consulta?.id_tipo_consulta === selectedTipo : true;
+    return matchPaciente && matchTipo;
+  });
 
   // 📌 Para armar el calendario
   const dateTemplate = (dateMeta: { day: number; month: number; year: number }) => {
@@ -61,9 +79,7 @@ const turnosFiltrados = turnos.filter(t => {
 
     return (
       <div
-        className={`w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${
-          isSelected ? "text-white " : ""
-        }`}
+        className={`w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${isSelected ? "text-white " : ""}`}
       >
         {dateMeta.day}
       </div>
@@ -84,9 +100,7 @@ const turnosFiltrados = turnos.filter(t => {
   const fetchTurnos = async () => {
     if (!date || !user?.profesionalId) return;
     const fechaISO = date.toISOString().split("T")[0];
-    const res = await fetch(
-      `/api/profesional/agenda_medico?fecha=${fechaISO}&profesionalId=${user.profesionalId}`
-    );
+    const res = await fetch(`/api/profesional/agenda_medico?fecha=${fechaISO}&profesionalId=${user.profesionalId}`);
     const data = await res.json();
     setTurnos(data.filter((t: { estado_turno_id: number }) => t.estado_turno_id === 5));
   };
@@ -94,9 +108,7 @@ const turnosFiltrados = turnos.filter(t => {
   // 📌 Fetch de turnos con polling
   useEffect(() => {
     if (!date || !user?.profesionalId) return;
-
     fetchTurnos();
-
     const interval = setInterval(fetchTurnos, 3000);
     return () => clearInterval(interval);
   }, [date, user?.profesionalId]);
@@ -114,71 +126,63 @@ const turnosFiltrados = turnos.filter(t => {
     ).values()
   );
 
-
   // 📌 Transformar turnos para DataTable
   const turnosData = turnosFiltrados.map(turno => ({
     id: turno.id_turno,
     paciente: turno.pacientes 
       ? `${turno.pacientes.nombre_paciente} ${turno.pacientes.apellido_paciente}` 
       : "-",
-    horario: turno.hora_turno ,
+    horario: turno.hora_turno,
     tipoConsulta: turno.tipos_consulta?.nombre_tipo_consulta || "-",
     obraSocial: turno.pacientes?.obras_sociales?.nombre_obra_social || "-"
   }));
 
   const [totalPacientes, setTotalPacientes] = useState<number>(0);
 
+  // Contador de pacientes que ya fueron atendidos hoy
+  const [atendidosHoy, setAtendidosHoy] = useState<number>(0);
 
+  useEffect(() => {
+    if (!date || !user?.profesionalId) return;
 
-// Contador de pacientes que ya fueron atendidos hoy
-const [atendidosHoy, setAtendidosHoy] = useState<number>(0);
+    const fetchAtendidosHoy = async () => {
+      const fechaISO = date.toISOString().split("T")[0];
+      try {
+        const res = await fetch(`/api/profesional/pacientes_atendidos?fecha=${fechaISO}&profesionalId=${user.profesionalId}`);
+        const data = await res.json();
+        setAtendidosHoy(data.atendidosHoy);
+      } catch (error) {
+        console.error("Error al obtener turnos atendidos hoy:", error);
+      }
+    };
 
-useEffect(() => {
-  if (!date || !user?.profesionalId) return;
+    fetchAtendidosHoy();
+  }, [date, user?.profesionalId]);
 
-  const fetchAtendidosHoy = async () => {
-    const fechaISO = date.toISOString().split("T")[0];
+  const atenderTurno = async (idTurno: number) => {
     try {
-      const res = await fetch(
-        `/api/profesional/pacientes_atendidos?fecha=${fechaISO}&profesionalId=${user.profesionalId}`
-      );
+      const res = await fetch("/api/profesional/pacientes_atendidos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idTurno }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Error en la respuesta del servidor:", res.status, text);
+        return;
+      }
+
       const data = await res.json();
-      setAtendidosHoy(data.atendidosHoy); // Esto ahora refleja todos los atendidos del día
+
+      if (data.success) {
+        setTurnos(prev => prev?.map(t => t.id_turno === idTurno ? { ...t, estado_turno_id: 3 } : t));
+        setAtendidosHoy(prev => prev + 1);
+      }
     } catch (error) {
-      console.error("Error al obtener turnos atendidos hoy:", error);
+      console.error("Error al atender turno:", error);
     }
   };
-
-  fetchAtendidosHoy();
-}, [date, user?.profesionalId]);
-
-const atenderTurno = async (idTurno: number) => {
-  try {
-    const res = await fetch("/api/profesional/pacientes_atendidos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idTurno }),
-    });
-
-    if (!res.ok) {
-      const text = await res.text(); // depura la respuesta
-      console.error("Error en la respuesta del servidor:", res.status, text);
-      return;
-    }
-
-    const data = await res.json();
-
-    if (data.success) {
-      // Actualizamos el turno local
-      setTurnos(prev => prev?.map(t => t.id_turno === idTurno ? { ...t, estado_turno_id: 3 } : t));
-      setAtendidosHoy(prev => prev + 1);
-    }
-  } catch (error) {
-    console.error("Error al atender turno:", error);
-  }
-};
-
-
 
   return (
     <div>
@@ -187,11 +191,12 @@ const atenderTurno = async (idTurno: number) => {
         {/* 📌 Calendario */}
         <div className="w-2/5 p-2">
           <Calendar
-            value={date} 
-            onChange={(e) => setDate(e.value as Date)} 
-            inline 
+            value={date}
+            onChange={(e) => setDate(e.value as Date)}
+            inline
             dateTemplate={dateTemplate}
-            className="w-full h-120" 
+            className="w-full h-120"
+            dateFormat="dd/mm/yy"
           />
         </div>
 
@@ -218,11 +223,11 @@ const atenderTurno = async (idTurno: number) => {
                 <Dropdown
                   value={selectedTipo}
                   onChange={(e) => setSelectedTipo(e.value)}
-                  options={tiposConsulta} // [{ value: 1, label: "Consulta" }, ...]
+                  options={tiposConsulta}
                   placeholder="Tipo de Consulta"
                   showClear
                 />
-                </div>
+              </div>
 
               <div className="ml-8 w-1/3 flex gap-2">
                 <Button
@@ -230,7 +235,7 @@ const atenderTurno = async (idTurno: number) => {
                   label="Limpiar filtros"
                   severity="secondary"
                   className="p-button-outlined"
-                  onClick={() => {setSelectedPaciente(null); setSelectedTipo(null)} }
+                  onClick={() => { setSelectedPaciente(null); setSelectedTipo(null); }}
                 />
                 <Button
                   icon="pi pi-refresh"
@@ -246,7 +251,7 @@ const atenderTurno = async (idTurno: number) => {
 
           {/* 📌 Tabla turnos */}
           <DataTable 
-            value={turnosData} 
+            value={turnosData}
             tableStyle={{ minWidth: '50rem' }}
             className="pt-2"
           >
@@ -255,23 +260,23 @@ const atenderTurno = async (idTurno: number) => {
             <Column field="tipoConsulta" header="Tipo de consulta" />
             <Column field="obraSocial" header="Obra social" />
             <Column 
-              header="Acciones" 
+              header="Acciones"
               body={(rowData) => (
                 <div>
-                <Button 
-                  icon="pi pi-folder-open" 
-                  className="p-button-text" 
-                  onClick={() => console.log("Ver turno", rowData.id)} 
-                />
-                <Button
-                  icon="pi pi-check"
-                  className="p-button-outlined p-button-text"
-                  onClick={() => {
-                    if (window.confirm('¿Confirmar que el paciente fue atendido?')) {
-                      atenderTurno(rowData.id);
-                    }
-                  }}
-                />
+                  <Button 
+                    icon="pi pi-folder-open"
+                    className="p-button-text"
+                    onClick={() => console.log("Ver turno", rowData.id)}
+                  />
+                  <Button
+                    icon="pi pi-check"
+                    className="p-button-outlined p-button-text"
+                    onClick={() => {
+                      if (window.confirm('¿Confirmar que el paciente fue atendido?')) {
+                        atenderTurno(rowData.id);
+                      }
+                    }}
+                  />
                 </div>
               )}
             />
