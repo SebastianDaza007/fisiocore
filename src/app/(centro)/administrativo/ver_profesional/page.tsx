@@ -7,6 +7,7 @@ import { DataTableFilterMeta } from 'primereact/datatable';
 import ProfesionalTable from '../../../../components/pages/ver_profesional/ProfesionalTable';
 import ProfesionalFilter from '../../../../components/pages/ver_profesional/ProfesionalFilter';
 import ProfesionalDetailsModal from '../../../../components/pages/ver_profesional/ProfesionalDetailsModal';
+import EditProfesionalModal from '../../../../components/pages/ver_profesional/EditProfesionalModal';
 
 interface Profesional {
   id_profesional: number;
@@ -22,7 +23,9 @@ interface Profesional {
     nombre_especialidad: string;
   };
   horarios_profesionales: Array<{
+    id_horario: number;
     dias_semana: {
+      id_dia: number;
       nombre_dia: string;
     };
     hora_inicio: string;
@@ -30,7 +33,10 @@ interface Profesional {
     duracion_turno: number;
   }>;
   profesionales_por_obras_sociales: Array<{
+    id_profesional_obra: number;
+    obra_social_id: number;
     obras_sociales: {
+      id_obra_social: number;
       nombre_obra_social: string;
     };
   }>;
@@ -44,6 +50,7 @@ export default function VerProfesionalPage() {
   const [estadoFilter, setEstadoFilter] = useState<string | null>(null);
   const [selectedProfesional, setSelectedProfesional] = useState<Profesional | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [filters, setFilters] = useState<DataTableFilterMeta>({
     global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
     'especialidades.nombre_especialidad': { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
@@ -113,7 +120,13 @@ export default function VerProfesionalPage() {
   };
 
   const handleEdit = (profesional: Profesional) => {
-    console.log('Editar profesional:', profesional);
+    setSelectedProfesional(profesional);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    // Recargar la lista de profesionales después de guardar
+    fetchProfesionales();
   };
 
   const globalFilterFields = [
@@ -161,6 +174,16 @@ export default function VerProfesionalPage() {
             setShowDetailsModal(false);
             setSelectedProfesional(null);
           }}
+        />
+
+        <EditProfesionalModal
+          visible={showEditModal}
+          profesional={selectedProfesional}
+          onHide={() => {
+            setShowEditModal(false);
+            setSelectedProfesional(null);
+          }}
+          onSave={handleSaveEdit}
         />
       </div>
     </div>
