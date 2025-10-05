@@ -59,6 +59,7 @@ model pacientes {
   dni_paciente              String              @db.VarChar(8)
   telefono_paciente         String              @db.VarChar(20)
   fecha_nacimiento_paciente DateTime            @db.Date
+  fecha_alta_paciente       DateTime            @default(now()) @db.Date
   direccion_paciente        String?             @db.VarChar
   obra_social_id            Int
   obras_sociales            obras_sociales      @relation(fields: [obra_social_id], references: [id_obra_social], onDelete: NoAction, onUpdate: NoAction)
