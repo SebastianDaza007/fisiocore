@@ -51,14 +51,15 @@ model obras_sociales {
 }
 
 model pacientes {
-  id_paciente               Int                  @id @default(autoincrement())
+  id_paciente               Int                 @id @default(autoincrement())
   nombre_paciente           String              @db.VarChar(40)
   apellido_paciente         String              @db.VarChar(40)
-  email_paciente            String?              @db.VarChar(150)
+  sexo_paciente             String              @default("No especificado") @db.VarChar(15)   
+  email_paciente            String?             @db.VarChar(150)
   dni_paciente              String              @db.VarChar(8)
   telefono_paciente         String              @db.VarChar(20)
   fecha_nacimiento_paciente DateTime            @db.Date
-  direccion_paciente        String?              @db.VarChar
+  direccion_paciente        String?             @db.VarChar
   obra_social_id            Int
   obras_sociales            obras_sociales      @relation(fields: [obra_social_id], references: [id_obra_social], onDelete: NoAction, onUpdate: NoAction)
   registros_clinicos        registros_clinicos[]
