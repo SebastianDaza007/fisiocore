@@ -477,7 +477,7 @@ export default function EditProfesionalModal({
                   loading={loading}
                 />
                 <small className="text-gray-500 mt-2 block">
-                  * La obra social "Particular" es obligatoria
+                  * La obra social &quot;Particular&quot; es obligatoria
                 </small>
               </div>
             </Card>

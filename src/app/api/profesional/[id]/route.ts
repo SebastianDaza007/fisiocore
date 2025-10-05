@@ -7,6 +7,13 @@ interface RouteParams {
   }>;
 }
 
+interface HorarioData {
+  dia_semana_id: number;
+  hora_inicio: string;
+  hora_fin: string;
+  duracion_turno: number;
+}
+
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
@@ -120,7 +127,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         // Crear nuevos horarios
         if (horarios.length > 0) {
           await tx.horarios_profesionales.createMany({
-            data: horarios.map((h: any) => ({
+            data: horarios.map((h: HorarioData) => ({
               profesional_id: profesionalId,
               dia_semana_id: h.dia_semana_id,
               hora_inicio: new Date(`1970-01-01T${h.hora_inicio}`),
