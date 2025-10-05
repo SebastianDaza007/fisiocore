@@ -23,6 +23,7 @@ export async function GET() {
           include: {
             dias_semana: {
               select: {
+                id_dia: true,
                 nombre_dia: true,
               },
             },
@@ -32,6 +33,7 @@ export async function GET() {
           include: {
             obras_sociales: {
               select: {
+                id_obra_social: true,
                 nombre_obra_social: true,
               },
             },
@@ -55,7 +57,9 @@ export async function GET() {
         nombre_especialidad: p.especialidades.nombre_especialidad,
       },
       horarios_profesionales: p.horarios_profesionales.map((h) => ({
+        id_horario: h.id_horario,
         dias_semana: {
+          id_dia: h.dias_semana.id_dia,
           nombre_dia: h.dias_semana.nombre_dia,
         },
         hora_inicio: h.hora_inicio.toISOString(),
@@ -63,7 +67,10 @@ export async function GET() {
         duracion_turno: h.duracion_turno,
       })),
       profesionales_por_obras_sociales: p.profesionales_por_obras_sociales.map((po) => ({
+        id_profesional_obra: po.id_profesional_obra,
+        obra_social_id: po.obra_social_id,
         obras_sociales: {
+          id_obra_social: po.obras_sociales.id_obra_social,
           nombre_obra_social: po.obras_sociales.nombre_obra_social,
         },
       })),

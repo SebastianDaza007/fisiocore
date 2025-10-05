@@ -100,17 +100,19 @@ export default function ProfesionalTable({
 
   const accionesTemplate = (rowData: Profesional) => {
     return (
-      <div className="flex gap-2">
+      <div className="flex gap-1">
         <Button
           icon="pi pi-eye"
-          className="p-button-rounded p-button-outlined p-button-info p-button-sm"
+          className="p-button-text"
           tooltip="Ver detalles"
+          tooltipOptions={{ position: 'top' }}
           onClick={() => onViewDetails(rowData)}
         />
         <Button
           icon="pi pi-pencil"
-          className="p-button-rounded p-button-outlined p-button-warning p-button-sm"
+          className="p-button-text"
           tooltip="Editar"
+          tooltipOptions={{ position: 'top' }}
           onClick={() => onEdit(rowData)}
         />
       </div>
