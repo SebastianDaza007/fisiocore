@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
+// Prisma client
+const prisma = new PrismaClient();
 
 // -------------------- POST: crear paciente --------------------
 export async function POST(request: NextRequest) {
@@ -98,5 +100,62 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
+  }
+}
+
+// -------------------- PUT: actualizar paciente --------------------
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const {
+      id_paciente,
+      email_paciente,
+      direccion_paciente,
+      telefono_paciente,
+      obra_social, // nombre de la obra social opcional
+    } = body || {};
+
+    if (!id_paciente) {
+      return NextResponse.json({ error: 'Falta id_paciente' }, { status: 400 });
+    }
+
+    // Armar data de actualización de forma dinámica
+    const data: any = {};
+    if (typeof email_paciente !== 'undefined') data.email_paciente = email_paciente;
+    if (typeof direccion_paciente !== 'undefined') data.direccion_paciente = direccion_paciente;
+    if (typeof telefono_paciente !== 'undefined') data.telefono_paciente = telefono_paciente;
+
+    if (typeof obra_social !== 'undefined' && obra_social) {
+      // Buscar obra social por nombre y usar su ID
+      const os = await prisma.obras_sociales.findFirst({
+        where: { nombre_obra_social: obra_social },
+        select: { id_obra_social: true },
+      });
+      if (!os) {
+        return NextResponse.json({ error: 'La obra social especificada no existe' }, { status: 400 });
+      }
+      data.obra_social_id = os.id_obra_social;
+    }
+
+    const updated = await prisma.pacientes.update({
+      where: { id_paciente: Number(id_paciente) },
+      data,
+      select: {
+        id_paciente: true,
+        dni_paciente: true,
+        nombre_paciente: true,
+        apellido_paciente: true,
+        email_paciente: true,
+        telefono_paciente: true,
+        fecha_nacimiento_paciente: true,
+        direccion_paciente: true,
+        obras_sociales: { select: { nombre_obra_social: true } },
+      },
+    });
+
+    return NextResponse.json({ success: true, paciente: updated });
+  } catch (error) {
+    console.error('Error al actualizar paciente:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
