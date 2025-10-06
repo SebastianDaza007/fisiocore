@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -43,12 +44,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar contraseña (comparación directa de strings)
-    console.log('🔐 Verificando contraseña...')
-    console.log('🔐 Password enviado:', password)
-    console.log('🔐 Password en BD:', usuario.password_hash_usuario)
-    const isValidPassword = password === usuario.password_hash_usuario
-    console.log('🔐 Resultado verificación:', { isValidPassword })
+    // Verificar contraseña (soporta tanto hash bcrypt como texto plano)
+    let isValidPassword = false
+
+    // Primero intentar con bcrypt (para contraseñas hasheadas)
+    try {
+      const passwordFromDB = usuario.password_hash_usuario || ''
+
+      // Si la contraseña en BD parece un hash de bcrypt (empieza con $2a$ o $2b$)
+      if (passwordFromDB.startsWith('$2a$') || passwordFromDB.startsWith('$2b$')) {
+        isValidPassword = await bcrypt.compare(password, passwordFromDB)
+      } else {
+        // Si no es un hash bcrypt, comparar como texto plano (legacy)
+        isValidPassword = password === passwordFromDB
+      }
+    } catch (error) {
+      console.error('❌ Error verificando contraseña:', error)
+      isValidPassword = false
+    }
 
     if (!isValidPassword) {
       console.log('❌ Contraseña inválida para DNI:', dni)

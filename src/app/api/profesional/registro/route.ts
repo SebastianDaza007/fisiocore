@@ -12,7 +12,7 @@ interface HorarioData {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { dni, nombre, apellido, fecha_nacimiento, email, matricula, especialidad_id, obras_sociales, horarios } = body;
+    const { dni, nombre, apellido, fecha_nacimiento, email, matricula, especialidad_id, obras_sociales, horarios, password } = body;
 
     // Validaciones
     if (!dni || dni.length !== 8) {
@@ -25,6 +25,13 @@ export async function POST(request: NextRequest) {
     if (!nombre || !apellido || !email || !matricula || !especialidad_id) {
       return NextResponse.json(
         { error: "Todos los campos son obligatorios" },
+        { status: 400 }
+      );
+    }
+
+    if (!password || password.length < 6) {
+      return NextResponse.json(
+        { error: "La contraseña debe tener al menos 6 caracteres" },
         { status: 400 }
       );
     }
@@ -103,8 +110,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generar password por defecto: dni del profesional
-    const passwordHash = await bcrypt.hash(dni, 10);
+    // Hashear la contraseña proporcionada
+    const passwordHash = await bcrypt.hash(password, 10);
 
     // Crear en una transacción
     const result = await prisma.$transaction(async (tx) => {

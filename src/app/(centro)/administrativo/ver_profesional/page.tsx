@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card } from 'primereact/card';
 import { FilterMatchMode } from 'primereact/api';
 import { DataTableFilterMeta } from 'primereact/datatable';
+import { useAuth } from '@/hooks/useAuth';
 import ProfesionalTable from '../../../../components/pages/ver_profesional/ProfesionalTable';
 import ProfesionalFilter from '../../../../components/pages/ver_profesional/ProfesionalFilter';
 import ProfesionalDetailsModal from '../../../../components/pages/ver_profesional/ProfesionalDetailsModal';
@@ -44,6 +45,7 @@ interface Profesional {
 }
 
 export default function VerProfesionalPage() {
+  const { user } = useAuth();
   const [profesionales, setProfesionales] = useState<Profesional[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -58,6 +60,9 @@ export default function VerProfesionalPage() {
     'especialidades.nombre_especialidad': { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
     estado: { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
   });
+
+  // Verificar si el usuario puede registrar profesionales (solo ADMIN o GERENTE)
+  const canRegisterProfesional = user?.rol === 'ADMIN' || user?.rol === 'GERENTE';
 
   const fetchProfesionales = async () => {
     try {
@@ -151,13 +156,15 @@ export default function VerProfesionalPage() {
             <h1 className="text-2xl font-bold text-gray-800">Profesionales</h1>
             <p className="text-sm text-gray-600">Gestión de profesionales del centro médico</p>
           </div>
-          <button
-            onClick={() => setShowRegistroModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors shadow-sm"
-          >
-            <i className="pi pi-user-plus"></i>
-            <span>Registrar Nuevo Profesional</span>
-          </button>
+          {canRegisterProfesional && (
+            <button
+              onClick={() => setShowRegistroModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors shadow-sm"
+            >
+              <i className="pi pi-user-plus"></i>
+              <span>Registrar Nuevo Profesional</span>
+            </button>
+          )}
         </div>
 
         <ProfesionalFilter
