@@ -8,12 +8,15 @@ import { DataTableFilterMeta } from 'primereact/datatable';
 import PacienteFilter from '../../../../components/pages/ver_pacientes/PacienteFilter';
 import PacienteTable, { Paciente } from '../../../../components/pages/ver_pacientes/PacienteTable';
 import PacienteInfoDialog from '../../../../components/pages/ver_pacientes/PacienteInfoDialog';
+import PacienteEditDialog from '../../../../components/pages/ver_pacientes/PacienteEditDialog';
 
 export default function VerPacientesPage() {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editPaciente, setEditPaciente] = useState<Paciente | null>(null);
 
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [sexoFilter, setSexoFilter] = useState<string | null>(null);
@@ -75,7 +78,8 @@ export default function VerPacientesPage() {
   };
 
   const handleEdit = (p: Paciente) => {
-    console.log('Editar paciente', p);
+    setEditPaciente(p);
+    setIsEditOpen(true);
   };
 
   const globalFilterFields = [
@@ -90,7 +94,6 @@ export default function VerPacientesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">Gestión de pacientes</h1>
-            <p className="text-sm text-gray-600">Consulta, filtra y administra la información de tus pacientes.</p>
           </div>
           <Button
             icon="pi pi-user-plus"
@@ -127,6 +130,23 @@ export default function VerPacientesPage() {
           isOpen={isInfoOpen}
           paciente={selectedPaciente}
           onClose={() => setIsInfoOpen(false)}
+        />
+        <PacienteEditDialog
+          isOpen={isEditOpen}
+          paciente={editPaciente}
+          onClose={() => setIsEditOpen(false)}
+          onSave={async (payload) => {
+            // TODO: Reemplazar con endpoint real de actualización
+            try {
+              await fetch('/api/paciente', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              }).catch(() => {}); // silencioso si no existe aún
+            } finally {
+              await fetchPacientes();
+            }
+          }}
         />
       </div>
     </div>
