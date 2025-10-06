@@ -38,6 +38,8 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
   const [obraSocialNombre, setObraSocialNombre] = useState<string | null>(null);
   const [obraLoading, setObraLoading] = useState(false);
   const [fullPaciente, setFullPaciente] = useState<any | null>(null);
+  const [turnos, setTurnos] = useState<Array<any>>([]);
+  const [turnosLoading, setTurnosLoading] = useState(false);
 
   // Cerrar con ESC
   useEffect(() => {
@@ -76,10 +78,37 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
     loadFull();
   }, [isOpen, paciente]);
 
+  // Cargar últimos turnos por DNI usando /api/ver_turnos?q=<dni>
+  useEffect(() => {
+    const loadTurnos = async () => {
+      if (!isOpen || !paciente?.dni_paciente) return;
+      try {
+        setTurnosLoading(true);
+        const url = `/api/ver_turnos?q=${encodeURIComponent(paciente.dni_paciente)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('No se pudo obtener turnos');
+        const data = await res.json();
+        const items: any[] = data?.items ?? [];
+        // Tomar los últimos 5 (API ordena ascendente)
+        const last = items.slice(-5).reverse();
+        setTurnos(last);
+      } catch (e) {
+        console.error(e);
+        setTurnos([]);
+      } finally {
+        setTurnosLoading(false);
+      }
+    };
+    loadTurnos();
+  }, [isOpen, paciente?.dni_paciente]);
+
   if (!isOpen || !paciente) return null;
 
   const nombreCompleto = `${paciente.nombre_paciente} ${paciente.apellido_paciente}`.trim();
   const edad = calcularEdad(paciente.fecha_nacimiento_paciente);
+  const obraSocialDisplay = obraLoading
+    ? 'Cargando...'
+    : (obraSocialNombre ?? fullPaciente?.obras_sociales?.nombre_obra_social ?? '-');
 
   return (
     <div
@@ -130,18 +159,46 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
               <ItemRow
                 label="Obra Social"
                 value={
-                  obraLoading ? 'Cargando...' : (obraSocialNombre ?? fullPaciente?.obras_sociales?.nombre_obra_social ?? '-')
+                  <span className={
+                    `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ` +
+                    (obraSocialDisplay && obraSocialDisplay !== '-' && obraSocialDisplay !== 'Cargando...'
+                      ? 'bg-amber-50 text-amber-700 border-amber-200'
+                      : 'bg-gray-50 text-gray-600 border-gray-200')
+                  }>
+                    {obraSocialDisplay}
+                  </span>
                 }
               />
             </div>
           </div>
 
-          {/* Últimos turnos (placeholder) */}
+          {/* Últimos turnos */}
           <div className="rounded-lg border border-gray-200 p-5">
             <div className="flex items-center gap-2 mb-3">
               <i className="pi pi-history text-gray-600" />
+              <span className="font-medium text-gray-900">Últimos turnos</span>
             </div>
-            <p className="text-sm text-gray-500">Sin información de turnos disponible.</p>
+            {turnosLoading ? (
+              <p className="text-sm text-gray-500">Cargando turnos...</p>
+            ) : turnos.length === 0 ? (
+              <p className="text-sm text-gray-500">Sin información de turnos disponible.</p>
+            ) : (
+              <ul className="space-y-3">
+                {turnos.map((t, idx) => (
+                  <li key={t.id ?? idx} className="flex items-center justify-between">
+                    <div className="text-sm text-gray-800">
+                      {/* La API actual no devuelve fecha; mostramos profesional + hora */}
+                      <span className="font-medium">{t.profesional || 'Profesional'}</span>
+                      <span className="mx-2 text-gray-400">•</span>
+                      <span>{t.hora ?? '--:--'}</span>
+                    </div>
+                    <span className="text-xs px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {t.tipoConsulta || 'Tipo de consulta'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>
