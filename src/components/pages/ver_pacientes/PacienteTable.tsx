@@ -63,7 +63,7 @@ export default function PacienteTable({
   };
 
   const accionesTemplate = (row: Paciente) => (
-    <div className="flex gap-1">
+    <div className="flex items-center justify-end gap-1">
       <Button
         icon="pi pi-eye"
         className="p-button-text"
@@ -105,7 +105,15 @@ export default function PacienteTable({
       />
       <Column field="sexo" header="Sexo" body={sexoTemplate} style={{ minWidth: '120px' }} />
       <Column header="Edad" body={edadTemplate} style={{ minWidth: '100px' }} />
-      <Column header="Acciones" body={accionesTemplate} exportable={false} style={{ minWidth: '140px' }} />
+      <Column
+        header="Acciones"
+        body={accionesTemplate}
+        exportable={false}
+        headerClassName="text-right"
+        bodyClassName="text-right"
+        headerStyle={{ width: '110px' }}
+        style={{ minWidth: '100px', maxWidth: '120px' }}
+      />
     </DataTable>
   );
 }

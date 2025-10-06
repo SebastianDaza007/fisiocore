@@ -30,7 +30,7 @@ export default function PacienteFilter({
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 items-stretch sm:items-center">
           <div className="flex-1">
             <span className="p-input-icon-left">
               <i className="pi pi-search text-gray-800" style={{ paddingLeft: '1rem' }} />
@@ -59,13 +59,13 @@ export default function PacienteFilter({
             icon="pi pi-filter-slash"
             label="Limpiar Filtros"
             onClick={onClearFilters}
-            className="p-button-outlined p-button-secondary"
+            className="p-button-outlined p-button-secondary w-full sm:w-auto"
           />
 
           <Button
             icon="pi pi-refresh"
             onClick={onRefresh}
-            className="p-button-outlined"
+            className="p-button-outlined w-full sm:w-auto"
             tooltip="Actualizar lista"
           />
         </div>

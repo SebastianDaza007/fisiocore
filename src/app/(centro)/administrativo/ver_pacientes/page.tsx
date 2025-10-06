@@ -85,31 +85,43 @@ export default function VerPacientesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Gestión de pacientes</h1>
-          <Button icon="pi pi-user-plus" label="Dar de alta paciente" className="p-button-success" onClick={() => console.log('Ir a alta de paciente')} />
+    <div className="min-h-screen bg-gray-50/60 p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">Gestión de pacientes</h1>
+            <p className="text-sm text-gray-600">Consulta, filtra y administra la información de tus pacientes.</p>
+          </div>
+          <Button
+            icon="pi pi-user-plus"
+            label="Dar de alta paciente"
+            className="p-button-success shadow-sm text-sm md:text-base w-full sm:w-auto"
+            onClick={() => console.log('Ir a alta de paciente')}
+          />
         </div>
 
-        <PacienteFilter
-          globalFilterValue={globalFilterValue}
-          sexoFilter={sexoFilter}
-          onGlobalFilterChange={onGlobalFilterChange}
-          onSexoFilterChange={onSexoFilterChange}
-          onClearFilters={onClearFilters}
-          onRefresh={fetchPacientes}
-        />
-
-        <Card className="shadow-lg">
-          <PacienteTable
-            pacientes={pacientes}
-            loading={loading}
-            filters={filters}
-            globalFilterFields={globalFilterFields}
-            onView={handleView}
-            onEdit={handleEdit}
+        <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
+          <PacienteFilter
+            globalFilterValue={globalFilterValue}
+            sexoFilter={sexoFilter}
+            onGlobalFilterChange={onGlobalFilterChange}
+            onSexoFilterChange={onSexoFilterChange}
+            onClearFilters={onClearFilters}
+            onRefresh={fetchPacientes}
           />
+        </div>
+
+        <Card className="rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <PacienteTable
+              pacientes={pacientes}
+              loading={loading}
+              filters={filters}
+              globalFilterFields={globalFilterFields}
+              onView={handleView}
+              onEdit={handleEdit}
+            />
+          </div>
         </Card>
         <PacienteInfoDialog
           isOpen={isInfoOpen}
