@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 import { Paciente } from "./PacienteTable";
 
 interface PacienteEditDialogProps {
@@ -28,6 +29,16 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
   const [obra, setObra] = useState<string | null>(null);
   const [obraOptions, setObraOptions] = useState<ObraOption[]>([]);
   const [saving, setSaving] = useState(false);
+  const [originalObra, setOriginalObra] = useState<string | null>(null);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [changesPreview, setChangesPreview] = useState<string[]>([]);
+  const [pendingPayload, setPendingPayload] = useState<{
+    id_paciente: number;
+    email_paciente: string | null;
+    direccion_paciente: string | null;
+    telefono_paciente: string | null;
+    obra_social: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!isOpen || !paciente) return;
@@ -57,10 +68,12 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
           currentObra = found?.obras_sociales?.nombre_obra_social ?? null;
         }
         setObra(currentObra);
+        setOriginalObra(currentObra);
       } catch (e) {
         console.error(e);
         setObraOptions([]);
         setObra(null);
+        setOriginalObra(null);
       }
     };
     loadObras();
@@ -71,20 +84,56 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
   const nombreCompleto = `${paciente.nombre_paciente} ${paciente.apellido_paciente}`.trim();
 
   const handleSave = async () => {
+    const norm = (v: string | null | undefined) => {
+      const t = typeof v === 'string' ? v.trim() : v ?? null;
+      return t === '' ? null : t;
+    };
+
+    const oldEmail = norm(paciente.email_paciente ?? null);
+    const newEmail = norm(email);
+    const oldDom = norm(paciente.direccion_paciente ?? null);
+    const newDom = norm(domicilio);
+    const oldTel = norm(paciente.telefono_paciente ?? null);
+    const newTel = norm(telefono);
+    const oldObra = norm(originalObra ?? null);
+    const newObra = norm(obra ?? null);
+
+    const changes: string[] = [];
+    if (oldEmail !== newEmail) changes.push(`- Correo: ${oldEmail ?? '-'} -> ${newEmail ?? '-'}`);
+    if (oldDom !== newDom) changes.push(`- Domicilio: ${oldDom ?? '-'} -> ${newDom ?? '-'}`);
+    if (oldTel !== newTel) changes.push(`- Teléfono: ${oldTel ?? '-'} -> ${newTel ?? '-'}`);
+    if (oldObra !== newObra) changes.push(`- Obra social: ${oldObra ?? '-'} -> ${newObra ?? '-'}`);
+
+    if (changes.length === 0) {
+      window.alert('No hay cambios para guardar.');
+      return;
+    }
+
+    // Mostrar ventana blanca (modal) con detalle de cambios
+    setChangesPreview(changes);
+    setPendingPayload({
+      id_paciente: paciente.id_paciente,
+      email_paciente: newEmail,
+      direccion_paciente: newDom,
+      telefono_paciente: newTel,
+      obra_social: newObra,
+    });
+    setConfirmVisible(true);
+  };
+
+  const handleConfirmAccept = async () => {
+    if (!pendingPayload) return;
     try {
       setSaving(true);
-      await onSave({
-        id_paciente: paciente.id_paciente,
-        email_paciente: email || null,
-        direccion_paciente: domicilio || null,
-        telefono_paciente: telefono || null,
-        obra_social: obra || null,
-      });
+      await onSave(pendingPayload);
+      setConfirmVisible(false);
       onClose();
     } catch (e) {
       console.error(e);
     } finally {
       setSaving(false);
+      setPendingPayload(null);
+      setChangesPreview([]);
     }
   };
 
@@ -92,7 +141,7 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
-      onClick={onClose}
+      onClick={() => { if (!confirmVisible) onClose(); }}
     >
       <div
         className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl"
@@ -188,6 +237,39 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
           />
         </div>
       </div>
+      {/* Confirm Dialog */}
+      <Dialog
+        visible={confirmVisible}
+        onHide={() => setConfirmVisible(false)}
+        header="Confirmar cambios"
+        style={{ width: '32rem' }}
+        modal
+        closable={!saving}
+      >
+        <div className="space-y-3">
+          <p className="text-gray-700">Vas a registrar los siguientes cambios en los datos del paciente:</p>
+          <div className="bg-gray-50 border border-gray-200 rounded p-3">
+            {changesPreview.map((c, idx) => (
+              <div key={idx} className="text-sm text-gray-800 whitespace-pre-wrap">{c}</div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-end">
+          <Button
+            label="Cancelar"
+            className="p-button-danger p-button-outlined w-full sm:w-auto"
+            onClick={() => setConfirmVisible(false)}
+            disabled={saving}
+          />
+          <Button
+            label={saving ? "Guardando..." : "Confirmar"}
+            icon="pi pi-check"
+            className="p-button-success w-full sm:w-auto"
+            onClick={handleConfirmAccept}
+            disabled={saving}
+          />
+        </div>
+      </Dialog>
     </div>
   );
 }
