@@ -34,10 +34,10 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
   const [changesPreview, setChangesPreview] = useState<string[]>([]);
   const [pendingPayload, setPendingPayload] = useState<{
     id_paciente: number;
-    email_paciente: string | null;
-    direccion_paciente: string | null;
-    telefono_paciente: string | null;
-    obra_social: string | null;
+    email_paciente?: string | null;
+    direccion_paciente?: string | null;
+    telefono_paciente?: string | null;
+    obra_social?: string | null;
   } | null>(null);
 
   useEffect(() => {
@@ -109,15 +109,23 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
       return;
     }
 
+    // Construir payload solo con campos modificados
+    const payload: {
+      id_paciente: number;
+      email_paciente?: string | null;
+      direccion_paciente?: string | null;
+      telefono_paciente?: string | null;
+      obra_social?: string | null;
+    } = { id_paciente: paciente.id_paciente };
+
+    if (oldEmail !== newEmail) payload.email_paciente = newEmail;
+    if (oldDom !== newDom) payload.direccion_paciente = newDom;
+    if (oldTel !== newTel) payload.telefono_paciente = newTel;
+    if (oldObra !== newObra) payload.obra_social = newObra;
+
     // Mostrar ventana blanca (modal) con detalle de cambios
     setChangesPreview(changes);
-    setPendingPayload({
-      id_paciente: paciente.id_paciente,
-      email_paciente: newEmail,
-      direccion_paciente: newDom,
-      telefono_paciente: newTel,
-      obra_social: newObra,
-    });
+    setPendingPayload(payload);
     setConfirmVisible(true);
   };
 
