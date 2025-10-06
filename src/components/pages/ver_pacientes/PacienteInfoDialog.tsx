@@ -26,6 +26,7 @@ function calcularEdad(fecha?: string | Date | null): number | null {
   if (m < 0 || (m === 0 && hoy.getDate() < d.getDate())) edad--;
   return edad;
 }
+
 const ItemRow: React.FC<{ label: string; value?: React.ReactNode }> = ({ label, value }) => (
   <div className="flex flex-col">
     <span className="text-xs uppercase tracking-wide text-gray-500">{label}</span>
@@ -39,6 +40,7 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
   const [fullPaciente, setFullPaciente] = useState<any | null>(null);
   const [turnos, setTurnos] = useState<Array<any>>([]);
   const [turnosLoading, setTurnosLoading] = useState(false);
+
   // Cerrar con ESC
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -174,6 +176,7 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
           <div className="rounded-lg border border-gray-200 p-5">
             <div className="flex items-center gap-2 mb-3">
               <i className="pi pi-history text-gray-600" />
+              <span className="text-sm font-semibold text-gray-900">Últimos turnos</span>
             </div>
             {turnosLoading ? (
               <p className="text-sm text-gray-500">Cargando turnos...</p>
@@ -189,7 +192,13 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
                       <span className="mx-2 text-gray-400">•</span>
                       <span>{t.hora ?? '--:--'}</span>
                     </div>
-                    <span className="text-xs px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className={`text-xs px-3 py-1 rounded-full border ${
+                      (t.tipoConsulta ?? '').toLowerCase().includes('consul')
+                        ? 'bg-yellow-100 text-yellow-900 border-yellow-300'
+                        : (t.tipoConsulta ?? '').toLowerCase().includes('control')
+                          ? 'bg-orange-100 text-orange-900 border-orange-300'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    }`}>
                       {t.tipoConsulta || 'Tipo de consulta'}
                     </span>
                   </li>
