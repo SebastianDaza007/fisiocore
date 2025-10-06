@@ -26,7 +26,6 @@ function calcularEdad(fecha?: string | Date | null): number | null {
   if (m < 0 || (m === 0 && hoy.getDate() < d.getDate())) edad--;
   return edad;
 }
-
 const ItemRow: React.FC<{ label: string; value?: React.ReactNode }> = ({ label, value }) => (
   <div className="flex flex-col">
     <span className="text-xs uppercase tracking-wide text-gray-500">{label}</span>
@@ -40,7 +39,6 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
   const [fullPaciente, setFullPaciente] = useState<any | null>(null);
   const [turnos, setTurnos] = useState<Array<any>>([]);
   const [turnosLoading, setTurnosLoading] = useState(false);
-
   // Cerrar con ESC
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -161,7 +159,7 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
                 value={
                   <span className={
                     `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ` +
-                    (obraSocialDisplay && obraSocialDisplay !== '-' && obraSocialDisplay !== 'Cargando...'
+                    (obraSocialDisplay && obraSocialDisplay !== '-' &&obraSocialDisplay !== 'Cargando...'
                       ? 'bg-amber-50 text-amber-700 border-amber-200'
                       : 'bg-gray-50 text-gray-600 border-gray-200')
                   }>
@@ -176,16 +174,15 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
           <div className="rounded-lg border border-gray-200 p-5">
             <div className="flex items-center gap-2 mb-3">
               <i className="pi pi-history text-gray-600" />
-              <span className="font-medium text-gray-900">Últimos turnos</span>
             </div>
             {turnosLoading ? (
               <p className="text-sm text-gray-500">Cargando turnos...</p>
             ) : turnos.length === 0 ? (
               <p className="text-sm text-gray-500">Sin información de turnos disponible.</p>
             ) : (
-              <ul className="space-y-3">
-                {turnos.map((t, idx) => (
-                  <li key={t.id ?? idx} className="flex items-center justify-between">
+              <ul className="divide-y divide-gray-200">
+                {turnos.map((t: { id?: string | number, profesional?: string, hora?: string, tipoConsulta?: string }, idx: number) => (
+                  <li key={t.id ?? idx} className="flex items-center justify-between py-2">
                     <div className="text-sm text-gray-800">
                       {/* La API actual no devuelve fecha; mostramos profesional + hora */}
                       <span className="font-medium">{t.profesional || 'Profesional'}</span>
