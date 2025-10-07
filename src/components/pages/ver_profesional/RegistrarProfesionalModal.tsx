@@ -47,7 +47,7 @@ export default function RegistrarProfesionalModal({
   const [dni, setDni] = useState('');
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
-  const [fechaNacimiento, setFechaNacimiento] = useState<Date | null>(null);
+//  const [fechaNacimiento, setFechaNacimiento] = useState<Date | null>(null);
   const [email, setEmail] = useState('');
   const [matricula, setMatricula] = useState('');
   const [especialidadId, setEspecialidadId] = useState<number | null>(null);
@@ -88,7 +88,7 @@ export default function RegistrarProfesionalModal({
     setDni('');
     setNombre('');
     setApellido('');
-    setFechaNacimiento(null);
+//    setFechaNacimiento(null);
     setEmail('');
     setMatricula('');
     setEspecialidadId(null);
@@ -219,7 +219,7 @@ export default function RegistrarProfesionalModal({
       return;
     }
 
-    if (!fechaNacimiento) {
+/*    if (!fechaNacimiento) {
       toast.current?.show({
         severity: 'error',
         summary: 'Error',
@@ -228,6 +228,7 @@ export default function RegistrarProfesionalModal({
       });
       return;
     }
+*/
 
     if (!email || !email.includes('@')) {
       toast.current?.show({
@@ -338,7 +339,7 @@ export default function RegistrarProfesionalModal({
           dni,
           nombre,
           apellido,
-          fecha_nacimiento: fechaNacimiento.toISOString().split('T')[0],
+          //fecha_nacimiento: fechaNacimiento.toISOString().split('T')[0],
           email,
           matricula,
           especialidad_id: especialidadId,
@@ -513,7 +514,7 @@ export default function RegistrarProfesionalModal({
                       className="w-full"
                     />
                   </div>
-                </div>
+                {/*</div>
                 <div>
                   <label htmlFor="fechaNacimiento" className="block text-sm font-medium text-gray-700 mb-2">
                     Fecha de Nacimiento *
@@ -527,7 +528,7 @@ export default function RegistrarProfesionalModal({
                     className="w-full"
                     showIcon
                     maxDate={new Date()}
-                  />
+                  />*/}
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
