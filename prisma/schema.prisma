@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model asistencias {
-  id_asistencia     Int      @id @default(autoincrement())
-  nombre_asistencia String  @db.VarChar(25)
-  turnos            turnos[]
-}
-
 model dias_inhabilitados {
   id_dia_inhabilitado Int      @id @default(autoincrement())
   fecha               DateTime @db.Date
@@ -57,14 +51,16 @@ model obras_sociales {
 }
 
 model pacientes {
-  id_paciente               Int                  @id @default(autoincrement())
+  id_paciente               Int                 @id @default(autoincrement())
   nombre_paciente           String              @db.VarChar(40)
   apellido_paciente         String              @db.VarChar(40)
-  email_paciente            String?              @db.VarChar(150)
+  sexo_paciente             String              @default("No especificado") @db.VarChar(15)   
+  email_paciente            String?             @db.VarChar(150)
   dni_paciente              String              @db.VarChar(8)
   telefono_paciente         String              @db.VarChar(20)
   fecha_nacimiento_paciente DateTime            @db.Date
-  direccion_paciente        String?              @db.VarChar
+  fecha_alta_paciente       DateTime            @default(now()) @db.Date
+  direccion_paciente        String?             @db.VarChar
   obra_social_id            Int
   obras_sociales            obras_sociales      @relation(fields: [obra_social_id], references: [id_obra_social], onDelete: NoAction, onUpdate: NoAction)
   registros_clinicos        registros_clinicos[]
@@ -121,15 +117,15 @@ model turnos {
   id_turno                 Int                  @id @default(autoincrement())
   paciente_id              Int
   profesional_id           Int
-  fecha_hora_turno         DateTime            @db.Timestamp(6)
-  estado_turno_id          Int
-  asistencia_id            Int
+  fecha_turno              DateTime             @db.Date
+  hora_turno               DateTime             @db.Time(6)
+  estado_turno_id          Int                  @default(2)      // 2 = CONFIRMADO por defecto
   tipo_consulta_id         Int
   fecha_agendamiento_turno DateTime            @db.Timestamp(6)
-  creado_por_usuario_id    Int
+  creado_por_usuario_id    Int?
+  
   registros_clinicos       registros_clinicos[]
-  asistencias              asistencias         @relation(fields: [asistencia_id], references: [id_asistencia], onDelete: NoAction, onUpdate: NoAction)
-  usuarios                 usuarios            @relation(fields: [creado_por_usuario_id], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  usuarios                 usuarios?            @relation(fields: [creado_por_usuario_id], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
   estados_turno            estados_turno       @relation(fields: [estado_turno_id], references: [id_estado_turno], onDelete: NoAction, onUpdate: NoAction)
   pacientes                pacientes           @relation(fields: [paciente_id], references: [id_paciente], onDelete: NoAction, onUpdate: NoAction)
   profesionales            profesionales       @relation(fields: [profesional_id], references: [id_profesional], onDelete: NoAction, onUpdate: NoAction)

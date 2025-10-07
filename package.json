@@ -9,14 +9,25 @@
     "lint": "eslint --quiet"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.16.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcryptjs": "^3.0.2",
+    "framer-motion": "^12.23.22",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
     "next": "15.5.3",
+    "node-fetch": "^3.3.2",
     "pg": "^8.16.3",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.7",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-transition-group": "^4.4.5"
+    "react-icons": "^5.5.0",
+    "react-transition-group": "^4.4.5",
+    "recharts": "^3.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

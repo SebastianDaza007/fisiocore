@@ -1,0 +1,26 @@
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+
+export async function GET() {
+  try {
+    const obrasSociales = await prisma.obras_sociales.findMany({
+      select: {
+        id_obra_social: true,
+        nombre_obra_social: true,
+      },
+      orderBy: {
+        nombre_obra_social: "asc",
+      },
+    });
+
+    return NextResponse.json(obrasSociales, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching obras sociales:", error);
+    return NextResponse.json(
+      { error: "Error al obtener las obras sociales" },
+      { status: 500 }
+    );
+  } finally {
+  }
+}
