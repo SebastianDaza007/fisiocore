@@ -9,8 +9,9 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useAuth } from "@/hooks/useAuth";
 import { addLocale, locale as setLocale } from 'primereact/api';
+import { CompletarTurnoDialog } from "../historial clinico/finalizar_turno/modal";
+import { VerHistorialDialog } from "../historial clinico/ver_historial/modal";
 
-// Registrar y fijar Español para PrimeReact antes del primer render
 addLocale('es', {
   firstDayOfWeek: 1,
   dayNames: ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],
@@ -45,8 +46,11 @@ export default function Miagenda() {
   const [selectedPaciente, setSelectedPaciente] = useState<number | null>(null);
   const [tiposConsulta, setTiposConsulta] = useState<{ value: number; label: string }[]>([]);
   const [selectedTipo, setSelectedTipo] = useState<number | null>(null);
-
-  // (Localización ya registrada arriba a nivel módulo)
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTurnoId, setSelectedTurnoId] = useState<number | null>(null);
+  const [modalHistorialOpen, setModalHistorialOpen] = useState(false);
+  const [selectedPacienteHistorial, setSelectedPacienteHistorial] = useState<any>(null);
 
   // --- Opción 1: traer de la API ---
   useEffect(() => {
@@ -184,6 +188,39 @@ export default function Miagenda() {
     }
   };
 
+  const abrirModalCompletarTurno = (idTurno: number) => {
+    setSelectedTurnoId(idTurno);
+    setModalOpen(true);
+  };
+
+  const abrirModalHistorial = (turno: Turno) => {
+    setSelectedPacienteHistorial({
+      id_paciente: turno.pacientes.id_paciente,
+      pacienteInfo: {
+        ...turno.pacientes,
+        obras_sociales: turno.pacientes.obras_sociales
+      }
+    });
+    setModalHistorialOpen(true);
+  };
+
+  const cerrarModalHistorial = () => {
+    setModalHistorialOpen(false);
+    setSelectedPacienteHistorial(null);
+  };
+
+  const handleTurnoCompletado = () => {
+    // Actualizar la lista de turnos
+    fetchTurnos();
+    // Actualizar contador de atendidos
+    setAtendidosHoy(prev => prev + 1);
+  };
+
+  const cerrarModal = () => {
+    setModalOpen(false);
+    setSelectedTurnoId(null);
+  };
+
   return (
     <div>
       <h1 className="text-black font-bold">Ver mis Turnos</h1>
@@ -261,28 +298,50 @@ export default function Miagenda() {
             <Column field="obraSocial" header="Obra social" />
             <Column 
               header="Acciones"
-              body={(rowData) => (
-                <div>
-                  <Button 
-                    icon="pi pi-folder-open"
-                    className="p-button-text"
-                    onClick={() => console.log("Ver turno", rowData.id)}
-                  />
-                  <Button
-                    icon="pi pi-check"
-                    className="p-button-outlined p-button-text"
-                    onClick={() => {
-                      if (window.confirm('¿Confirmar que el paciente fue atendido?')) {
-                        atenderTurno(rowData.id);
-                      }
-                    }}
-                  />
-                </div>
-              )}
+              body={(rowData) => {
+                // Encontrar el turno completo para pasar al modal de historial
+                const turnoCompleto = turnos.find(t => t.id_turno === rowData.id);
+                
+                return (
+                  <div className="flex gap-2">
+                    {/* Botón Ver Historial */}
+                    <Button 
+                      icon="pi pi-folder-open"
+                      className="p-button-text p-button-info"
+                      tooltip="Ver historial clínico"
+                      tooltipOptions={{ position: 'top' }}
+                      onClick={() => turnoCompleto && abrirModalHistorial(turnoCompleto)}
+                    />
+                    
+                    {/* Botón Completar Turno */}
+                    <Button
+                      icon="pi pi-check"
+                      className="p-button-outlined p-button-success"
+                      tooltip="Completar turno"
+                      tooltipOptions={{ position: 'top' }}
+                      onClick={() => abrirModalCompletarTurno(rowData.id)}
+                    />
+                  </div>
+                );
+              }}
             />
           </DataTable>
         </div>
       </div>
+
+      <CompletarTurnoDialog
+        isOpen={modalOpen}
+        onClose={cerrarModal}
+        turnoId={selectedTurnoId}
+        onTurnoCompletado={handleTurnoCompletado}
+      />
+
+      <VerHistorialDialog
+        isOpen={modalHistorialOpen}
+        onClose={cerrarModalHistorial}
+        pacienteId={selectedPacienteHistorial?.id_paciente}
+        pacienteInfo={selectedPacienteHistorial?.pacienteInfo}
+      />
     </div>
   );
 }
