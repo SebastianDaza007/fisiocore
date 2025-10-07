@@ -56,26 +56,36 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     try {
         const {id} = await context.params;
         const idTurno = Number(id);
-        const { estado } = await req.json();
+        const body = await req.json();
 
-        // buscar id_estado_turno según nombre
-        const estadoDB = await prisma.estados_turno.findFirst({
-        where: { nombre_estado_turno: estado },
-        });
+        let estadoId: number;
 
-        if (!estadoDB) {
-        return NextResponse.json({ error: "Estado no válido" }, { status: 400 });
+        // Aceptar tanto estado_turno_id (number) como estado (string)
+        if (body.estado_turno_id !== undefined) {
+            estadoId = body.estado_turno_id;
+        } else if (body.estado) {
+            // buscar id_estado_turno según nombre
+            const estadoDB = await prisma.estados_turno.findFirst({
+                where: { nombre_estado_turno: body.estado },
+            });
+
+            if (!estadoDB) {
+                return NextResponse.json({ error: "Estado no válido" }, { status: 400 });
+            }
+            estadoId = estadoDB.id_estado_turno;
+        } else {
+            return NextResponse.json({ error: "Se requiere 'estado' o 'estado_turno_id'" }, { status: 400 });
         }
 
         const turno = await prisma.turnos.update({
-        where: { id_turno: idTurno },
-        data: { estado_turno_id: estadoDB.id_estado_turno },
-        include: { estados_turno: true },
+            where: { id_turno: idTurno },
+            data: { estado_turno_id: estadoId },
+            include: { estados_turno: true },
         });
 
         return NextResponse.json({
-        id: turno.id_turno,
-        estado: turno.estados_turno.nombre_estado_turno,
+            id: turno.id_turno,
+            estado: turno.estados_turno.nombre_estado_turno,
         });
     } catch (error) {
         console.error("PATCH turno error:", error);

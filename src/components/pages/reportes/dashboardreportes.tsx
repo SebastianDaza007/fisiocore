@@ -1,6 +1,5 @@
 "use client";
 
-
 import { addLocale, locale } from "primereact/api";
 import React, { useEffect, useState, useCallback } from "react";
 import { Card } from "primereact/card";
@@ -15,6 +14,7 @@ import {
     Tooltip,
     ResponsiveContainer,
     CartesianGrid,
+    Cell,
 } from "recharts";
 
 type ProfesionalOption = {
@@ -81,6 +81,14 @@ locale("es");
     const [dataPacientesMes, setDataPacientesMes] = useState<ReportData[]>([]);
     const [loadingChart, setLoadingChart] = useState(false);
     const [loadingProfesionales, setLoadingProfesionales] = useState(false);
+    // 👇 Agregalo debajo de tus otros useState
+    const [resumen, setResumen] = useState({
+        completados: 0,
+        cancelados: 0,
+        enEspera: 0,
+        noAsistidos: 0,
+    });
+    const [dataProfesionalesObra, setDataProfesionalesObra] = useState<{ nombre: string; cantidad: number }[]>([]);
 
     // 🔹 Cargar lista de profesionales (desde /api/reportes/meta)
     useEffect(() => {
@@ -124,23 +132,69 @@ locale("es");
             setLoadingChart(false);
         }
     }, [selectedProfesional, dateRange]);
+
+    // 🔹 Cargar resumen de KPIs
+    const fetchResumen = useCallback(async () => {
+        try {
+            const params = new URLSearchParams();
+
+            // Si hay profesional seleccionado, lo enviamos
+            if (typeof selectedProfesional === "number" && !isNaN(selectedProfesional)) {
+                params.set("profesionalId", selectedProfesional.toString());
+            }
+
+            // Si hay rango de fechas, lo enviamos
+            if (dateRange?.[0] && dateRange?.[1]) {
+                params.set("startDate", dateRange[0].toISOString());
+                params.set("endDate", dateRange[1].toISOString());
+            }
+
+            const res = await fetch(`/api/reportes/resumen?${params.toString()}`);
+            const data = await res.json();
+
+            // Guardamos los datos del resumen (con valores seguros por si faltan)
+            setResumen({
+                completados: data.completados ?? 0,
+                cancelados: data.cancelados ?? 0,
+                enEspera: data.enEspera ?? 0,
+                noAsistidos: data.noAsistidos ?? 0,
+            });
+        } catch (err) {
+            console.error("Error al cargar resumen:", err);
+        }
+    }, [selectedProfesional, dateRange]);
+
+    // 🔹 Cargar cantidad de profesionales por obra social
+    const fetchProfesionalesPorObra = useCallback(async () => {
+        try {
+            const res = await fetch("/api/reportes/profesionales-por-obra");
+            const data = await res.json();
+            setDataProfesionalesObra(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error("Error al cargar profesionales por obra social:", err);
+        }
+    }, []);
+
     // 🧩 Paso 2: Cargar datos por defecto (todos los profesionales y meses)
     useEffect(() => {
         if (!loadingProfesionales) {
             fetchData(); // Llama al backend sin filtros
+            fetchResumen(); //nuevo: carga el resumen inicial
+            fetchProfesionalesPorObra(); //nuevo: carga profesionales por obra social
         }
-    }, [loadingProfesionales, fetchData]);
+    }, [loadingProfesionales, fetchData, fetchResumen, fetchProfesionalesPorObra]);
 
     // 🔹 Llamar fetch al hacer clic en “Filtrar”
     const handleFilter = () => {
         fetchData();
+        fetchResumen();
     };
 
     return (
         <div className="p-6 min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-white text-gray-800">
         {/* Header */}
         <div className="mb-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 p-5">
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard de Reportes</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard de Profesionales</h1>
             <p className="text-gray-600">
             Visualiza métricas clave de pacientes, turnos y profesionales.
             </p>
@@ -187,25 +241,25 @@ locale("es");
             {[
             {
                 label: "Pacientes atendidos",
-                value: "120",
+                value: resumen.completados,
                 icon: "pi pi-user-plus",
                 color: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200",
             },
             {
                 label: "Turnos cancelados",
-                value: "15",
+                value: resumen.cancelados,
                 icon: "pi pi-ban",
                 color: "bg-red-100 text-red-700 hover:bg-red-200",
             },
             {
                 label: "Turnos en espera",
-                value: "8",
+                value: resumen.enEspera,
                 icon: "pi pi-clock",
                 color: "bg-yellow-100 text-yellow-700 hover:bg-yellow-200",
             },
             {
                 label: "Turnos no asistidos",
-                value: "5",
+                value: resumen.noAsistidos,
                 icon: "pi pi-times-circle",
                 color: "bg-gray-100 text-gray-700 hover:bg-gray-200",
             },
@@ -246,25 +300,28 @@ locale("es");
                 ) : (
                 <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={dataPacientesMes}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis
-                        dataKey="mes"
-                        tickFormatter={(mes) => {
-                        const [year, month] = mes.split("-");
-                        const meses = [
-                            "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-                            "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
-                        ];
-                        return `${meses[Number(month) - 1]} ${year}`;
-                        }}
-                        tick={{ fontSize: 12 }}
-                    />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip
-                        labelFormatter={(mes) => `Mes: ${mes}`}
-                        formatter={(value) => [`${value} pacientes`, "Atendidos"]}
-                    />
-                    <Bar dataKey="cantidad" fill="#14b8a6" radius={[6, 6, 0, 0]} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis
+                            dataKey="mes"
+                            tickFormatter={(mes) => {
+                                const [year, month] = mes.split("-");
+                                const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+                                return `${meses[Number(month) - 1]} ${year}`;
+                            }}
+                            tick={{ fontSize: 12 }}
+                        />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip
+                            labelFormatter={(mes) => `Mes: ${mes}`}
+                            formatter={(value) => [`${value} pacientes`, "Atendidos"]}
+                        />
+                        {/* 🧩 Colores variables por barra */}
+                        <Bar dataKey="cantidad" radius={[6, 6, 0, 0]}>
+                            {dataPacientesMes.map((entry, index) => {
+                                const colores = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
+                                return<Cell key={`cell-${index}`} fill={colores[index % colores.length]} />;
+                            })}
+                        </Bar>
                     </BarChart>
                 </ResponsiveContainer>
                 )}
@@ -273,13 +330,41 @@ locale("es");
 
             {/* Otros reportes... */}
             <Card
-            title="Cantidad de pacientes por obra social"
-            className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm 
-            transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
-            >
-            <div className="h-[300px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/60">
-                🧾 Aquí irá el gráfico circular (PieChart)
-            </div>
+                title="Cantidad de profesionales por obra social"
+                    className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm 
+                    transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
+                >
+                    <div className="h-[300px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/60">
+                        {dataProfesionalesObra.length === 0 ? (
+                            <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart
+                                    data={dataProfesionalesObra}
+                                    layout="vertical"
+                                    margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis type="number" allowDecimals={false} />
+                                    <YAxis
+                                        dataKey="nombre"
+                                        type="category"
+                                        width={150}
+                                        tick={{ fontSize: 12 }}
+                                    />
+                                    <Tooltip
+                                        formatter={(value) => [`${value} profesionales`, "Cantidad"]}
+                                    />
+                                    <Bar dataKey="cantidad" radius={[0, 6, 6, 0]}>
+                                        {dataProfesionalesObra.map((entry, index) => {
+                                            const colores = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
+                                            return <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />;
+                                        })}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
             </Card>
         </div>
         {/* 🧩 Estilos locales para mejorar el calendario */}
