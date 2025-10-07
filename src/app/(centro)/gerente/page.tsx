@@ -104,15 +104,15 @@ export default function HomeGerentePage() {
   // href genérico: reemplazar cada "#" por el path real cuando esté definido
   const cards = [
     {
-      title: 'Reportes gerenciales',
-      href: '/desarrollo',
-      icon: 'pi pi-file-o',
+      title: 'Estadisticas pacientes',
+      href: '/gerente/estadisticas-pacientes',
+      icon: 'pi pi-users',
       image: '/images/calendario.jpg',
       spanCols: 1,
     },
     {
-      title: 'Estadisticas',
-      href: '/desarrollo',
+      title: 'Estadisticas profesionales',
+      href: '/gerente/estadisticas',
       icon: 'pi pi-chart-bar',
       image: '/images/gestionar%20profesionales.jpg',
       spanCols: 1,

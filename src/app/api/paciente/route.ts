@@ -2,8 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from "@/lib/prisma";  
 
-// Prisma client
-const prisma = new PrismaClient();
 
 // -------------------- POST: crear paciente --------------------
 export async function POST(request: NextRequest) {
@@ -120,7 +118,12 @@ export async function PUT(request: NextRequest) {
     }
 
     // Armar data de actualización de forma dinámica
-    const data: any = {};
+    const data: {
+      email_paciente?: string | null;
+      direccion_paciente?: string | null;
+      telefono_paciente?: string;
+      obra_social_id?: number;
+    } = {};
     if (typeof email_paciente !== 'undefined') data.email_paciente = email_paciente;
     if (typeof direccion_paciente !== 'undefined') data.direccion_paciente = direccion_paciente;
     if (typeof telefono_paciente !== 'undefined') data.telefono_paciente = telefono_paciente;
