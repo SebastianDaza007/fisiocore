@@ -50,7 +50,7 @@ export default function DashboardLayout({
           { icon: "pi-home", label: "Home", path: "/gerente", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
           { icon: "pi-file-o", label: "Reportes", path: "/desarrollo", options: null },
-          { icon: "pi-chart-bar", label: "Estadisticas", path: "/desarrollo", options: null },
+          { icon: "pi-chart-bar", label: "Estadisticas", path: "/gerente/estadisticas", options: null },
           ...baseItems
         ];
 

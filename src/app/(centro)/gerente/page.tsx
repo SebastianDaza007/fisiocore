@@ -112,7 +112,7 @@ export default function HomeGerentePage() {
     },
     {
       title: 'Estadisticas',
-      href: '/desarrollo',
+      href: '/gerente/estadisticas',
       icon: 'pi pi-chart-bar',
       image: '/images/gestionar%20profesionales.jpg',
       spanCols: 1,
