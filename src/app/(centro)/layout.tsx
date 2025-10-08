@@ -69,6 +69,7 @@ export default function DashboardLayout({
           { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/administrativo/agendar", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/administrativo/turnos/ver", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
+          { icon: "pi-users", label: "Ver Pacientes", path: "/administrativo/ver_pacientes", options: null },
           ...baseItems
         ];
 
@@ -105,6 +106,7 @@ export default function DashboardLayout({
         <DashboardNavbar
           idUsuario={user.id}
           usuario={{ nombre: user.nombre }}
+          rol={user.rol}
           urlLogin="/login"
           urlRegistro="/registro"
           notificaciones={[]}

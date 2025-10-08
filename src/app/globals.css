@@ -41,3 +41,222 @@ body {
   color: #ffffff !important;
   opacity: 1 !important;
 }
+
+/* ========================================
+   PERSONALIZACIÓN DE COLORES PRIMARIOS
+   ======================================== */
+
+/* Sobrescribir color primario de PrimeReact (teal -> color corporativo) */
+:root {
+  --primary-color: #0C645A;
+  --primary-color-text: #ffffff;
+  --surface-ground: #ffffff;
+  --surface-section: #f8f9fa;
+  --surface-card: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-border: #dee2e6;
+  --surface-hover: #e9ecef;
+}
+
+/* Dropdowns y selects */
+.p-dropdown:not(.p-disabled):hover,
+.p-dropdown:not(.p-disabled).p-focus {
+  border-color: #0f766e !important;
+}
+
+.p-dropdown-panel .p-dropdown-item.p-highlight {
+  background: #0f766e !important;
+  color: #ffffff !important;
+}
+
+.p-dropdown-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+  background: rgba(15, 118, 110, 0.1) !important;
+  color: #0f766e !important;
+}
+
+/* Inputs de texto */
+.p-inputtext:enabled:focus,
+.p-inputtextarea:enabled:focus {
+  border-color: #0f766e !important;
+  box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.25) !important;
+}
+
+/* Calendar */
+.p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext {
+  border-color: #0f766e !important;
+  box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.25) !important;
+}
+
+.p-datepicker table td > span.p-highlight {
+  background: #0f766e !important;
+  color: #ffffff !important;
+}
+
+.p-datepicker table td > span:not(.p-highlight):not(.p-disabled):hover {
+  background: rgba(15, 118, 110, 0.1) !important;
+  color: #0f766e !important;
+}
+
+/* DataTable */
+.p-datatable .p-datatable-tbody > tr.p-highlight {
+  background: rgba(15, 118, 110, 0.1) !important;
+  color: #0f766e !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:not(.p-highlight):hover {
+  background: rgba(15, 118, 110, 0.05) !important;
+}
+
+/* Columnas sorteables - estilo mejorado */
+.p-datatable .p-datatable-thead > tr > th.p-sortable-column:hover {
+  background-color: rgba(15, 118, 110, 0.08) !important;
+  color: #0f766e !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th.p-sortable-column.p-highlight {
+  background-color: rgba(15, 118, 110, 0.12) !important;
+  color: #0f766e !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th.p-sortable-column .p-sortable-column-icon {
+  color: #0f766e !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th.p-sortable-column:not(.p-highlight):hover .p-sortable-column-icon {
+  color: #0f766e !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background-color: #f8f9fa !important;
+  color: #495057 !important;
+  font-weight: 600 !important;
+  border-color: #dee2e6 !important;
+}
+
+/* Checkboxes y Radio buttons */
+.p-checkbox .p-checkbox-box.p-highlight {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+}
+
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box:hover {
+  border-color: #0f766e !important;
+}
+
+.p-radiobutton .p-radiobutton-box.p-highlight {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+}
+
+.p-radiobutton:not(.p-radiobutton-disabled) .p-radiobutton-box:hover {
+  border-color: #0f766e !important;
+}
+
+/* Multiselect - Mejorar contraste */
+.p-multiselect:not(.p-disabled):hover,
+.p-multiselect:not(.p-disabled).p-focus {
+  border-color: #0f766e !important;
+}
+
+.p-multiselect-panel .p-multiselect-item.p-highlight {
+  background: #0f766e !important;
+  color: #ffffff !important;
+}
+
+.p-multiselect-panel .p-multiselect-item.p-highlight:hover {
+  background: #115e59 !important;
+  color: #ffffff !important;
+}
+
+.p-multiselect-panel .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover {
+  background: rgba(15, 118, 110, 0.1) !important;
+  color: #0f766e !important;
+}
+
+/* Chips seleccionados en MultiSelect */
+.p-multiselect-token {
+  background-color: #0f766e !important;
+  color: white !important;
+}
+
+.p-multiselect-token .p-multiselect-token-icon {
+  color: white !important;
+}
+
+/* Paginator */
+.p-paginator .p-paginator-page.p-highlight {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+  color: #ffffff !important;
+}
+
+/* Progress Bar y Spinner */
+.p-progressbar .p-progressbar-value {
+  background: #0f766e !important;
+}
+
+.p-progress-spinner-circle {
+  stroke: #0f766e !important;
+}
+
+/* Tabs */
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  border-color: #0f766e !important;
+  color: #0f766e !important;
+}
+
+/* Accordion */
+.p-accordion .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link {
+  background: rgba(15, 118, 110, 0.1) !important;
+  border-color: #0f766e !important;
+  color: #0f766e !important;
+}
+
+/* Panel */
+.p-panel .p-panel-header {
+  border-color: #dee2e6 !important;
+}
+
+/* Chips y Tags */
+.p-chip {
+  background: rgba(15, 118, 110, 0.1) !important;
+  color: #0f766e !important;
+}
+
+.p-tag {
+  background: #0f766e !important;
+  color: #ffffff !important;
+}
+
+/* Slider */
+.p-slider .p-slider-range {
+  background: #0f766e !important;
+}
+
+.p-slider .p-slider-handle {
+  border-color: #0f766e !important;
+  background: #0f766e !important;
+}
+
+/* Toggle Button */
+.p-togglebutton.p-highlight {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+  color: #ffffff !important;
+}
+
+/* SelectButton */
+.p-selectbutton .p-button.p-highlight {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+  color: #ffffff !important;
+}
+
+/* InputSwitch - Color corporativo mejorado */
+.p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+  background: #0f766e !important;
+}
+
+.p-inputswitch.p-focus .p-inputswitch-slider {
+  box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.25) !important;
+}

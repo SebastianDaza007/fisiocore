@@ -16,6 +16,17 @@ function formatDate(value?: string | Date | null) {
   return d.toLocaleDateString();
 }
 
+function formatShortDate(value?: string | Date | null) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "-";
+  // Formato: "DD/MM/YYYY"
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 function calcularEdad(fecha?: string | Date | null): number | null {
   if (!fecha) return null;
   const d = new Date(fecha);
@@ -34,11 +45,27 @@ const ItemRow: React.FC<{ label: string; value?: React.ReactNode }> = ({ label, 
   </div>
 );
 
+type FullPaciente = {
+  id_paciente: number;
+  telefono_paciente?: string | null;
+  email_paciente?: string | null;
+  direccion_paciente?: string | null;
+  obras_sociales?: { nombre_obra_social: string } | null;
+};
+
+type TurnoInfo = {
+  id?: string | number;
+  fecha?: string;
+  profesional?: string;
+  hora?: string;
+  tipoConsulta?: string;
+};
+
 const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, paciente, onClose }) => {
   const [obraSocialNombre, setObraSocialNombre] = useState<string | null>(null);
   const [obraLoading, setObraLoading] = useState(false);
-  const [fullPaciente, setFullPaciente] = useState<any | null>(null);
-  const [turnos, setTurnos] = useState<Array<any>>([]);
+  const [fullPaciente, setFullPaciente] = useState<FullPaciente | null>(null);
+  const [turnos, setTurnos] = useState<TurnoInfo[]>([]);
   const [turnosLoading, setTurnosLoading] = useState(false);
 
   // Cerrar con ESC
@@ -62,7 +89,7 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
         if (!res.ok) throw new Error('No se pudo obtener pacientes');
         const list = await res.json();
         const found = Array.isArray(list)
-          ? list.find((p: any) => Number(p.id_paciente) === Number(paciente.id_paciente))
+          ? list.find((p: FullPaciente) => Number(p.id_paciente) === Number(paciente.id_paciente))
           : null;
         setFullPaciente(found || null);
         const nombreObra: string | null = found?.obras_sociales?.nombre_obra_social ?? null;
@@ -88,7 +115,7 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
         const res = await fetch(url);
         if (!res.ok) throw new Error('No se pudo obtener turnos');
         const data = await res.json();
-        const items: any[] = data?.items ?? [];
+        const items: TurnoInfo[] = data?.items ?? [];
         // Tomar los últimos 5 (API ordena ascendente)
         const last = items.slice(-5).reverse();
         setTurnos(last);
@@ -152,10 +179,9 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
               <ItemRow label="DNI" value={paciente.dni_paciente || "-"} />
               <ItemRow label="Sexo" value={paciente.sexo || "-"} />
               <ItemRow label="Fecha de nacimiento" value={formatDate(paciente.fecha_nacimiento_paciente)} />
-              {/* Campos pedidos exactamente: telefono_paciente y email_paciente */}
               <ItemRow label="Teléfono" value={fullPaciente?.telefono_paciente ?? paciente.telefono_paciente ?? "-"} />
               <ItemRow label="Correo" value={fullPaciente?.email_paciente ?? paciente.email_paciente ?? "-"} />
-              {/* Reemplaza Domicilio por Obra Social resolviendo por ID */}
+              <ItemRow label="Domicilio" value={fullPaciente?.direccion_paciente ?? paciente.direccion_paciente ?? "-"} />
               <ItemRow
                 label="Obra Social"
                 value={
@@ -184,15 +210,25 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
               <p className="text-sm text-gray-500">Sin información de turnos disponible.</p>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {turnos.map((t: { id?: string | number, profesional?: string, hora?: string, tipoConsulta?: string }, idx: number) => (
-                  <li key={t.id ?? idx} className="flex items-center justify-between py-2">
-                    <div className="text-sm text-gray-800">
-                      {/* La API actual no devuelve fecha; mostramos profesional + hora */}
-                      <span className="font-medium">{t.profesional || 'Profesional'}</span>
-                      <span className="mx-2 text-gray-400">•</span>
-                      <span>{t.hora ?? '--:--'}</span>
+                {turnos.map((t, idx: number) => (
+                  <li key={t.id ?? idx} className="py-3 flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <i className="pi pi-calendar text-teal-600 text-xs"></i>
+                        <span className="text-xs font-semibold text-gray-600">
+                          {formatShortDate(t.fecha) || '-'}
+                        </span>
+                        <span className="text-gray-400">•</span>
+                        <i className="pi pi-clock text-teal-600 text-xs"></i>
+                        <span className="text-xs font-semibold text-gray-600">
+                          {t.hora ?? '--:--'}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-800">
+                        <span className="font-medium">{t.profesional || 'Profesional'}</span>
+                      </div>
                     </div>
-                    <span className={`text-xs px-3 py-1 rounded-full border ${
+                    <span className={`text-xs px-3 py-1 rounded-full border whitespace-nowrap ${
                       (t.tipoConsulta ?? '').toLowerCase().includes('consul')
                         ? 'bg-yellow-100 text-yellow-900 border-yellow-300'
                         : (t.tipoConsulta ?? '').toLowerCase().includes('control')

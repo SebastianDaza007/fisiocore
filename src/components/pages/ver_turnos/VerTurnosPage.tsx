@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import CalendarPanel from "./CalendarPanel";
 import FiltersBar from "./FiltersBar";
 import TurnosTable from "./TurnosTable";
@@ -9,6 +10,7 @@ import type { Option } from "./FiltersBar";
 import Button from "@/components/common/button";
 
 export default function VerTurnosPage() {
+  const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [items, setItems] = React.useState<Turno[]>([]);
@@ -193,7 +195,12 @@ export default function VerTurnosPage() {
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
               <h2 className="text-2xl font-semibold text-gray-900">{titulo}</h2>
               <div className="flex items-center gap-2">
-                <Button label="Agendar turno" icon="pi pi-plus" severity="success" />
+                <Button
+                  label="Agendar turno"
+                  icon="pi pi-plus"
+                  severity="success"
+                  onClick={() => router.push('/administrativo/agendar')}
+                />
               </div>
             </div>
             <div className="bg-gray-50 rounded-lg p-3 mb-1">
