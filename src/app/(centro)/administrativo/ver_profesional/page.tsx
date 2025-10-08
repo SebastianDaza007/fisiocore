@@ -153,8 +153,7 @@ export default function VerProfesionalPage() {
         {/* Header con título y botón */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Profesionales</h1>
-            <p className="text-sm text-gray-600">Gestión de profesionales del centro médico</p>
+            <h1 className="text-2xl font-bold text-gray-800">Listado de Profesionales</h1>
           </div>
           {canRegisterProfesional && (
             <button
