@@ -59,7 +59,6 @@ export default function DashboardLayout({
           { icon: "pi-home", label: "Home", path: "/profesional", options: null },
           { icon: "pi-calendar", label: "Agenda de Turnos", path: "/profesional/agenda_turnos", options: null },
           { icon: "pi-users", label: "Mis Pacientes", path: "/desarrollo", options: null },
-          { icon: "pi-folder-open", label: "Historia Clinica", path: "/desarrollo", options: null },
           ...baseItems
         ];
 
