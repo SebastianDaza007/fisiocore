@@ -448,7 +448,7 @@ export default function Miagenda() {
                     <Button
                       icon="pi pi-check"
                       className="p-button-outlined p-button-success"
-                      tooltip="Completar turno"
+                      tooltip="Registrar atención médica"
                       tooltipOptions={{ position: 'top' }}
                       onClick={() => abrirModalCompletarTurno(rowData.id)}
                     />

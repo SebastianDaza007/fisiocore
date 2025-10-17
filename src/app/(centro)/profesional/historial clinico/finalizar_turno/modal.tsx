@@ -224,7 +224,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
           {/* Header del modal */}
           <div className="border-b border-gray-200 p-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">Completar Turno</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Registrar Atención Médica</h2>
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 text-2xl font-bold transition-colors"
