@@ -47,7 +47,7 @@ export default function DashboardLayout({
 
       case 'GERENTE':
         return [
-          { icon: "pi-home", label: "Home", path: "/gerente", options: null },
+          { icon: "pi-home", label: "Inicio", path: "/gerente", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
           { icon: "pi-users", label: "Estadisticas pacientes", path: "/gerente/estadisticas-pacientes", options: null },
           { icon: "pi-chart-bar", label: "Estadisticas profesionales", path: "/gerente/estadisticas", options: null },
@@ -56,7 +56,7 @@ export default function DashboardLayout({
 
       case 'PROFESIONAL':
         return [
-          { icon: "pi-home", label: "Home", path: "/profesional", options: null },
+          { icon: "pi-home", label: "Inicio", path: "/profesional", options: null },
           { icon: "pi-calendar", label: "Agenda de Turnos", path: "/profesional/agenda_turnos", options: null },
           { icon: "pi-users", label: "Mis Pacientes", path: "/desarrollo", options: null },
           ...baseItems
@@ -64,7 +64,7 @@ export default function DashboardLayout({
 
       case 'ADMINISTRATIVO':
         return [
-          { icon: "pi-home", label: "Home", path: "/administrativo", options: null },
+          { icon: "pi-home", label: "Inicio", path: "/administrativo", options: null },
           { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/administrativo/agendar", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/administrativo/turnos/ver", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
