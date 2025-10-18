@@ -30,58 +30,26 @@ type ReportData = {
 // 🧩 Configuración del idioma español para el calendario PrimeReact
 addLocale("es", {
     firstDayOfWeek: 1,
-    dayNames: [
-        "domingo",
-        "lunes",
-        "martes",
-        "miércoles",
-        "jueves",
-        "viernes",
-        "sábado",
-    ],
+    dayNames: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
     dayNamesShort: ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
     dayNamesMin: ["D", "L", "M", "X", "J", "V", "S"],
     monthNames: [
-        "enero",
-        "febrero",
-        "marzo",
-        "abril",
-        "mayo",
-        "junio",
-        "julio",
-        "agosto",
-        "septiembre",
-        "octubre",
-        "noviembre",
-        "diciembre",
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
     ],
-    monthNamesShort: [
-        "ene",
-        "feb",
-        "mar",
-        "abr",
-        "may",
-        "jun",
-        "jul",
-        "ago",
-        "sep",
-        "oct",
-        "nov",
-        "dic",
-    ],
+    monthNamesShort: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
     today: "Hoy",
     clear: "Limpiar",
 });
 locale("es");
 
-    export default function DashboardReportes() {
+export default function DashboardReportes() {
     const [selectedProfesional, setSelectedProfesional] = useState<number | null>(null);
     const [dateRange, setDateRange] = useState<Date[] | null>(null);
     const [profesionales, setProfesionales] = useState<ProfesionalOption[]>([]);
     const [dataPacientesMes, setDataPacientesMes] = useState<ReportData[]>([]);
     const [loadingChart, setLoadingChart] = useState(false);
     const [loadingProfesionales, setLoadingProfesionales] = useState(false);
-    // 👇 Agregalo debajo de tus otros useState
     const [resumen, setResumen] = useState({
         completados: 0,
         cancelados: 0,
@@ -89,40 +57,38 @@ locale("es");
         noAsistidos: 0,
     });
     const [dataProfesionalesObra, setDataProfesionalesObra] = useState<{ nombre: string; cantidad: number }[]>([]);
+    const [dataProfesionalesDemandados, setDataProfesionalesDemandados] = useState<{ nombre: string; cantidad: number }[]>([]); // 🧩 Nuevo
 
-    // 🔹 Cargar lista de profesionales (desde /api/reportes/meta)
+    // 🔹 Cargar lista de profesionales
     useEffect(() => {
         const fetchProfesionales = async () => {
-        setLoadingProfesionales(true);
-        try {
-            const res = await fetch("/api/reportes/meta");
-            if (!res.ok) throw new Error("Error al cargar profesionales");
-            const data = await res.json();
-            setProfesionales([{ label: "Todos los profesionales", value: null }, ...data.profesionales]);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoadingProfesionales(false);
-        }
+            setLoadingProfesionales(true);
+            try {
+                const res = await fetch("/api/reportes/meta");
+                if (!res.ok) throw new Error("Error al cargar profesionales");
+                const data = await res.json();
+                setProfesionales([{ label: "Todos los profesionales", value: null }, ...data.profesionales]);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoadingProfesionales(false);
+            }
         };
         fetchProfesionales();
     }, []);
 
-    // 🔹 Cargar reporte "Pacientes atendidos por mes"
+    // 🔹 Reporte: Pacientes por mes
     const fetchData = useCallback(async () => {
         setLoadingChart(true);
         try {
             const params = new URLSearchParams();
-
             if (typeof selectedProfesional === "number" && !isNaN(selectedProfesional)) {
                 params.set("profesionalId", selectedProfesional.toString());
             }
-
             if (dateRange?.[0] && dateRange?.[1]) {
                 params.set("startDate", dateRange[0].toISOString());
                 params.set("endDate", dateRange[1].toISOString());
             }
-
             const res = await fetch(`/api/reportes/pacientes-mes?${params.toString()}`);
             const data = await res.json();
             setDataPacientesMes(Array.isArray(data) ? data : []);
@@ -133,26 +99,19 @@ locale("es");
         }
     }, [selectedProfesional, dateRange]);
 
-    // 🔹 Cargar resumen de KPIs
+    // 🔹 Reporte: Resumen KPIs
     const fetchResumen = useCallback(async () => {
         try {
             const params = new URLSearchParams();
-
-            // Si hay profesional seleccionado, lo enviamos
             if (typeof selectedProfesional === "number" && !isNaN(selectedProfesional)) {
                 params.set("profesionalId", selectedProfesional.toString());
             }
-
-            // Si hay rango de fechas, lo enviamos
             if (dateRange?.[0] && dateRange?.[1]) {
                 params.set("startDate", dateRange[0].toISOString());
                 params.set("endDate", dateRange[1].toISOString());
             }
-
             const res = await fetch(`/api/reportes/resumen?${params.toString()}`);
             const data = await res.json();
-
-            // Guardamos los datos del resumen (con valores seguros por si faltan)
             setResumen({
                 completados: data.completados ?? 0,
                 cancelados: data.cancelados ?? 0,
@@ -164,7 +123,7 @@ locale("es");
         }
     }, [selectedProfesional, dateRange]);
 
-    // 🔹 Cargar cantidad de profesionales por obra social
+    // 🔹 Reporte: Profesionales por obra social
     const fetchProfesionalesPorObra = useCallback(async () => {
         try {
             const res = await fetch("/api/reportes/profesionales-por-obra");
@@ -175,239 +134,214 @@ locale("es");
         }
     }, []);
 
-    // 🧩 Paso 2: Cargar datos por defecto (todos los profesionales y meses)
+    // 🔹 🧩 Reporte: Profesionales más demandados
+    const fetchProfesionalesDemandados = useCallback(async () => {
+        try {
+            const params = new URLSearchParams();
+            if (dateRange?.[0] && dateRange?.[1]) {
+                params.set("startDate", dateRange[0].toISOString());
+                params.set("endDate", dateRange[1].toISOString());
+            }
+            const res = await fetch(`/api/reportes/profesionales-demandados?${params.toString()}`);
+            const data = await res.json();
+            setDataProfesionalesDemandados(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error("Error al cargar profesionales más demandados:", err);
+        }
+    }, [dateRange]);
+
+    // 🧩 Cargar datos iniciales
     useEffect(() => {
         if (!loadingProfesionales) {
-            fetchData(); // Llama al backend sin filtros
-            fetchResumen(); //nuevo: carga el resumen inicial
-            fetchProfesionalesPorObra(); //nuevo: carga profesionales por obra social
+            fetchData();
+            fetchResumen();
+            fetchProfesionalesPorObra();
+            fetchProfesionalesDemandados(); // 🧩 Nuevo
         }
-    }, [loadingProfesionales, fetchData, fetchResumen, fetchProfesionalesPorObra]);
+    }, [loadingProfesionales, fetchData, fetchResumen, fetchProfesionalesPorObra, fetchProfesionalesDemandados]);
 
-    // 🔹 Llamar fetch al hacer clic en “Filtrar”
+    // 🔹 Filtrar
     const handleFilter = () => {
         fetchData();
         fetchResumen();
+        fetchProfesionalesDemandados(); // 🧩 Nuevo
     };
 
     return (
         <div className="p-6 min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-white text-gray-800">
-        {/* Header */}
-        <div className="mb-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 p-5">
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard de Profesionales</h1>
-            <p className="text-gray-600">
-            Visualiza métricas clave de pacientes, turnos y profesionales.
-            </p>
-        </div>
-
-        {/* 🔹 Filtros superiores */}
-        <div className="bg-white/95 rounded-2xl border border-gray-200 shadow-sm p-5 mb-8 flex flex-wrap gap-4 items-end backdrop-blur-sm">
-            <div className="flex-1 min-w-[220px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Profesional</label>
-            <Dropdown
-                value={selectedProfesional}
-                options={profesionales}
-                onChange={(e) => setSelectedProfesional(e.value)}
-                placeholder={loadingProfesionales ? "Cargando..." : "Seleccionar"}
-                className="w-full"
-                disabled={loadingProfesionales}
-            />
+            {/* Header */}
+            <div className="mb-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 p-5">
+                <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard de Profesionales</h1>
+                <p className="text-gray-600">Visualiza métricas clave de pacientes, turnos y profesionales.</p>
             </div>
 
-            <div className="flex-1 min-w-[220px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rango de fechas</label>
-            <Calendar
-                value={dateRange}
-                onChange={(e) => setDateRange(e.value as Date[] | null)}
-                selectionMode="range"
-                dateFormat="dd/mm/yy"
-                showIcon
-                locale="es"
-                className="w-full"
-            />
+            {/* Filtros */}
+            <div className="bg-white/95 rounded-2xl border border-gray-200 shadow-sm p-5 mb-8 flex flex-wrap gap-4 items-end backdrop-blur-sm">
+                <div className="flex-1 min-w-[220px]">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Profesional</label>
+                    <Dropdown
+                        value={selectedProfesional}
+                        options={profesionales}
+                        onChange={(e) => setSelectedProfesional(e.value)}
+                        placeholder={loadingProfesionales ? "Cargando..." : "Seleccionar"}
+                        className="w-full"
+                        disabled={loadingProfesionales}
+                    />
+                </div>
+
+                <div className="flex-1 min-w-[220px]">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Rango de fechas</label>
+                    <Calendar
+                        value={dateRange}
+                        onChange={(e) => setDateRange(e.value as Date[] | null)}
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        locale="es"
+                        appendTo={typeof window !== "undefined" ? document.body : undefined}
+                        className="w-full"
+                    />
+                </div>
+
+                <Button icon="pi pi-search" label="Filtrar" className="h-[42px]" severity="info" onClick={handleFilter} />
             </div>
 
-            <Button
-            icon="pi pi-search"
-            label="Filtrar"
-            className="h-[42px]"
-            severity="info"
-            onClick={handleFilter}
-            />
-        </div>
-
-        {/* 🔹 Cards de resumen */}
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 mb-10">
-            {[
-            {
-                label: "Pacientes atendidos",
-                value: resumen.completados,
-                icon: "pi pi-user-plus",
-                color: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200",
-            },
-            {
-                label: "Turnos cancelados",
-                value: resumen.cancelados,
-                icon: "pi pi-ban",
-                color: "bg-red-100 text-red-700 hover:bg-red-200",
-            },
-            {
-                label: "Turnos en espera",
-                value: resumen.enEspera,
-                icon: "pi pi-clock",
-                color: "bg-yellow-100 text-yellow-700 hover:bg-yellow-200",
-            },
-            {
-                label: "Turnos no asistidos",
-                value: resumen.noAsistidos,
-                icon: "pi pi-times-circle",
-                color: "bg-gray-100 text-gray-700 hover:bg-gray-200",
-            },
-            ].map((item) => (
-            <Card
-                key={item.label}
-                className={`p-5 rounded-2xl bg-white/90 border border-gray-200 shadow-sm 
-                transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300`}
-            >
-                <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm text-gray-500">{item.label}</p>
-                    <h3 className="text-2xl font-bold text-gray-900">{item.value}</h3>
-                </div>
-                <div
-                    className={`p-3 rounded-full ${item.color} shadow-inner transition-colors duration-300`}
-                >
-                    <i className={`${item.icon} text-xl`} />
-                </div>
-                </div>
-            </Card>
-            ))}
-        </div>
-
-        {/* 🔹 Contenedores para los reportes */}
-        <div className="grid gap-8 lg:grid-cols-2">
-            {/* Reporte 1 */}
-            <Card
-            title="Pacientes atendidos por mes"
-            className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm 
-                transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
-            >
-            <div className="h-[300px] flex items-center justify-center text-gray-400">
-                {loadingChart ? (
-                <span className="text-sm text-gray-500">Cargando datos...</span>
-                ) : dataPacientesMes.length === 0 ? (
-                <span className="text-sm text-gray-500">No hay datos disponibles.</span>
-                ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={dataPacientesMes}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                            dataKey="mes"
-                            tickFormatter={(mes) => {
-                                const [year, month] = mes.split("-");
-                                const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-                                return `${meses[Number(month) - 1]} ${year}`;
-                            }}
-                            tick={{ fontSize: 12 }}
-                        />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip
-                            labelFormatter={(mes) => `Mes: ${mes}`}
-                            formatter={(value) => [`${value} pacientes`, "Atendidos"]}
-                        />
-                        {/* 🧩 Colores variables por barra */}
-                        <Bar dataKey="cantidad" radius={[6, 6, 0, 0]}>
-                            {dataPacientesMes.map((entry, index) => {
-                                const colores = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
-                                return<Cell key={`cell-${index}`} fill={colores[index % colores.length]} />;
-                            })}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
-                )}
+            {/* Cards resumen */}
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 mb-10">
+                {[
+                    { label: "Pacientes atendidos", value: resumen.completados, icon: "pi pi-user-plus", color: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" },
+                    { label: "Turnos cancelados", value: resumen.cancelados, icon: "pi pi-ban", color: "bg-red-100 text-red-700 hover:bg-red-200" },
+                    { label: "Turnos en espera", value: resumen.enEspera, icon: "pi pi-clock", color: "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" },
+                    { label: "Turnos no asistidos", value: resumen.noAsistidos, icon: "pi pi-times-circle", color: "bg-gray-100 text-gray-700 hover:bg-gray-200" },
+                ].map((item) => (
+                    <Card key={item.label} className={`p-5 rounded-2xl bg-white/90 border border-gray-200 shadow-sm transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300`}>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-500">{item.label}</p>
+                                <h3 className="text-2xl font-bold text-gray-900">{item.value}</h3>
+                            </div>
+                            <div className={`p-3 rounded-full ${item.color} shadow-inner transition-colors duration-300`}>
+                                <i className={`${item.icon} text-xl`} />
+                            </div>
+                        </div>
+                    </Card>
+                ))}
             </div>
-            </Card>
 
-            {/* Otros reportes... */}
-            <Card
-                title="Cantidad de profesionales por obra social"
-                    className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm 
-                    transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
-                >
-                    <div className="h-[300px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/60">
-                        {dataProfesionalesObra.length === 0 ? (
+            {/* Gráficos */}
+            <div className="grid gap-8 lg:grid-cols-2">
+                {/* Pacientes por mes */}
+                <Card title="Pacientes atendidos por mes" className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300">
+                    <div className="h-[300px] flex items-center justify-center text-gray-400">
+                        {loadingChart ? (
+                            <span className="text-sm text-gray-500">Cargando datos...</span>
+                        ) : dataPacientesMes.length === 0 ? (
                             <span className="text-sm text-gray-500">No hay datos disponibles.</span>
                         ) : (
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart
-                                    data={dataProfesionalesObra}
-                                    layout="vertical"
-                                    margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis type="number" allowDecimals={false} />
-                                    <YAxis
-                                        dataKey="nombre"
-                                        type="category"
-                                        width={150}
+                                <BarChart data={dataPacientesMes}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                    <XAxis
+                                        dataKey="mes"
+                                        tickFormatter={(mes) => {
+                                            const [year, month] = mes.split("-");
+                                            const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+                                            return `${meses[Number(month) - 1]} ${year}`;
+                                        }}
                                         tick={{ fontSize: 12 }}
                                     />
-                                    <Tooltip
-                                        formatter={(value) => [`${value} profesionales`, "Cantidad"]}
-                                    />
-                                    <Bar dataKey="cantidad" radius={[0, 6, 6, 0]}>
-                                        {dataProfesionalesObra.map((entry, index) => {
+                                    <YAxis allowDecimals={false} />
+                                    <Tooltip labelFormatter={(mes) => `Mes: ${mes}`} formatter={(value) => [`${value} pacientes`, "Atendidos"]} />
+                                    <Bar dataKey="cantidad" radius={[6, 6, 0, 0]}>
+                                        {dataPacientesMes.map((_, index) => {
                                             const colores = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
-                                            return <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />;
+                                            return <Cell key={index} fill={colores[index % colores.length]} />;
                                         })}
                                     </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
                         )}
                     </div>
-            </Card>
-        </div>
-        {/* 🧩 Estilos locales para mejorar el calendario */}
-        <style jsx global>{`
-            /* Texto general del calendario */
-            .p-datepicker table td > span {
-                color: #374151 !important;
-                font-weight: 500;
-            }
+                </Card>
 
-            /* Días seleccionados */
-            .p-datepicker table td > span.p-highlight {
-                background-color: #14b8a6 !important;
-                color: #ffffff !important;
-                border-radius: 50% !important;
-                font-weight: 600;
-            }
+                {/* Profesionales por obra social */}
+                <Card title="Cantidad de profesionales por obra social" className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300">
+                    <div className="h-[300px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/60">
+                        {dataProfesionalesObra.length === 0 ? (
+                            <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={dataProfesionalesObra} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis type="number" allowDecimals={false} />
+                                    <YAxis dataKey="nombre" type="category" width={150} tick={{ fontSize: 12 }} />
+                                    <Tooltip formatter={(value) => [`${value} profesionales`, "Cantidad"]} />
+                                    <Bar dataKey="cantidad" radius={[0, 6, 6, 0]}>
+                                        {dataProfesionalesObra.map((_, index) => {
+                                            const colores = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
+                                            return <Cell key={index} fill={colores[index % colores.length]} />;
+                                        })}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </Card>
 
-            /* Hover de días */
-            .p-datepicker table td > span:hover {
-                background-color: #d1f5f0 !important;
-                border-radius: 50% !important;
-            }
+                {/* 🧩 Nuevo reporte: Profesionales más demandados */}
+                <Card title="Profesionales más demandados" className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300">
+                    <div className="h-[300px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/60">
+                        {dataProfesionalesDemandados.length === 0 ? (
+                            <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={dataProfesionalesDemandados} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis type="number" allowDecimals={false} />
+                                    <YAxis dataKey="nombre" type="category" width={150} tick={{ fontSize: 12 }} />
+                                    <Tooltip formatter={(value) => [`${value} turnos`, "Confirmados/Completados"]} />
+                                    <Bar dataKey="cantidad" radius={[0, 6, 6, 0]}>
+                                        {dataProfesionalesDemandados.map((_, index) => {
+                                            const colores = ["#3b82f6", "#14b8a6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
+                                            return <Cell key={index} fill={colores[index % colores.length]} />;
+                                        })}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </Card>
+            </div>
 
-            /* 🔹 Corregir color de texto en dropdown al seleccionar */
-            .p-dropdown-item.p-highlight {
-                background-color: #0f766e !important; /* color teal más oscuro */
-                color: #ffffff !important; /* texto blanco visible */
-            }
-
-            /* 🔹 Hover del item en el dropdown */
-            .p-dropdown-item:not(.p-highlight):hover {
-                background-color: #e0f2f1 !important; /* verde claro */
-                color: #065f46 !important; /* texto verde oscuro */
-            }
-
-            /* 🔹 Fondo general del panel dropdown */
-            .p-dropdown-panel {
-                border-radius: 0.75rem !important;
-                overflow: hidden !important;
-            }
-        `}</style>
-
+            {/* Estilos globales calendario */}
+            <style jsx global>{`
+                .p-datepicker table td > span {
+                    color: #374151 !important;
+                    font-weight: 500;
+                }
+                .p-datepicker table td > span.p-highlight {
+                    background-color: #14b8a6 !important;
+                    color: #ffffff !important;
+                    border-radius: 50% !important;
+                    font-weight: 600;
+                }
+                .p-datepicker table td > span:hover {
+                    background-color: #d1f5f0 !important;
+                    border-radius: 50% !important;
+                }
+                .p-dropdown-item.p-highlight {
+                    background-color: #0f766e !important;
+                    color: #ffffff !important;
+                }
+                .p-dropdown-item:not(.p-highlight):hover {
+                    background-color: #e0f2f1 !important;
+                    color: #065f46 !important;
+                }
+                .p-dropdown-panel {
+                    border-radius: 0.75rem !important;
+                    overflow: hidden !important;
+                }
+            `}</style>
         </div>
     );
 }
