@@ -8,65 +8,66 @@ import { OverlayPanel } from "primereact/overlaypanel";
 type Props = {
   items?: Turno[];
   onChangeEstado?: (idTurno: number, estado: string) => void;
+  onReprogramar?: (turno: Turno) => void;
 };
 
-// ✅ Chip de estado con colores
-function EstadoChip({ estado }: { estado?: string }) {
-  const base = "inline-flex px-2 py-1 rounded-full text-xs font-medium";
-
-  switch (estado) {
-    case "CONFIRMADO":
-      return <span className={`${base} bg-green-100 text-green-700`}>Confirmado</span>;
-    case "NO ASISTIDO":
-      return <span className={`${base} bg-gray-200 text-gray-700`}>No Asistido</span>;
-    case "EN ESPERA":
-      return <span className={`${base} bg-blue-100 text-blue-700`}>En Espera</span>;
-    case "CANCELADO":
-      return <span className={`${base} bg-red-100 text-red-700`}>Cancelado</span>;
-    case "COMPLETADO":
-      return <span className={`${base} bg-emerald-200 text-emerald-800`}>Completado</span>;
-    default:
-      return <span className={`${base} bg-slate-100 text-slate-700`}>Pendiente</span>;
-  }
-}
-
-export default function TurnosTable({ items = [], onChangeEstado }: Props) {
+export default function TurnosTable({ items = [], onChangeEstado, onReprogramar }: Props) {
   const opRef = useRef<OverlayPanel>(null);
   const [selectedTurno, setSelectedTurno] = useState<Turno | null>(null);
 
   // Menú dinámico según turno seleccionado
-  const menuItems: MenuItem[] = [
-    {
-      label: "Marcar como No Asistido",
-      icon: "pi pi-times-circle",
-      command: () => {
-        if (selectedTurno) onChangeEstado?.(selectedTurno.id, "NO ASISTIDO");
-        opRef.current?.hide();
+  const getMenuItems = (): MenuItem[] => {
+    const items: MenuItem[] = [];
+
+    // Solo mostrar "Reprogramar" si el estado es CONFIRMADO
+    if (selectedTurno?.estado === "CONFIRMADO") {
+      items.push({
+        label: "Reprogramar",
+        icon: "pi pi-calendar-plus",
+        command: () => {
+          if (selectedTurno) onReprogramar?.(selectedTurno);
+          opRef.current?.hide();
+        },
+      });
+      items.push({ separator: true });
+    }
+
+    // Opciones de cambio de estado (siempre disponibles)
+    items.push(
+      {
+        label: "Marcar como No Asistido",
+        icon: "pi pi-times-circle",
+        command: () => {
+          if (selectedTurno) onChangeEstado?.(selectedTurno.id, "NO ASISTIDO");
+          opRef.current?.hide();
+        },
       },
-    },
-    {
-      label: "Marcar como En Espera",
-      icon: "pi pi-hourglass",
-      command: () => {
-        if (selectedTurno) onChangeEstado?.(selectedTurno.id, "EN ESPERA");
-        opRef.current?.hide();
+      {
+        label: "Marcar como En Espera",
+        icon: "pi pi-hourglass",
+        command: () => {
+          if (selectedTurno) onChangeEstado?.(selectedTurno.id, "EN ESPERA");
+          opRef.current?.hide();
+        },
       },
-    },
-    {
-      label: "Marcar como Cancelado",
-      icon: "pi pi-ban",
-      command: () => {
-        if (selectedTurno) onChangeEstado?.(selectedTurno.id, "CANCELADO");
-        opRef.current?.hide();
-      },
-    },
-  ];
+      {
+        label: "Marcar como Cancelado",
+        icon: "pi pi-ban",
+        command: () => {
+          if (selectedTurno) onChangeEstado?.(selectedTurno.id, "CANCELADO");
+          opRef.current?.hide();
+        },
+      }
+    );
+
+    return items;
+  };
 
   return (
     <div className="bg-white rounded-xl shadow p-4">
       {/* Overlay con menú */}
       <OverlayPanel ref={opRef}>
-        <Menu model={menuItems} />
+        <Menu model={getMenuItems()} />
       </OverlayPanel>
 
       <div className="overflow-x-auto">
@@ -107,10 +108,7 @@ export default function TurnosTable({ items = [], onChangeEstado }: Props) {
                     </div>
                   </td>
                   <td className="py-3 px-3">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 font-medium">
-                      <i className="pi pi-clock mr-1 text-xs" />
-                      <span className="tabular-nums">{t.hora}</span>
-                    </span>
+                    <span className="text-gray-900">{t.hora}</span>
                   </td>
                   <td className="py-3 px-3">
                     <div className="flex flex-col">
@@ -119,18 +117,13 @@ export default function TurnosTable({ items = [], onChangeEstado }: Props) {
                     </div>
                   </td>
                   <td className="py-3 px-3">
-                    <span className="inline-flex px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
-                      {t.tipoConsulta}
-                    </span>
+                    <span className="text-gray-900">{t.tipoConsulta}</span>
                   </td>
                   <td className="py-3 px-3">
-                    <span className="inline-flex px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
-                      {t.obraSocial}
-                    </span>
+                    <span className="text-gray-900">{t.obraSocial}</span>
                   </td>
                   <td className="py-3 px-3">
-                    {/* Estado del turno */}
-                    <EstadoChip estado={t.estado} />
+                    <span className="text-gray-900">{t.estado}</span>
                   </td>
                   <td className="py-3 px-3">
                     <Button

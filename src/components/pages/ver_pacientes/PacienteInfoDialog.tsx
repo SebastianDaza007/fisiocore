@@ -182,19 +182,7 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
               <ItemRow label="Teléfono" value={fullPaciente?.telefono_paciente ?? paciente.telefono_paciente ?? "-"} />
               <ItemRow label="Correo" value={fullPaciente?.email_paciente ?? paciente.email_paciente ?? "-"} />
               <ItemRow label="Domicilio" value={fullPaciente?.direccion_paciente ?? paciente.direccion_paciente ?? "-"} />
-              <ItemRow
-                label="Obra Social"
-                value={
-                  <span className={
-                    `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ` +
-                    (obraSocialDisplay && obraSocialDisplay !== '-' &&obraSocialDisplay !== 'Cargando...'
-                      ? 'bg-amber-50 text-amber-700 border-amber-200'
-                      : 'bg-gray-50 text-gray-600 border-gray-200')
-                  }>
-                    {obraSocialDisplay}
-                  </span>
-                }
-              />
+              <ItemRow label="Obra Social" value={obraSocialDisplay} />
             </div>
           </div>
 

@@ -2,7 +2,6 @@
 
 import { Dialog } from 'primereact/dialog';
 import { Badge } from 'primereact/badge';
-import { Divider } from 'primereact/divider';
 import { Card } from 'primereact/card';
 
 interface Profesional {
@@ -135,15 +134,11 @@ export default function ProfesionalDetailsModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Matrícula</label>
-              <Badge value={profesional.matricula_profesional} severity="info" className="text-sm" />
+              <p className="text-gray-900">{profesional.matricula_profesional}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Especialidad</label>
-              <Badge
-                value={profesional.especialidades.nombre_especialidad}
-                severity="success"
-                className="text-sm"
-              />
+              <p className="text-gray-900">{profesional.especialidades.nombre_especialidad}</p>
             </div>
           </div>
         </Card>
@@ -154,15 +149,12 @@ export default function ProfesionalDetailsModal({
             <i className="pi pi-heart text-gray-600"></i>
             <h4 className="text-lg font-semibold text-gray-800 m-0">Obras Sociales</h4>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-2">
             {profesional.profesionales_por_obras_sociales.length > 0 ? (
               profesional.profesionales_por_obras_sociales.map((relacion, index) => (
-                <Badge
-                  key={index}
-                  value={relacion.obras_sociales.nombre_obra_social}
-                  severity="warning"
-                  className="text-sm"
-                />
+                <p key={index} className="text-gray-900 m-0">
+                  • {relacion.obras_sociales.nombre_obra_social}
+                </p>
               ))
             ) : (
               <p className="text-gray-500 italic">No hay obras sociales asociadas</p>
