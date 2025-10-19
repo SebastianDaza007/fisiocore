@@ -5,17 +5,22 @@ import { useRouter } from "next/navigation";
 import CalendarPanel from "./CalendarPanel";
 import FiltersBar from "./FiltersBar";
 import TurnosTable from "./TurnosTable";
+import ReprogramarDialog from "./ReprogramarDialog";
 import type { Turno } from "./types";
 import type { Option } from "./FiltersBar";
 import Button from "@/components/common/button";
+import { Toast } from "primereact/toast";
 
 export default function VerTurnosPage() {
   const router = useRouter();
+  const toast = React.useRef<Toast>(null);
   const [mounted, setMounted] = React.useState(false);
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [items, setItems] = React.useState<Turno[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+  const [showReprogramarDialog, setShowReprogramarDialog] = React.useState(false);
+  const [turnoToReprogramar, setTurnoToReprogramar] = React.useState<Turno | null>(null);
   const [filters, setFilters] = React.useState({
     q: "",
     especialidadId: null as string | null,
@@ -180,8 +185,70 @@ export default function VerTurnosPage() {
     }
   }
 
+  // Abrir dialog de reprogramar
+  function handleReprogramar(turno: Turno) {
+    setTurnoToReprogramar(turno);
+    setShowReprogramarDialog(true);
+  }
+
+  // Confirmar reprogramación
+  async function handleConfirmReprogramar(
+    turnoId: number,
+    nuevaFecha: Date,
+    nuevaHora: string
+  ) {
+    try {
+      const year = nuevaFecha.getFullYear();
+      const month = (nuevaFecha.getMonth() + 1).toString().padStart(2, "0");
+      const day = nuevaFecha.getDate().toString().padStart(2, "0");
+      const fechaStr = `${year}-${month}-${day}`;
+
+      const res = await fetch(`/api/turnos/${turnoId}/reprogramar`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fecha: fechaStr, hora: nuevaHora }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Error al reprogramar");
+      }
+
+      // Recargar la lista de turnos
+      await load(true);
+
+      toast.current?.show({
+        severity: "success",
+        summary: "Turno reprogramado",
+        detail: `El turno fue reprogramado exitosamente para el ${fechaStr} a las ${nuevaHora}`,
+        life: 5000,
+      });
+
+      setShowReprogramarDialog(false);
+      setTurnoToReprogramar(null);
+    } catch (error) {
+      console.error("Error al reprogramar:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: error instanceof Error ? error.message : "No se pudo reprogramar el turno",
+        life: 5000,
+      });
+    }
+  }
+
   return (
     <div className="p-4">
+      <Toast ref={toast} />
+      <ReprogramarDialog
+        visible={showReprogramarDialog}
+        turno={turnoToReprogramar}
+        onHide={() => {
+          setShowReprogramarDialog(false);
+          setTurnoToReprogramar(null);
+        }}
+        onConfirm={handleConfirmReprogramar}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-1">
           {mounted ? (
@@ -232,7 +299,11 @@ export default function VerTurnosPage() {
                 {errorMsg}
               </div>
             ) : (
-              <TurnosTable items={items} onChangeEstado={handleChangeEstado} />
+              <TurnosTable
+                items={items}
+                onChangeEstado={handleChangeEstado}
+                onReprogramar={handleReprogramar}
+              />
             )}
           </div>
         </div>

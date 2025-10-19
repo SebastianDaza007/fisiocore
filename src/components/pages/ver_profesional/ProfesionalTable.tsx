@@ -2,7 +2,6 @@
 
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { Badge } from 'primereact/badge';
 import { Button } from 'primereact/button';
 
 interface Profesional {
@@ -64,11 +63,9 @@ export default function ProfesionalTable({
 
   const especialidadTemplate = (rowData: Profesional) => {
     return (
-      <Badge
-        value={rowData.especialidades.nombre_especialidad}
-        severity="success"
-        className="text-sm"
-      />
+      <span className="text-gray-900">
+        {rowData.especialidades.nombre_especialidad}
+      </span>
     );
   };
 
@@ -76,25 +73,19 @@ export default function ProfesionalTable({
     return (
       <div className="flex flex-col gap-1">
         {rowData.profesionales_por_obras_sociales.map((relacion, index) => (
-          <Badge
-            key={index}
-            value={relacion.obras_sociales.nombre_obra_social}
-            severity="warning"
-            className="text-xs mr-1 mb-1"
-          />
+          <span key={index} className="text-gray-900">
+            {relacion.obras_sociales.nombre_obra_social}
+          </span>
         ))}
       </div>
     );
   };
 
   const estadoTemplate = (rowData: Profesional) => {
-    const isActivo = rowData.estado === 'Activo';
     return (
-      <Badge
-        value={rowData.estado}
-        severity={isActivo ? "success" : "danger"}
-        className="text-sm"
-      />
+      <span className="text-gray-900">
+        {rowData.estado}
+      </span>
     );
   };
 
