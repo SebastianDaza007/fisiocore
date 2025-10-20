@@ -7,7 +7,7 @@ import prisma from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { dni, nombre, apellido, fechaNacimiento, email, telefono, direccion, obraSocial } = body;
+    const { dni, nombre, apellido, fechaNacimiento, email, telefono, direccion, obraSocial, enfermedadCronica } = body;
 
     // Validaciones
     if (!dni || !nombre || !apellido || !fechaNacimiento || !telefono || !obraSocial) {
@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
         telefono_paciente: telefono,
         fecha_nacimiento_paciente: new Date(fechaNacimiento),
         direccion_paciente: direccion || null,
+        enfermedad_cronica: enfermedadCronica || null,
         obra_social_id: obraSocialExistente.id_obra_social,
       },
     });
@@ -83,6 +84,7 @@ export async function GET() {
         telefono_paciente: true,
         fecha_nacimiento_paciente: true,
         direccion_paciente: true,
+        enfermedad_cronica: true,
         obras_sociales: {
           select: { nombre_obra_social: true },
         },
@@ -110,6 +112,7 @@ export async function PUT(request: NextRequest) {
       email_paciente,
       direccion_paciente,
       telefono_paciente,
+      enfermedad_cronica,
       obra_social, // nombre de la obra social opcional
     } = body || {};
 
@@ -123,10 +126,12 @@ export async function PUT(request: NextRequest) {
       direccion_paciente?: string | null;
       telefono_paciente?: string;
       obra_social_id?: number;
+      enfermedad_cronica?: string | null;
     } = {};
     if (typeof email_paciente !== 'undefined') data.email_paciente = email_paciente;
     if (typeof direccion_paciente !== 'undefined') data.direccion_paciente = direccion_paciente;
     if (typeof telefono_paciente !== 'undefined') data.telefono_paciente = telefono_paciente;
+    if (typeof enfermedad_cronica !== 'undefined') data.enfermedad_cronica = enfermedad_cronica;
 
     if (typeof obra_social !== 'undefined' && obra_social) {
       // Buscar obra social por nombre y usar su ID

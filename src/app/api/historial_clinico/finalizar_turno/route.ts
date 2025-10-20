@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { paciente_id, turno_id, profesional_id, texto_comentario, texto_indicacion } = body;
+    const { paciente_id, turno_id, profesional_id, texto_comentario, texto_indicacion,objetivos_sesion, ejercicios_asignados, instrumentos_utilizados} = body;
 
     // Validaciones
     if (!paciente_id || !turno_id || !profesional_id || !texto_comentario || !texto_indicacion) {
@@ -93,6 +93,9 @@ export async function POST(req: NextRequest) {
         profesional_id: parseInt(profesional_id),
         texto_comentario: texto_comentario.trim(),
         texto_indicacion: texto_indicacion.trim(),
+        objetivos_sesion: objetivos_sesion?.trim() || null,
+        ejercicios_asignados: ejercicios_asignados?.trim() || null,
+        instrumentos_utilizados: instrumentos_utilizados?.trim() || null,
         fecha_registro: new Date()
       },
       include: {
