@@ -7,6 +7,7 @@ import 'primereact/resources/themes/lara-light-cyan/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
+
 interface PacienteInfo {
   id_paciente: number;
   nombre_paciente: string;
@@ -14,6 +15,7 @@ interface PacienteInfo {
   dni_paciente: string;
   email_paciente?: string;
   telefono_paciente: string;
+  enfermedad_cronica?: string;
   obras_sociales: {
     nombre_obra_social: string;
   };
@@ -34,6 +36,10 @@ interface RegistroClinicoHistorico {
   fecha_registro: string;
   texto_comentario: string;
   texto_indicacion: string;
+  objetivos_sesion?: string;
+  ejercicios_asignados?: string;
+  instrumentos_utilizados?: string;
+  nota_post_turno?:string;
   profesionales: ProfesionalInfo;
   turnos: {
     fecha_turno: string;
@@ -60,6 +66,9 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState<number | number[]>(0);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editNota, setEditNota] = useState<string>("");
+  const [savingNota, setSavingNota] = useState<boolean>(false);
 
   // Función para obtener el color de la obra social
   const getObraSocialClass = (obraSocial: string | undefined) => {
@@ -120,6 +129,39 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
       return () => document.removeEventListener('keydown', handleEsc);
     }
   }, [isOpen, onClose]);
+
+  // Manejo de anotación post turno
+  const startEditNota = (index: number, current: string | undefined) => {
+    setEditingIndex(index);
+    setEditNota(current ?? "");
+  };
+
+  const cancelEditNota = () => {
+    setEditingIndex(null);
+    setEditNota("");
+  };
+
+  const saveNotaPostTurno = async (registroId: number, index: number) => {
+    try {
+      setSavingNota(true);
+      const res = await fetch(`/api/historial_clinico/nota_post_turno/${registroId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nota_post_turno: editNota })
+      });
+      if (!res.ok) throw new Error('No se pudo actualizar la anotación');
+      const json = await res.json();
+      const nuevaNota = json?.data?.nota_post_turno ?? editNota;
+      setRegistros(prev => prev.map((r, i) => i === index ? { ...r, nota_post_turno: nuevaNota } : r));
+      setEditingIndex(null);
+      setEditNota("");
+    } catch (e) {
+      console.error(e);
+      alert('Ocurrió un error al guardar la anotación.');
+    } finally {
+      setSavingNota(false);
+    }
+  };
 
   // ✅ FUNCIONES DE FORMATO CORREGIDAS (VERSIÓN RECOMENDADA)
   const formatFecha = (fechaString: string) => {
@@ -182,6 +224,64 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
 
           <div className="p-6">
             {/* PRIMER BOX: Información Personal */}
+            {/*<div className="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <IdentificationIcon className="w-5 h-5" />
+                Información Personal
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre
+                  </label>
+                  <p className="text-gray-900 font-medium">
+                    {pacienteInfo.nombre_paciente} {pacienteInfo.apellido_paciente}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    DNI
+                  </label>
+                  <p className="text-gray-900">{pacienteInfo.dni_paciente}</p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <p className="text-gray-900">
+                    {pacienteInfo.email_paciente || 'No especificado'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Teléfono
+                  </label>
+                  <p className="text-gray-900">{pacienteInfo.telefono_paciente}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Enfermedad Cronica 
+                  </label>
+                  <p className="text-gray-900">
+                    {pacienteInfo.enfermedad_cronica || '-'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Obra Social
+                  </label>
+                  <div className="text-gray-900">
+                    {pacienteInfo.obras_sociales?.nombre_obra_social || 'No especificada'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-6">
                 <p>{error}</p>
@@ -273,14 +373,97 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
                               {registro.texto_indicacion}
                             </p>
                           </div>
-                          
+                          {/* OBJETIVOS DE LA SESIÓN */}
+                          {registro.objetivos_sesion && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <i className="pi pi-list text-yellow-500"></i>
+                                <h4 className="font-semibold text-gray-700">Objetivos de la Sesión</h4>
+                              </div>
+                              <p className="text-gray-800 bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                                {registro.objetivos_sesion}
+                              </p>
+                            </div>
+                          )}
+                          {/* EJERCICIOS ASIGNADOS */}
+                          {registro.ejercicios_asignados && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <i className="pi pi-heart-fill text-pink-500"></i>
+                                <h4 className="font-semibold text-gray-700">Ejercicios Asignados</h4>
+                              </div>
+                              <p className="text-gray-800 bg-pink-200 p-4 rounded-lg border border-pink-100">
+                                {registro.ejercicios_asignados}
+                              </p>
+                            </div>
+                          )}
+                          {/* Instrumentos utilizados */}
+                          {registro.instrumentos_utilizados && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <i className="pi pi-list text-purple-500"></i>
+                                <h4 className="font-semibold text-gray-700">Instrumentos Utilizados </h4>
+                              </div>
+                              <p className="text-gray-800 bg-purple-200 p-4 rounded-lg border border-pink-100">
+                                {registro.instrumentos_utilizados}
+                              </p>
+                            </div>
+                          )}
+                          {/* NOTA POST TURNO */}
+                          {registro.nota_post_turno && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <i className="pi pi-file text-pink-500"></i>
+                                <h4 className="font-semibold text-gray-700">Nota Post Turno</h4>
+                              </div>
+                              <p className="text-gray-800 bg-pink-50 p-4 rounded-lg border border-pink-100">
+                                {registro.nota_post_turno}
+                              </p>
+                            </div>
+                          )}
+                          {/* Editor de anotación */}
+                          {editingIndex === index ? (
+                            <div className="space-y-2">
+                              <textarea
+                                className="w-full border rounded-md p-2 text-sm"
+                                rows={3}
+                                value={editNota}
+                                onChange={(e) => setEditNota(e.target.value)}
+                                placeholder="Escribe una anotación post turno..."
+                              />
+                              <div className="flex items-center gap-2">
+                                <button
+                                  className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm disabled:opacity-60"
+                                  onClick={() => saveNotaPostTurno(registro.id_registro, index)}
+                                  disabled={savingNota}
+                                >
+                                  {savingNota ? 'Guardando...' : 'Guardar'}
+                                </button>
+                                <button
+                                  className="px-3 py-1.5 rounded-md bg-gray-200 text-gray-800 text-sm"
+                                  onClick={cancelEditNota}
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end">
+                              <button
+                                className="px-3 py-1.5 rounded-md bg-green-600 text-white text-sm"
+                                onClick={() => startEditNota(index, registro.nota_post_turno)}
+                              >
+                                Agregar Anotación
+                              </button>
+                            </div>
+                          )}
+
                           <div className="flex justify-between items-center pt-3 border-t border-gray-200">
                             <div className="text-sm text-gray-500">
                               <i className="pi pi-clock mr-1"></i>
                                Fecha de la consulta: {formatFecha(registro.turnos.fecha_turno)}
                             </div>
                             <div className="text-sm text-gray-500">
-                              ID: #{registro.id_registro}
                             </div>
                           </div>
                         </div>

@@ -63,9 +63,10 @@ export default function PacienteFilter({
           />
 
           <Button
-            icon="pi pi-refresh"
+            icon="pi pi-refresh "
             onClick={onRefresh}
             className="p-button-outlined w-full sm:w-auto"
+            style={{ color: '#14b8a6' }}
             tooltip="Actualizar lista"
           />
         </div>

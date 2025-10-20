@@ -51,6 +51,7 @@ type FullPaciente = {
   email_paciente?: string | null;
   direccion_paciente?: string | null;
   obras_sociales?: { nombre_obra_social: string } | null;
+  enfermedad_cronica?: string | null;
 };
 
 type TurnoInfo = {
@@ -182,6 +183,7 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
               <ItemRow label="Teléfono" value={fullPaciente?.telefono_paciente ?? paciente.telefono_paciente ?? "-"} />
               <ItemRow label="Correo" value={fullPaciente?.email_paciente ?? paciente.email_paciente ?? "-"} />
               <ItemRow label="Domicilio" value={fullPaciente?.direccion_paciente ?? paciente.direccion_paciente ?? "-"} />
+              <ItemRow label="Enfermedad crónica" value={fullPaciente?.enfermedad_cronica ?? "-"} />
               <ItemRow
                 label="Obra Social"
                 value={

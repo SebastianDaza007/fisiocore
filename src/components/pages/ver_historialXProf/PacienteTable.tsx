@@ -65,8 +65,9 @@ export default function PacienteTable({
   const accionesTemplate = (row: Paciente) => (
     <div className="flex items-center justify-end gap-1">
       <Button
-        icon="pi pi-folder"
+        icon="pi pi-book"
         className="p-button-text"
+        style={{ color: '#14b8a6' }}
         tooltip="Ver Registro Clinico"
         tooltipOptions={{ position: 'top' }}
         onClick={() => onView(row)}
@@ -74,6 +75,7 @@ export default function PacienteTable({
       <Button
         icon="pi pi-eye"
         className="p-button-text"
+        style={{ color: '#14b8a6' }}
         tooltip="Ver datos"
         tooltipOptions={{ position: 'top' }}
         onClick={() => onEdit(row)}
