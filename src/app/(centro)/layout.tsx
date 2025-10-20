@@ -37,6 +37,7 @@ export default function DashboardLayout({
       case 'ADMIN':
         return [
           { icon: "pi-user-plus", label: "Profesionales", path: "/profesional", options: null },
+          { icon: "pi-briefcase", label: "Ver Empleados", path: "/gerente/ver_empleados", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/turnos", options: null },
           { icon: "pi-calendar-plus", label: "Agendar", path: "/administrativo/agendar", options: null },
@@ -49,6 +50,7 @@ export default function DashboardLayout({
         return [
           { icon: "pi-home", label: "Inicio", path: "/gerente", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
+          { icon: "pi-briefcase", label: "Ver Empleados", path: "/gerente/ver_empleados", options: null },
           { icon: "pi-users", label: "Estadisticas pacientes", path: "/gerente/estadisticas-pacientes", options: null },
           { icon: "pi-chart-bar", label: "Estadisticas profesionales", path: "/gerente/estadisticas", options: null },
           ...baseItems
