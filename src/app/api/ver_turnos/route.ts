@@ -121,6 +121,8 @@ export async function GET(req: NextRequest) {
         fecha: fecha, // 👈 agregado para mostrar fecha del turno
         pacienteDni,
         pacienteNombre,
+        pacienteId: t.paciente_id, // 👈 agregado para reprogramar
+        profesionalId: t.profesional_id, // 👈 agregado para reprogramar
         hora: horaLocal,
         especialidad: esp?.nombre_especialidad ?? "",
         profesional: profesionalNombre || "",
