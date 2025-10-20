@@ -27,8 +27,8 @@ addLocale("es", {
     dayNamesShort: ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
     dayNamesMin: ["D", "L", "M", "X", "J", "V", "S"],
     monthNames: [
-    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
     ],
     monthNamesShort: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
     today: "Hoy",
@@ -37,21 +37,26 @@ addLocale("es", {
 locale("es");
 
 type ObraPacData = { nombre: string; cantidad: number };
-type GeneroEdadData = {
-    rango: string;
-    [genero: string]: number | string;
-};
 type DiasDemandaData = { dia: string; cantidad: number };
+type HorarioDemandaData = { hora: string; cantidad: number };
 
-export default function DashboardPacientes() {
+    export default function DashboardPacientes() {
     // 🔹 Filtros
     const [dateRange, setDateRange] = useState<Date[] | null>(null);
     const [obraSocial, setObraSocial] = useState<string | null>(null);
 
     const [dataPacientesObra, setDataPacientesObra] = useState<ObraPacData[]>([]);
-    const [dataPacientesGeneroEdad, setDataPacientesGeneroEdad] = useState<GeneroEdadData[]>([]);
-    const [dataDiasDemanda, setDataDiasDemanda] = useState<DiasDemandaData[]>([]); // 🧩 Nuevo
+    const [dataDiasDemanda, setDataDiasDemanda] = useState<DiasDemandaData[]>([]);
+    const [dataHorariosDemanda, setDataHorariosDemanda] = useState<HorarioDemandaData[]>([]);
     const [loadingChart, setLoadingChart] = useState(false);
+    const [dataConcurrenciaMes, setDataConcurrenciaMes] = useState<{ mes: string; cantidad: number }[]>([]);
+    const [monthsRange, setMonthsRange] = useState<number>(3);
+
+    const periodOptions = [
+    { label: "Últimos 3 meses", value: 3 },
+    { label: "Últimos 6 meses", value: 6 },
+    { label: "Últimos 12 meses", value: 12 },
+    ];
 
     const obrasSociales = [
         { label: "Todas las obras sociales", value: null },
@@ -76,23 +81,7 @@ export default function DashboardPacientes() {
         }
     }, []);
 
-    // 🔹 Reporte: Pacientes por género y edad
-    const fetchPacientesGeneroEdad = useCallback(async () => {
-        try {
-        setLoadingChart(true);
-        const res = await fetch("/api/reportes/pacientes-por-genero-edad", { cache: "no-store" });
-        if (!res.ok) throw new Error("Error al cargar distribución");
-        const data = await res.json();
-        setDataPacientesGeneroEdad(Array.isArray(data) ? data : []);
-        } catch (err) {
-        console.error("Error al cargar pacientes por género y edad:", err);
-        setDataPacientesGeneroEdad([]);
-        } finally {
-        setLoadingChart(false);
-        }
-    }, []);
-
-    // 🧩 Reporte: Días con mayor demanda
+    // 🔹 Reporte: Días con mayor demanda
     const fetchDiasMayorDemanda = useCallback(async () => {
         try {
         const params = new URLSearchParams();
@@ -111,17 +100,53 @@ export default function DashboardPacientes() {
         }
     }, [dateRange]);
 
+    // 🧩 Reporte: Horarios con mayor concurrencia
+    const fetchHorariosMayorConcurrencia = useCallback(async () => {
+        try {
+        const params = new URLSearchParams();
+        if (dateRange?.[0] && dateRange?.[1]) {
+            params.set("startDate", dateRange[0].toISOString());
+            params.set("endDate", dateRange[1].toISOString());
+        }
+
+        const res = await fetch(`/api/reportes/horarios-mayor-concurrencia?${params.toString()}`, { cache: "no-store" });
+        if (!res.ok) throw new Error("Error al cargar horarios");
+        const data = await res.json();
+        setDataHorariosDemanda(Array.isArray(data) ? data : []);
+        } catch (err) {
+        console.error("Error al cargar horarios con mayor concurrencia:", err);
+        setDataHorariosDemanda([]);
+        }
+    }, [dateRange]);
+
+    const fetchConcurrenciaPorMes = useCallback(async () => {
+    try {
+        const res = await fetch(`/api/reportes/concurrencia-por-mes?months=${monthsRange}`, { cache: "no-store" });
+        if (!res.ok) throw new Error("Error al cargar concurrencia mensual");
+        const data = await res.json();
+        setDataConcurrenciaMes(Array.isArray(data) ? data : []);
+    } catch (err) {
+        console.error("Error al cargar concurrencia mensual:", err);
+        setDataConcurrenciaMes([]);
+    }
+    }, [monthsRange]);
+
+
+
     // 🔹 useEffect inicial
     useEffect(() => {
         fetchPacientesPorObra();
-        fetchPacientesGeneroEdad();
-        fetchDiasMayorDemanda(); // 🧩 Nuevo
-    }, [fetchPacientesPorObra, fetchPacientesGeneroEdad, fetchDiasMayorDemanda]);
+        fetchDiasMayorDemanda();
+        fetchHorariosMayorConcurrencia();
+        fetchConcurrenciaPorMes();
+    }, [fetchPacientesPorObra, fetchDiasMayorDemanda, fetchHorariosMayorConcurrencia, fetchConcurrenciaPorMes]);
 
     // 🔹 Filtrar
     const handleFilter = () => {
         fetchPacientesPorObra();
-        fetchDiasMayorDemanda(); // 🧩 Nuevo
+        fetchDiasMayorDemanda();
+        fetchHorariosMayorConcurrencia();
+        fetchConcurrenciaPorMes();
     };
 
     return (
@@ -161,13 +186,7 @@ export default function DashboardPacientes() {
             />
             </div>
 
-            <Button
-            icon="pi pi-search"
-            label="Filtrar"
-            className="h-[42px]"
-            severity="info"
-            onClick={handleFilter}
-            />
+            <Button icon="pi pi-search" label="Filtrar" className="h-[42px]" severity="info" onClick={handleFilter} />
         </div>
 
         {/* 🔹 Reporte: Cantidad de pacientes por obra social */}
@@ -206,7 +225,6 @@ export default function DashboardPacientes() {
                         const COLORS = [
                         "#14b8a6", "#3b82f6", "#f59e0b", "#ef4444",
                         "#8b5cf6", "#10b981", "#06b6d4", "#84cc16",
-                        "#f97316", "#a855f7", "#e11d48", "#22c55e",
                         ];
                         return <Cell key={i} fill={COLORS[i % COLORS.length]} />;
                     })}
@@ -219,49 +237,7 @@ export default function DashboardPacientes() {
             </div>
         </Card>
 
-        {/* 🔹 Reporte: Pacientes por género y edad */}
-        <div className="mt-10">
-            <Card
-            title="Distribución de pacientes por género y edad"
-            className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
-            >
-            <div className="h-[400px] flex items-center justify-center text-gray-400 p-4">
-                {loadingChart ? (
-                <span className="text-sm text-gray-500">Cargando datos...</span>
-                ) : dataPacientesGeneroEdad.length === 0 ? (
-                <span className="text-sm text-gray-500">No hay datos disponibles.</span>
-                ) : (
-                <ResponsiveContainer width="100%" height={360}>
-                    {(() => {
-                    const generos = ["Masculino", "Femenino", "No especificado"];
-                    const dataNormalizada = dataPacientesGeneroEdad.map((fila) => {
-                        const f = { ...fila };
-                        generos.forEach((g) => {
-                        if (typeof f[g] !== "number") f[g] = 0;
-                        });
-                        return f;
-                    });
-
-                    return (
-                        <BarChart data={dataNormalizada}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="rango" />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="Masculino" fill="#3b82f6" name="Masculino" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="Femenino" fill="#ec4899" name="Femenino" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="No especificado" fill="#9ca3af" name="No especificado" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                    );
-                    })()}
-                </ResponsiveContainer>
-                )}
-            </div>
-            </Card>
-        </div>
-
-        {/* 🧩 Nuevo Reporte: Días con mayor demanda */}
+        {/* 🧩 Reporte: Días con mayor demanda */}
         <div className="mt-10">
             <Card
             title="Días con mayor demanda de turnos"
@@ -290,23 +266,73 @@ export default function DashboardPacientes() {
             </Card>
         </div>
 
-        {/* Estilos globales */}
-        <style jsx global>{`
-            .p-datepicker table td > span {
-            color: #374151 !important;
-            font-weight: 500;
-            }
-            .p-datepicker table td > span.p-highlight {
-            background-color: #14b8a6 !important;
-            color: #ffffff !important;
-            border-radius: 50% !important;
-            font-weight: 600;
-            }
-            .p-datepicker table td > span:hover {
-            background-color: #d1f5f0 !important;
-            border-radius: 50% !important;
-            }
-        `}</style>
+        {/* 🧩 Nuevo Reporte: Horarios con mayor concurrencia */}
+        <div className="mt-10">
+            <Card
+                title="Horarios con mayor concurrencia"
+                subTitle={`Año ${new Date().getFullYear()}`}
+                className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
+            >
+            <div className="h-[350px] flex items-center justify-center text-gray-400">
+                {dataHorariosDemanda.length === 0 ? (
+                <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={dataHorariosDemanda}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="hora" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip
+                    labelStyle={{ color: "#111827", fontWeight: 600 }}
+                    itemStyle={{ color: "#111827", fontWeight: 500 }} 
+                    formatter={(v) => [`${v} turnos`, "Cantidad"]}
+                    />
+                    <Bar dataKey="cantidad" fill="#1F8F86" radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                </ResponsiveContainer>
+                )}
+            </div>
+            </Card>
+        </div>
+
+        {/* 🧩 Nuevo Reporte: Concurrencia de pacientes por mes */}
+        <div className="mt-10">
+            <Card
+                title="Concurrencia de pacientes por mes"
+                subTitle={`Últimos ${monthsRange} meses - Año ${new Date().getFullYear()}`}
+                className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg"
+            >
+                <div className="flex justify-end mb-4">
+                <Dropdown
+                    value={monthsRange}
+                    options={periodOptions}
+                    onChange={(e) => setMonthsRange(e.value)}
+                    placeholder="Seleccionar rango"
+                    className="w-52"
+                />
+                </div>
+
+                <div className="h-[350px] flex items-center justify-center text-gray-400">
+                {dataConcurrenciaMes.length === 0 ? (
+                    <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                ) : (
+                    <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={dataConcurrenciaMes}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis dataKey="mes" />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip
+                        labelStyle={{ color: "#111827", fontWeight: 600 }}
+                        itemStyle={{ color: "#111827", fontWeight: 500 }}
+                        formatter={(v) => [`${v} turnos`, "Cantidad"]}
+                        />
+                        <Bar dataKey="cantidad" fill="#14b8a6" radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                    </ResponsiveContainer>
+                )}
+                </div>
+            </Card>
+        </div>
         </div>
     );
 }
