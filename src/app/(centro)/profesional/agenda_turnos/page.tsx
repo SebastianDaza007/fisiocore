@@ -448,7 +448,7 @@ export default function Miagenda() {
                     <Button
                       icon="pi pi-check"
                       className="p-button-outlined p-button-success"
-                      tooltip="Registrar atención médica"
+                      tooltip="Registrar nuevo historial clinico"
                       tooltipOptions={{ position: 'top' }}
                       onClick={() => abrirModalCompletarTurno(rowData.id)}
                     />

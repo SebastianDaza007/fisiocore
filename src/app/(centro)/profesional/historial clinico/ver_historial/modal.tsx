@@ -7,6 +7,7 @@ import 'primereact/resources/themes/lara-light-cyan/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
+
 interface PacienteInfo {
   id_paciente: number;
   nombre_paciente: string;
@@ -14,6 +15,7 @@ interface PacienteInfo {
   dni_paciente: string;
   email_paciente?: string;
   telefono_paciente: string;
+  enfermedad_cronica?: string;
   obras_sociales: {
     nombre_obra_social: string;
   };
@@ -34,6 +36,10 @@ interface RegistroClinicoHistorico {
   fecha_registro: string;
   texto_comentario: string;
   texto_indicacion: string;
+  objetivos_sesion?: string;
+  ejercicios_asignados?: string;
+  instrumentos_utilizados?: string;
+  nota_post_turno?:string;
   profesionales: ProfesionalInfo;
   turnos: {
     fecha_turno: string;
@@ -220,12 +226,20 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
                   </label>
                   <p className="text-gray-900">{pacienteInfo.telefono_paciente}</p>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Enfermedad Cronica 
+                  </label>
+                  <p className="text-gray-900">
+                    {pacienteInfo.enfermedad_cronica || '-'}
+                  </p>
+                </div>
                 
-                <div className="md:col-span-2">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Obra Social
                   </label>
-                  <div className={getObraSocialClass(pacienteInfo.obras_sociales?.nombre_obra_social)}>
+                  <div className="text-gray-900">
                     {pacienteInfo.obras_sociales?.nombre_obra_social || 'No especificada'}
                   </div>
                 </div>
@@ -323,14 +337,61 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
                               {registro.texto_indicacion}
                             </p>
                           </div>
-                          
+                          {/* OBJETIVOS DE LA SESIÓN */}
+                          {registro.objetivos_sesion && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <i className="pi pi-list text-yellow-500"></i>
+                                <h4 className="font-semibold text-gray-700">Objetivos de la Sesión</h4>
+                              </div>
+                              <p className="text-gray-800 bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                                {registro.objetivos_sesion}
+                              </p>
+                            </div>
+                          )}
+                          {/* EJERCICIOS ASIGNADOS */}
+                          {registro.ejercicios_asignados && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <i className="pi pi-heart-fill text-pink-500"></i>
+                                <h4 className="font-semibold text-gray-700">Ejercicios Asignados</h4>
+                              </div>
+                              <p className="text-gray-800 bg-pink-200 p-4 rounded-lg border border-pink-100">
+                                {registro.ejercicios_asignados}
+                              </p>
+                            </div>
+                          )}
+                          {/* Instrumentos utilizados */}
+                          {registro.instrumentos_utilizados && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <i className="pi pi-list text-purple-500"></i>
+                                <h4 className="font-semibold text-gray-700">Instrumentos Utilizados </h4>
+                              </div>
+                              <p className="text-gray-800 bg-purple-200 p-4 rounded-lg border border-pink-100">
+                                {registro.instrumentos_utilizados}
+                              </p>
+                            </div>
+                          )}
+                          {/* NOTA POST TURNO */}
+                          {registro.nota_post_turno && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <i className="pi pi-list text-pink-500"></i>
+                                <h4 className="font-semibold text-gray-700">Nota Post Turno</h4>
+                              </div>
+                              <p className="text-gray-800 bg-pink-50 p-4 rounded-lg border border-pink-100">
+                                {registro.nota_post_turno}
+                              </p>
+                            </div>
+                          )}
+
                           <div className="flex justify-between items-center pt-3 border-t border-gray-200">
                             <div className="text-sm text-gray-500">
                               <i className="pi pi-clock mr-1"></i>
                                Fecha de la consulta: {formatFecha(registro.turnos.fecha_turno)}
                             </div>
                             <div className="text-sm text-gray-500">
-                              ID: #{registro.id_registro}
                             </div>
                           </div>
                         </div>
