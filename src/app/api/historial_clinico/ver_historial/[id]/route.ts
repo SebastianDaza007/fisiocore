@@ -20,7 +20,19 @@ export async function GET(
       where: { 
         paciente_id: idPaciente 
       },
-      include: {
+      // ✅ NUEVO: Cambiar include por select para incluir los campos específicos
+      select: {
+        // Campos existentes:
+        id_registro: true,
+        fecha_registro: true,
+        texto_comentario: true,
+        texto_indicacion: true,
+        // ✅ NUEVO: Agregar los 4 campos nuevos
+        objetivos_sesion: true,           // ← CAMPO NUEVO
+        ejercicios_asignados: true,       // ← CAMPO NUEVO
+        instrumentos_utilizados: true,    // ← CAMPO NUEVO
+        nota_post_turno: true,            // ← CAMPO NUEVO
+        // Relaciones:
         profesionales: {
           include: {
             usuarios: {
