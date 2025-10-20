@@ -67,14 +67,14 @@ export default function PacienteTable({
       <Button
         icon="pi pi-folder"
         className="p-button-text"
-        tooltip="Ver"
+        tooltip="Ver Registro Clinico"
         tooltipOptions={{ position: 'top' }}
         onClick={() => onView(row)}
       />
       <Button
-        icon="pi pi-pencil"
+        icon="pi pi-eye"
         className="p-button-text"
-        tooltip="Editar"
+        tooltip="Ver datos"
         tooltipOptions={{ position: 'top' }}
         onClick={() => onEdit(row)}
       />

@@ -7,8 +7,8 @@ import { FilterMatchMode } from 'primereact/api';
 import { DataTableFilterMeta } from 'primereact/datatable';
 import PacienteFilter from '../../../../components/pages/ver_historialXProf/PacienteFilter';
 import PacienteTable, { Paciente } from '../../../../components/pages/ver_historialXProf/PacienteTable';
-import PacienteEditDialog from '../../../../components/pages/ver_historialXProf/PacienteEditDialog';
-import { VerHistorialDialog } from '../historial clinico/ver_historial/modal';
+import { VerHistorialDialog } from '../../../../components/pages/ver_historialXProf/modal';
+import PacienteInfoDialog from '../../../../components/pages/ver_historialXProf/PacienteInfoDialog';
 
 export default function VerPacientesPage() {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
@@ -18,6 +18,7 @@ export default function VerPacientesPage() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editPaciente, setEditPaciente] = useState<Paciente | null>(null);
   const [pacienteInfo, setPacienteInfo] = useState<any>(null);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
 
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [sexoFilter, setSexoFilter] = useState<string | null>(null);
@@ -112,8 +113,8 @@ export default function VerPacientesPage() {
   };
 
   const handleEdit = (p: Paciente) => {
-    setEditPaciente(p);
-    setIsEditOpen(true);
+    setSelectedPaciente(p);
+    setIsInfoOpen(true);
   };
 
   const globalFilterFields = [
@@ -154,6 +155,11 @@ export default function VerPacientesPage() {
             />
           </div>
         </Card>
+        <PacienteInfoDialog
+          isOpen={isInfoOpen}
+          paciente={selectedPaciente}
+          onClose={() => setIsInfoOpen(false)}
+        />
         {selectedPaciente && pacienteInfo && (
           <VerHistorialDialog
             isOpen={isHistorialOpen}
@@ -162,25 +168,7 @@ export default function VerPacientesPage() {
             pacienteInfo={pacienteInfo}
           />
         )}
-        <PacienteEditDialog
-          isOpen={isEditOpen}
-          paciente={editPaciente}
-          onClose={() => setIsEditOpen(false)}
-          onSave={async (payload) => {
-            // TODO: Reemplazar con endpoint real de actualización
-            try {
-              await fetch('/api/paciente', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-              }).catch(() => {}); // silencioso si no existe aún
-            } finally {
-              await fetchPacientes();
-            }
-          }}
-        />
       </div>
     </div>
   );
 }
-
