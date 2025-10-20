@@ -155,19 +155,20 @@ export default function VerTurnosPage() {
 
   // Cargar turnos cuando cambie fecha o filtros
   React.useEffect(() => {
-    const controller = new AbortController();
-
     // Primera carga con spinner
     load(true);
 
     // Polling cada 3 segundos (sin spinner)
-    const interval = setInterval(() => load(false), 3000);
+    const interval = setInterval(() => {
+      load(false);
+    }, 3000);
 
     return () => {
-      controller.abort();
       clearInterval(interval);
     };
-  }, [selectedDate, qDebouncedValue, filters, load]);
+    // Omitimos 'load' de las dependencias para evitar re-renders infinitos
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, qDebouncedValue, filters]);
 
   // Actualizar estado de turno
   async function handleChangeEstado(id: number, estado: string) {
