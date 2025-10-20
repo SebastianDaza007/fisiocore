@@ -41,7 +41,7 @@ export default function UserMenu({ idUsuario, usuario, urlLogin, urlRegistro, on
             {
             label: "Mi perfil",
             icon: "pi pi-user-edit",
-            command: () => router.push(`/user/${idUsuario}`),
+            command: () => router.push('/perfil'),
             },
             {
             label: "Cerrar sesión",
