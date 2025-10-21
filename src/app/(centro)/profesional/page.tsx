@@ -142,10 +142,10 @@ export default function HomeAdministradorPage() {
       spanCols: 1,
     },
     {
-      title: "Ajustes",
-      href: "/ajustes",
-      icon: "pi pi-cog",
-      image: "/images/agendar%20turno.jpg",
+      title: "Reportes",
+      href: "/profesional/reportes",
+      icon: "pi pi-chart-line",
+      image: "/images/statsprof.svg", 
       spanCols: 2,
     },
   ] as const;
