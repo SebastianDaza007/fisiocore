@@ -68,6 +68,9 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
   const [fullPaciente, setFullPaciente] = useState<FullPaciente | null>(null);
   const [turnos, setTurnos] = useState<TurnoInfo[]>([]);
   const [turnosLoading, setTurnosLoading] = useState(false);
+  const [turnosOpen, setTurnosOpen] = useState(true);
+  const [turnosProximos, setTurnosProximos] = useState<TurnoInfo[]>([]);
+  const [proximosOpen, setProximosOpen] = useState(true);
 
   // Cerrar con ESC
   useEffect(() => {
@@ -117,9 +120,28 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
         if (!res.ok) throw new Error('No se pudo obtener turnos');
         const data = await res.json();
         const items: TurnoInfo[] = data?.items ?? [];
-        // Tomar los últimos 5 (API ordena ascendente)
-        const last = items.slice(-5).reverse();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const past = items.filter((it: TurnoInfo) => {
+          if (!it.fecha) return false;
+          const d = new Date(it.fecha);
+          if (isNaN(d.getTime())) return false;
+          const dd = new Date(d);
+          dd.setHours(0, 0, 0, 0);
+          return dd.getTime() < today.getTime();
+        });
+        const upcoming = items.filter((it: TurnoInfo) => {
+          if (!it.fecha) return false;
+          const d = new Date(it.fecha);
+          if (isNaN(d.getTime())) return false;
+          const dd = new Date(d);
+          dd.setHours(0, 0, 0, 0);
+          return dd.getTime() >= today.getTime();
+        });
+        const last = past.slice(-5).reverse();
+        const nextUp = upcoming.slice(0, 5);
         setTurnos(last);
+        setTurnosProximos(nextUp);
       } catch (e) {
         console.error(e);
         setTurnos([]);
@@ -188,10 +210,8 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
                 label="Obra Social"
                 value={
                   <span className={
-                    `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ` +
-                    (obraSocialDisplay && obraSocialDisplay !== '-' &&obraSocialDisplay !== 'Cargando...'
-                      ? 'bg-amber-50 text-amber-700 border-amber-200'
-                      : 'bg-gray-50 text-gray-600 border-gray-200')
+                    `inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ` +
+                    (obraSocialDisplay && obraSocialDisplay !== '-' &&obraSocialDisplay !== 'Cargando...')
                   }>
                     {obraSocialDisplay}
                   </span>
@@ -200,49 +220,122 @@ const PacienteInfoDialog: React.FC<PacienteInfoDialogProps> = ({ isOpen, pacient
             </div>
           </div>
 
-          {/* Últimos turnos */}
-          <div className="rounded-lg border border-gray-200 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <i className="pi pi-history text-gray-600" />
-              <span className="text-sm font-semibold text-gray-900">Últimos turnos</span>
+          {/* Próximos turnos */}
+          <div className="rounded-lg border border-gray-200">
+            <button
+              type="button"
+              onClick={() => setProximosOpen(v => !v)}
+              className="w-full p-5 flex items-center justify-between gap-3"
+              aria-expanded={proximosOpen}
+              aria-controls="proximos-turnos-panel"
+            >
+              <div className="flex items-center gap-2">
+                <i className="pi pi-bell text-gray-600" />
+                <span className="text-sm font-semibold text-gray-900">Próximos turnos</span>
+              </div>
+              <i className={`pi pi-chevron-down text-gray-500 transition-transform ${proximosOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <div
+              id="proximos-turnos-panel"
+              className={`px-5 pb-5 transition-all duration-300 ease-out ${proximosOpen ? 'opacity-100 max-h-[480px]' : 'opacity-0 max-h-0 overflow-hidden pointer-events-none'}`}
+            >
+              {turnosLoading ? (
+                <p className="text-sm text-gray-500">Cargando turnos...</p>
+              ) : turnosProximos.length === 0 ? (
+                <p className="text-sm text-gray-500">Sin próximos turnos.</p>
+              ) : (
+                <ul className="divide-y divide-gray-200">
+                  {turnosProximos.map((t, idx: number) => (
+                    <li key={t.id ?? idx} className="py-3 flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <i className="pi pi-calendar text-emerald-600 text-xs"></i>
+                          <span className="text-xs font-semibold text-gray-600">
+                            {formatShortDate(t.fecha) || '-'}
+                          </span>
+                          <span className="text-gray-400">•</span>
+                          <i className="pi pi-clock text-emerald-600 text-xs"></i>
+                          <span className="text-xs font-semibold text-gray-600">
+                            {t.hora ?? '--:--'}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-800">
+                          <span className="font-medium">{t.profesional || 'Profesional'}</span>
+                        </div>
+                      </div>
+                      <span className={`text-xs px-3 py-1 rounded-full border whitespace-nowrap ${
+                        (t.tipoConsulta ?? '').toLowerCase().includes('consul')
+                          ? 'bg-yellow-100 text-yellow-900 border-yellow-300'
+                          : (t.tipoConsulta ?? '').toLowerCase().includes('control')
+                            ? 'bg-orange-100 text-orange-900 border-orange-300'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}>
+                        {t.tipoConsulta || 'Tipo de consulta'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-            {turnosLoading ? (
-              <p className="text-sm text-gray-500">Cargando turnos...</p>
-            ) : turnos.length === 0 ? (
-              <p className="text-sm text-gray-500">Sin información de turnos disponible.</p>
-            ) : (
-              <ul className="divide-y divide-gray-200">
-                {turnos.map((t, idx: number) => (
-                  <li key={t.id ?? idx} className="py-3 flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <i className="pi pi-calendar text-teal-600 text-xs"></i>
-                        <span className="text-xs font-semibold text-gray-600">
-                          {formatShortDate(t.fecha) || '-'}
-                        </span>
-                        <span className="text-gray-400">•</span>
-                        <i className="pi pi-clock text-teal-600 text-xs"></i>
-                        <span className="text-xs font-semibold text-gray-600">
-                          {t.hora ?? '--:--'}
-                        </span>
+          </div>
+
+          {/* Últimos turnos */}
+          <div className="rounded-lg border border-gray-200">
+            <button
+              type="button"
+              onClick={() => setTurnosOpen(v => !v)}
+              className="w-full p-5 flex items-center justify-between gap-3"
+              aria-expanded={turnosOpen}
+              aria-controls="ultimos-turnos-panel"
+            >
+              <div className="flex items-center gap-2">
+                <i className="pi pi-history text-gray-600" />
+                <span className="text-sm font-semibold text-gray-900">Últimos turnos</span>
+              </div>
+              <i className={`pi pi-chevron-down text-gray-500 transition-transform ${turnosOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <div
+              id="ultimos-turnos-panel"
+              className={`px-5 pb-5 transition-all duration-300 ease-out ${turnosOpen ? 'opacity-100 max-h-[480px]' : 'opacity-0 max-h-0 overflow-hidden pointer-events-none'}`}
+            >
+              {turnosLoading ? (
+                <p className="text-sm text-gray-500">Cargando turnos...</p>
+              ) : turnos.length === 0 ? (
+                <p className="text-sm text-gray-500">Sin información de turnos disponible.</p>
+              ) : (
+                <ul className="divide-y divide-gray-200">
+                  {turnos.map((t, idx: number) => (
+                    <li key={t.id ?? idx} className="py-3 flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <i className="pi pi-calendar text-teal-600 text-xs"></i>
+                          <span className="text-xs font-semibold text-gray-600">
+                            {formatShortDate(t.fecha) || '-'}
+                          </span>
+                          <span className="text-gray-400">•</span>
+                          <i className="pi pi-clock text-teal-600 text-xs"></i>
+                          <span className="text-xs font-semibold text-gray-600">
+                            {t.hora ?? '--:--'}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-800">
+                          <span className="font-medium">{t.profesional || 'Profesional'}</span>
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-800">
-                        <span className="font-medium">{t.profesional || 'Profesional'}</span>
-                      </div>
-                    </div>
-                    <span className={`text-xs px-3 py-1 rounded-full border whitespace-nowrap ${
-                      (t.tipoConsulta ?? '').toLowerCase().includes('consul')
-                        ? 'bg-yellow-100 text-yellow-900 border-yellow-300'
-                        : (t.tipoConsulta ?? '').toLowerCase().includes('control')
-                          ? 'bg-orange-100 text-orange-900 border-orange-300'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    }`}>
-                      {t.tipoConsulta || 'Tipo de consulta'}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <span className={`text-xs px-3 py-1 rounded-full border whitespace-nowrap ${
+                        (t.tipoConsulta ?? '').toLowerCase().includes('consul')
+                          ? 'bg-yellow-100 text-yellow-900 border-yellow-300'
+                          : (t.tipoConsulta ?? '').toLowerCase().includes('control')
+                            ? 'bg-orange-100 text-orange-900 border-orange-300'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}>
+                        {t.tipoConsulta || 'Tipo de consulta'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
       </div>
