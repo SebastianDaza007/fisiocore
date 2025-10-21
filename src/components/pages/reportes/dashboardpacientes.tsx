@@ -153,6 +153,12 @@ type HorarioDemandaData = { hora: string; cantidad: number };
         fetchConcurrenciaPorMes();
     };
 
+    // 🔹 Limpiar filtros
+    const handleClearFilters = () => {
+        setDateRange(null);
+        setObraSocial(null);
+    };
+
     // 🔹 Exportar a PDF
     const handleExportPDF = async () => {
         const rangoFechas = dateRange?.[0] && dateRange?.[1]
@@ -220,154 +226,152 @@ type HorarioDemandaData = { hora: string; cantidad: number };
             </div>
 
             <Button icon="pi pi-search" label="Filtrar" className="h-[42px]" severity="info" onClick={handleFilter} />
+            <Button icon="pi pi-filter-slash" label="Limpiar filtros" className="h-[42px]" severity="secondary" outlined onClick={handleClearFilters} />
         </div>
 
         {/* Contenedor exportable a PDF (sin filtros) */}
         <div id="dashboard-pacientes-content">
-        {/* 🔹 Reporte: Cantidad de pacientes por obra social */}
-        <Card
-            title="Cantidad de pacientes por obra social"
-            className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
-        >
-            <div className="h-[360px] flex items-center justify-center text-gray-400">
-            {loadingChart ? (
-                <span className="text-sm text-gray-500">Cargando datos...</span>
-            ) : dataPacientesObra.length === 0 ? (
-                <span className="text-sm text-gray-500">No hay datos disponibles.</span>
-            ) : (
-                <ResponsiveContainer width="100%" height={360}>
-                <PieChart>
-                    <Pie
-                    data={dataPacientesObra}
-                    dataKey="cantidad"
-                    nameKey="nombre"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={110}
-                    paddingAngle={4}
-                    labelLine={false}
-                    label={(props) => {
-                        const { name, value, percent } = props as {
-                        name?: string;
-                        value?: number;
-                        percent?: number;
-                        };
-                        return `${name}: ${value} (${((percent ?? 0) * 100).toFixed(1)}%)`;
-                    }}
-                    >
-                    {dataPacientesObra.map((_, i) => {
-                        const COLORS = [
-                        "#14b8a6", "#3b82f6", "#f59e0b", "#ef4444",
-                        "#8b5cf6", "#10b981", "#06b6d4", "#84cc16",
-                        ];
-                        return <Cell key={i} fill={COLORS[i % COLORS.length]} />;
-                    })}
-                    </Pie>
-                    <Tooltip formatter={(v: number) => [`${v} pacientes`, "Cantidad"]} />
-                    <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-                </ResponsiveContainer>
-            )}
-            </div>
-        </Card>
+            {/* Gráficos */}
+            <div className="grid gap-8 lg:grid-cols-2">
+                {/* Pacientes por obra social */}
+                <Card
+                    title="Cantidad de pacientes por obra social"
+                    className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300"
+                >
+                    <div className="h-[300px] flex items-center justify-center text-gray-400">
+                        {loadingChart ? (
+                            <span className="text-sm text-gray-500">Cargando datos...</span>
+                        ) : dataPacientesObra.length === 0 ? (
+                            <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={dataPacientesObra}
+                                        dataKey="cantidad"
+                                        nameKey="nombre"
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={90}
+                                        paddingAngle={4}
+                                        labelLine={false}
+                                        label={(props) => {
+                                            const { name, value, percent } = props as {
+                                                name?: string;
+                                                value?: number;
+                                                percent?: number;
+                                            };
+                                            return `${name}: ${value} (${((percent ?? 0) * 100).toFixed(1)}%)`;
+                                        }}
+                                    >
+                                        {dataPacientesObra.map((_, i) => {
+                                            const COLORS = [
+                                                "#14b8a6", "#3b82f6", "#f59e0b", "#ef4444",
+                                                "#8b5cf6", "#10b981", "#06b6d4", "#84cc16",
+                                            ];
+                                            return <Cell key={i} fill={COLORS[i % COLORS.length]} />;
+                                        })}
+                                    </Pie>
+                                    <Tooltip formatter={(v: number) => [`${v} pacientes`, "Cantidad"]} />
+                                    <Legend verticalAlign="bottom" height={36} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </Card>
 
-        {/* 🧩 Reporte: Días con mayor demanda */}
-        <div className="mt-10">
-            <Card
-            title="Días con mayor demanda de turnos"
-            className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
-            >
-            <div className="h-[350px] flex items-center justify-center text-gray-400">
-                {dataDiasDemanda.length === 0 ? (
-                <span className="text-sm text-gray-500">No hay datos disponibles.</span>
-                ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={dataDiasDemanda}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="dia" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip formatter={(v) => [`${v} turnos`, "Cantidad"]} />
-                    <Bar dataKey="cantidad" radius={[6, 6, 0, 0]}>
-                        {dataDiasDemanda.map((_, i) => {
-                        const colores = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#10b981"];
-                        return <Cell key={i} fill={colores[i % colores.length]} />;
-                        })}
-                    </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
-                )}
-            </div>
-            </Card>
-        </div>
+                {/* Días con mayor demanda */}
+                <Card
+                    title="Días con mayor demanda de turnos"
+                    className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300"
+                >
+                    <div className="h-[300px] flex items-center justify-center text-gray-400">
+                        {dataDiasDemanda.length === 0 ? (
+                            <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={dataDiasDemanda}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                    <XAxis dataKey="dia" />
+                                    <YAxis allowDecimals={false} />
+                                    <Tooltip formatter={(v) => [`${v} turnos`, "Cantidad"]} />
+                                    <Bar dataKey="cantidad" radius={[6, 6, 0, 0]}>
+                                        {dataDiasDemanda.map((_, i) => {
+                                            const colores = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#10b981"];
+                                            return <Cell key={i} fill={colores[i % colores.length]} />;
+                                        })}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </Card>
 
-        {/* 🧩 Nuevo Reporte: Horarios con mayor concurrencia */}
-        <div className="mt-10">
-            <Card
-                title="Horarios con mayor concurrencia"
-                subTitle={`Año ${new Date().getFullYear()}`}
-                className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50"
-            >
-            <div className="h-[350px] flex items-center justify-center text-gray-400">
-                {dataHorariosDemanda.length === 0 ? (
-                <span className="text-sm text-gray-500">No hay datos disponibles.</span>
-                ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={dataHorariosDemanda}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="hora" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip
-                    labelStyle={{ color: "#111827", fontWeight: 600 }}
-                    itemStyle={{ color: "#111827", fontWeight: 500 }} 
-                    formatter={(v) => [`${v} turnos`, "Cantidad"]}
-                    />
-                    <Bar dataKey="cantidad" fill="#1F8F86" radius={[6, 6, 0, 0]} />
-                    </BarChart>
-                </ResponsiveContainer>
-                )}
-            </div>
-            </Card>
-        </div>
+                {/* Horarios con mayor concurrencia */}
+                <Card
+                    title="Horarios con mayor concurrencia"
+                    subTitle={`Año ${new Date().getFullYear()}`}
+                    className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300"
+                >
+                    <div className="h-[300px] flex items-center justify-center text-gray-400">
+                        {dataHorariosDemanda.length === 0 ? (
+                            <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={dataHorariosDemanda}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                    <XAxis dataKey="hora" />
+                                    <YAxis allowDecimals={false} />
+                                    <Tooltip
+                                        labelStyle={{ color: "#111827", fontWeight: 600 }}
+                                        itemStyle={{ color: "#111827", fontWeight: 500 }}
+                                        formatter={(v) => [`${v} turnos`, "Cantidad"]}
+                                    />
+                                    <Bar dataKey="cantidad" fill="#1F8F86" radius={[6, 6, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </Card>
 
-        {/* 🧩 Nuevo Reporte: Concurrencia de pacientes por mes */}
-        <div className="mt-10">
-            <Card
-                title="Concurrencia de pacientes"
-                subTitle={`Últimos ${monthsRange} meses - Año ${new Date().getFullYear()}`}
-                className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg"
-            >
-                <div className="flex justify-end mb-4">
-                <Dropdown
-                    value={monthsRange}
-                    options={periodOptions}
-                    onChange={(e) => setMonthsRange(e.value)}
-                    placeholder="Seleccionar rango"
-                    className="w-52"
-                />
-                </div>
-
-                <div className="h-[350px] flex items-center justify-center text-gray-400">
-                {dataConcurrenciaMes.length === 0 ? (
-                    <span className="text-sm text-gray-500">No hay datos disponibles.</span>
-                ) : (
-                    <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={dataConcurrenciaMes}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="mes" />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip
-                        labelStyle={{ color: "#111827", fontWeight: 600 }}
-                        itemStyle={{ color: "#111827", fontWeight: 500 }}
-                        formatter={(v) => [`${v} turnos`, "Cantidad"]}
+                {/* Concurrencia de pacientes por mes */}
+                <Card
+                    title="Concurrencia de pacientes"
+                    subTitle={`Últimos ${monthsRange} meses - Año ${new Date().getFullYear()}`}
+                    className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300"
+                >
+                    <div className="flex justify-end mb-4">
+                        <Dropdown
+                            value={monthsRange}
+                            options={periodOptions}
+                            onChange={(e) => setMonthsRange(e.value)}
+                            placeholder="Seleccionar rango"
+                            className="w-52"
                         />
-                        <Bar dataKey="cantidad" fill="#14b8a6" radius={[6, 6, 0, 0]} />
-                    </BarChart>
-                    </ResponsiveContainer>
-                )}
-                </div>
-            </Card>
-        </div>
+                    </div>
+
+                    <div className="h-[300px] flex items-center justify-center text-gray-400">
+                        {dataConcurrenciaMes.length === 0 ? (
+                            <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={dataConcurrenciaMes}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                    <XAxis dataKey="mes" />
+                                    <YAxis allowDecimals={false} />
+                                    <Tooltip
+                                        labelStyle={{ color: "#111827", fontWeight: 600 }}
+                                        itemStyle={{ color: "#111827", fontWeight: 500 }}
+                                        formatter={(v) => [`${v} turnos`, "Cantidad"]}
+                                    />
+                                    <Bar dataKey="cantidad" fill="#14b8a6" radius={[6, 6, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </Card>
+            </div>
         </div>
         {/* Fin contenedor exportable a PDF */}
         </div>

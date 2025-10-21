@@ -59,6 +59,7 @@ export default function DashboardReportes() {
     });
     const [dataProfesionalesObra, setDataProfesionalesObra] = useState<{ nombre: string; cantidad: number }[]>([]);
     const [dataProfesionalesDemandados, setDataProfesionalesDemandados] = useState<{ nombre: string; cantidad: number }[]>([]);
+    const [dataTurnosPorEspecialidad, setDataTurnosPorEspecialidad] = useState<{ nombre: string; cantidad: number }[]>([]);
 
     // Hook de exportación PDF
     const { exportToPDF, isExporting } = useExportPDF();
@@ -154,21 +155,49 @@ export default function DashboardReportes() {
         }
     }, [dateRange]);
 
+    // 🔹 Reporte: Turnos por especialidad
+    const fetchTurnosPorEspecialidad = useCallback(async () => {
+        try {
+            const params = new URLSearchParams();
+            if (typeof selectedProfesional === "number" && !isNaN(selectedProfesional)) {
+                params.set("profesionalId", selectedProfesional.toString());
+            }
+            if (dateRange?.[0] && dateRange?.[1]) {
+                params.set("startDate", dateRange[0].toISOString());
+                params.set("endDate", dateRange[1].toISOString());
+            }
+            const res = await fetch(`/api/reportes/turnos-por-especialidad?${params.toString()}`);
+            const data = await res.json();
+            setDataTurnosPorEspecialidad(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error("Error al cargar turnos por especialidad:", err);
+        }
+    }, [selectedProfesional, dateRange]);
+
     // 🧩 Cargar datos iniciales
     useEffect(() => {
         if (!loadingProfesionales) {
             fetchData();
             fetchResumen();
             fetchProfesionalesPorObra();
-            fetchProfesionalesDemandados(); // 🧩 Nuevo
+            fetchProfesionalesDemandados();
+            fetchTurnosPorEspecialidad();
         }
-    }, [loadingProfesionales, fetchData, fetchResumen, fetchProfesionalesPorObra, fetchProfesionalesDemandados]);
+    }, [loadingProfesionales, fetchData, fetchResumen, fetchProfesionalesPorObra, fetchProfesionalesDemandados, fetchTurnosPorEspecialidad]);
 
     // 🔹 Filtrar
     const handleFilter = () => {
         fetchData();
         fetchResumen();
         fetchProfesionalesDemandados();
+        fetchTurnosPorEspecialidad();
+    };
+
+    // 🔹 Limpiar filtros
+    const handleClearFilters = () => {
+        setSelectedProfesional(null);
+        setDateRange(null);
+        // Los datos se actualizarán automáticamente por el useEffect cuando cambien los valores
     };
 
     // 🔹 Exportar a PDF
@@ -238,6 +267,7 @@ export default function DashboardReportes() {
                 </div>
 
                 <Button icon="pi pi-search" label="Filtrar" className="h-[42px]" severity="info" onClick={handleFilter} />
+                <Button icon="pi pi-filter-slash" label="Limpiar filtros" className="h-[42px]" severity="secondary" outlined onClick={handleClearFilters} />
             </div>
 
             {/* Contenedor exportable a PDF (sin filtros) */}
@@ -339,6 +369,30 @@ export default function DashboardReportes() {
                                     <Bar dataKey="cantidad" radius={[0, 6, 6, 0]}>
                                         {dataProfesionalesDemandados.map((_, index) => {
                                             const colores = ["#3b82f6", "#14b8a6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
+                                            return <Cell key={index} fill={colores[index % colores.length]} />;
+                                        })}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </Card>
+
+                {/* Turnos por especialidad */}
+                <Card title="Turnos por especialidad" className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-300">
+                    <div className="h-[300px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/60">
+                        {dataTurnosPorEspecialidad.length === 0 ? (
+                            <span className="text-sm text-gray-500">No hay datos disponibles.</span>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={dataTurnosPorEspecialidad} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis type="number" allowDecimals={false} />
+                                    <YAxis dataKey="nombre" type="category" width={170} tick={{ fontSize: 12 }} />
+                                    <Tooltip formatter={(value) => [`${value} turnos`, "Total"]} />
+                                    <Bar dataKey="cantidad" radius={[0, 6, 6, 0]}>
+                                        {dataTurnosPorEspecialidad.map((_, index) => {
+                                            const colores = ["#14b8a6", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"];
                                             return <Cell key={index} fill={colores[index % colores.length]} />;
                                         })}
                                     </Bar>
