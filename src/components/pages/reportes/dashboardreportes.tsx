@@ -16,6 +16,7 @@ import {
     CartesianGrid,
     Cell,
 } from "recharts";
+import { useExportPDF } from "@/hooks/useExportPDF";
 
 type ProfesionalOption = {
     label: string;
@@ -57,7 +58,10 @@ export default function DashboardReportes() {
         noAsistidos: 0,
     });
     const [dataProfesionalesObra, setDataProfesionalesObra] = useState<{ nombre: string; cantidad: number }[]>([]);
-    const [dataProfesionalesDemandados, setDataProfesionalesDemandados] = useState<{ nombre: string; cantidad: number }[]>([]); // 🧩 Nuevo
+    const [dataProfesionalesDemandados, setDataProfesionalesDemandados] = useState<{ nombre: string; cantidad: number }[]>([]);
+
+    // Hook de exportación PDF
+    const { exportToPDF, isExporting } = useExportPDF();
 
     // 🔹 Cargar lista de profesionales
     useEffect(() => {
@@ -164,18 +168,48 @@ export default function DashboardReportes() {
     const handleFilter = () => {
         fetchData();
         fetchResumen();
-        fetchProfesionalesDemandados(); // 🧩 Nuevo
+        fetchProfesionalesDemandados();
+    };
+
+    // 🔹 Exportar a PDF
+    const handleExportPDF = async () => {
+        const profesionalSeleccionado = profesionales.find(p => p.value === selectedProfesional);
+        const nombreProfesional = profesionalSeleccionado?.label || "Todos los profesionales";
+        const rangoFechas = dateRange?.[0] && dateRange?.[1]
+            ? `${dateRange[0].toLocaleDateString("es-AR")} - ${dateRange[1].toLocaleDateString("es-AR")}`
+            : "Todo el período";
+
+        await exportToPDF("dashboard-content", {
+            filename: "reporte-gerencial-fisiocore",
+            orientation: "landscape",
+            title: "Dashboard Gerencial - FisioCore",
+            subtitle: `${nombreProfesional} | ${rangoFechas}`,
+            includeDate: true,
+        });
     };
 
     return (
         <div className="p-6 min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-white text-gray-800">
             {/* Header */}
             <div className="mb-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 p-5">
-                <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard de Profesionales</h1>
-                <p className="text-gray-600">Visualiza métricas clave de pacientes, turnos y profesionales.</p>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard de Profesionales</h1>
+                        <p className="text-gray-600">Visualiza métricas clave de pacientes, turnos y profesionales.</p>
+                    </div>
+                    <Button
+                        icon={isExporting ? "pi pi-spin pi-spinner" : "pi pi-file-pdf"}
+                        label={isExporting ? "Generando PDF..." : "Exportar PDF"}
+                        severity="danger"
+                        outlined
+                        onClick={handleExportPDF}
+                        disabled={isExporting}
+                        className="h-12"
+                    />
+                </div>
             </div>
 
-            {/* Filtros */}
+            {/* Filtros (NO se exportan al PDF) */}
             <div className="bg-white/95 rounded-2xl border border-gray-200 shadow-sm p-5 mb-8 flex flex-wrap gap-4 items-end backdrop-blur-sm">
                 <div className="flex-1 min-w-[220px]">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Profesional</label>
@@ -206,6 +240,8 @@ export default function DashboardReportes() {
                 <Button icon="pi pi-search" label="Filtrar" className="h-[42px]" severity="info" onClick={handleFilter} />
             </div>
 
+            {/* Contenedor exportable a PDF (sin filtros) */}
+            <div id="dashboard-content">
             {/* Cards resumen */}
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 mb-10">
                 {[
@@ -342,6 +378,8 @@ export default function DashboardReportes() {
                     overflow: hidden !important;
                 }
             `}</style>
+            </div>
+            {/* Fin contenedor exportable a PDF */}
         </div>
     );
 }

@@ -19,6 +19,7 @@ import {
     YAxis,
     CartesianGrid,
 } from "recharts";
+import { useExportPDF } from "@/hooks/useExportPDF";
 
 // 🧩 Configuración del idioma español para PrimeReact
 addLocale("es", {
@@ -51,6 +52,9 @@ type HorarioDemandaData = { hora: string; cantidad: number };
     const [loadingChart, setLoadingChart] = useState(false);
     const [dataConcurrenciaMes, setDataConcurrenciaMes] = useState<{ mes: string; cantidad: number }[]>([]);
     const [monthsRange, setMonthsRange] = useState<number>(3);
+
+    // Hook de exportación PDF
+    const { exportToPDF, isExporting } = useExportPDF();
 
     const periodOptions = [
     { label: "Últimos 3 meses", value: 3 },
@@ -149,17 +153,46 @@ type HorarioDemandaData = { hora: string; cantidad: number };
         fetchConcurrenciaPorMes();
     };
 
+    // 🔹 Exportar a PDF
+    const handleExportPDF = async () => {
+        const rangoFechas = dateRange?.[0] && dateRange?.[1]
+            ? `${dateRange[0].toLocaleDateString("es-AR")} - ${dateRange[1].toLocaleDateString("es-AR")}`
+            : "Todo el período";
+        const obraSocialSeleccionada = obraSocial || "Todas las obras sociales";
+
+        await exportToPDF("dashboard-pacientes-content", {
+            filename: "estadisticas-pacientes-fisiocore",
+            orientation: "landscape",
+            title: "Estadísticas de Pacientes - FisioCore",
+            subtitle: `${obraSocialSeleccionada} | ${rangoFechas}`,
+            includeDate: true,
+        });
+    };
+
     return (
         <div className="p-6 min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-white text-gray-800">
         {/* 🩺 Header */}
         <div className="mb-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 p-5">
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard de Pacientes</h1>
-            <p className="text-gray-600">
-            Visualiza métricas relacionadas con los pacientes, obras sociales y actividad general.
-            </p>
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard de Pacientes</h1>
+                    <p className="text-gray-600">
+                    Visualiza métricas relacionadas con los pacientes, obras sociales y actividad general.
+                    </p>
+                </div>
+                <Button
+                    icon={isExporting ? "pi pi-spin pi-spinner" : "pi pi-file-pdf"}
+                    label={isExporting ? "Generando PDF..." : "Exportar PDF"}
+                    severity="danger"
+                    outlined
+                    onClick={handleExportPDF}
+                    disabled={isExporting}
+                    className="h-12"
+                />
+            </div>
         </div>
 
-        {/* 🔹 Filtros */}
+        {/* Filtros (NO se exportan al PDF) */}
         <div className="bg-white/95 rounded-2xl border border-gray-200 shadow-sm p-5 mb-8 flex flex-wrap gap-4 items-end backdrop-blur-sm">
             <div className="flex-1 min-w-[220px]">
             <label className="block text-sm font-medium text-gray-700 mb-1">Obra Social</label>
@@ -189,6 +222,8 @@ type HorarioDemandaData = { hora: string; cantidad: number };
             <Button icon="pi pi-search" label="Filtrar" className="h-[42px]" severity="info" onClick={handleFilter} />
         </div>
 
+        {/* Contenedor exportable a PDF (sin filtros) */}
+        <div id="dashboard-pacientes-content">
         {/* 🔹 Reporte: Cantidad de pacientes por obra social */}
         <Card
             title="Cantidad de pacientes por obra social"
@@ -333,6 +368,8 @@ type HorarioDemandaData = { hora: string; cantidad: number };
                 </div>
             </Card>
         </div>
+        </div>
+        {/* Fin contenedor exportable a PDF */}
         </div>
     );
 }
