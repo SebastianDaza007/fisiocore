@@ -183,11 +183,10 @@ export default function HomeAdministradorPage() {
                 <i className="pi pi-spin pi-spinner text-teal-600 text-sm"></i>
               )}
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
               <KpiCard color="emerald" icon="pi pi-calendar" label="Turnos hoy" value={resumen.turnosHoy} />
               <KpiCard color="teal" icon="pi pi-users" label="Pacientes" value={resumen.pacientesHoy} />
               <KpiCard color="cyan" icon="pi pi-refresh" label="Cancelados / Pend." value={resumen.canceladosOPendientes} />
-              <KpiCard color="rose" icon="pi pi-bell" label="Alertas" value={resumen.alertas} />
             </div>
           </section>
 
@@ -243,7 +242,7 @@ export default function HomeAdministradorPage() {
         </div>
 
         {/* SIDEBAR DERECHO */}
-        <aside className="md:sticky md:top-4 space-y-3 max-h-[calc(100vh-7rem)] overflow-auto pr-1">
+        <aside className="md:sticky md:top-4 space-y-3 max-h-[calc(100vh-7rem)] overflow-auto pr-1 md:mt-[40x]">
           <Panel title="Próximos turnos" icon="pi pi-clock" color="emerald">
             {recordatorios.length > 0 ? (
               recordatorios.map(r => (

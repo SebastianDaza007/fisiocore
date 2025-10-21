@@ -152,11 +152,10 @@ export default function HomeAdministradorPage() {
                 <i className="pi pi-spin pi-spinner text-teal-600 text-sm"></i>
               )}
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
               <KpiCard color="emerald" icon="pi pi-calendar" label="Pacientes Hoy" value={resumen.pacientesHoy} />
               <KpiCard color="teal" icon="pi pi-users" label="Completados" value={resumen.completados} />
               <KpiCard color="cyan" icon="pi pi-refresh" label="Pendientes" value={resumen.pendientes} />
-              <KpiCard color="rose" icon="pi pi-bell" label="Alertas" value={resumen.alertas} />
             </div>
           </section>
           {/* Accesos principales (tus 3 tarjetas con imagen) */}
@@ -209,7 +208,7 @@ export default function HomeAdministradorPage() {
         </div>
 
         {/* SIDEBAR DERECHO */}
-        <aside className="md:sticky md:top-4 space-y-3 max-h-[calc(100vh-7rem)] overflow-auto pr-1">
+        <aside className="md:sticky md:top-4 space-y-3 max-h-[calc(100vh-7rem)] overflow-auto pr-1 md:mt-[40px]">
           <Panel title="Sala de espera" icon="pi pi-users" color="teal">
             {pacientesEnEspera.length > 0 ? (
               pacientesEnEspera.map(p => (

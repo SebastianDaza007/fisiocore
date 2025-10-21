@@ -37,17 +37,32 @@ function KpiCard({ color, icon, label, value }: { color: 'emerald' | 'teal' | 'c
   );
 }
 
-function StatsCard({ title, icon, items }: { title: string; icon: string; items: string[] }) {
+function ProfessionalRankingCard({ title, icon, profesionales }: { title: string; icon: string; profesionales: Array<{ id: number; nombre: string; especialidad: string; turnos: number }> }) {
   return (
     <div className="rounded-2xl bg-white/60 backdrop-blur-[2px] ring-1 ring-black/5 shadow-sm p-4">
       <div className="flex items-center gap-2 mb-2 text-[#2f4858]">
-        <i className={`${icon}`}></i>
+        <i className={`${icon} text-teal-600`}></i>
         <h3 className="font-semibold">{title}</h3>
       </div>
-      <ul className="list-disc pl-5 space-y-1 text-sm text-[#2f4858]">
-        {items.map((it, i) => (
-          <li key={i}>{it}</li>
-        ))}
+      <ul className="list-none pl-0 m-0 space-y-2">
+        {profesionales.length > 0 ? (
+          profesionales.map((p, i) => (
+            <li key={p.id} className="flex items-center gap-2 py-2 px-2 rounded-lg bg-teal-50/50 text-sm text-[#2f4858]">
+              <span className="flex items-center justify-center h-6 w-6 rounded-full bg-teal-600 text-white text-xs font-bold">
+                {i + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate">{p.nombre}</div>
+                <div className="text-xs text-[#2f4858]/70 truncate">{p.especialidad}</div>
+              </div>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 font-medium">
+                {p.turnos} turnos
+              </span>
+            </li>
+          ))
+        ) : (
+          <li className="py-1 text-sm text-[#2f4858]/60 italic">No hay datos del mes</li>
+        )}
       </ul>
     </div>
   );
@@ -71,35 +86,61 @@ function Panel({ title, icon, color, children }: { title: string; icon: string; 
   );
 }
 
+interface ResumenData {
+  resumen: {
+    turnosHoy: number;
+    ocupacion: number;
+    pacientesHoy: number;
+    profesionales: number;
+  };
+  proximosTurnos: Array<{ id: number; hora: string; profesional: string; especialidad: string }>;
+  topProfesionales: Array<{ id: number; nombre: string; especialidad: string; turnos: number }>;
+  alertasEstrategicas: Array<{ id: number; texto: string; icon: string }>;
+}
+
 export default function HomeGerentePage() {
   const [mounted, setMounted] = React.useState(false);
+  const [data, setData] = React.useState<ResumenData>({
+    resumen: {
+      turnosHoy: 0,
+      ocupacion: 0,
+      pacientesHoy: 0,
+      profesionales: 0,
+    },
+    proximosTurnos: [],
+    topProfesionales: [],
+    alertasEstrategicas: [],
+  });
+  const [loading, setLoading] = React.useState(true);
+
   React.useEffect(() => {
     const t = setTimeout(() => setMounted(true), 30);
     return () => clearTimeout(t);
   }, []);
 
-  // Datos de ejemplo (puedes reemplazarlos por datos reales)
-  const resumen = {
-    ingresosHoy: 320000,
-    ocupacion: 85, // %
-    pacientesHoy: 120,
-    alertas: 3,
-  };
+  // Cargar datos del día
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/gerente/home");
+        if (response.ok) {
+          const result = await response.json();
+          setData(result);
+        }
+      } catch (error) {
+        console.error("Error al cargar datos gerenciales:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const alertasEstrategicas = [
-    { id: 1, texto: 'Baja ocupación próxima semana (65%)', icon: 'pi pi-exclamation-triangle' },
-    { id: 2, texto: 'Aumento de cancelaciones en kinesiología (+12%)', icon: 'pi pi-chart-line' },
-  ];
-  const hitos = [
-    { id: 1, texto: 'Revisión trimestral de resultados - Vie 10:00', icon: 'pi pi-calendar' },
-    { id: 2, texto: 'Cierre de presupuesto mensual - Lun 17:00', icon: 'pi pi-wallet' },
-    { id: 3, texto: 'Presentación a directorio - Mar 09:00', icon: 'pi pi-briefcase' },
-  ];
-  const kpisClave = [
-    'Ticket promedio: $12.500',
-    'NPS: 74',
-    'Satisfacción profesional: 4.5/5',
-  ];
+    fetchData();
+    // Actualizar cada 30 segundos
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const { resumen, proximosTurnos, topProfesionales, alertasEstrategicas } = data;
 
   // href genérico: reemplazar cada "#" por el path real cuando esté definido
   const cards = [
@@ -141,12 +182,17 @@ export default function HomeGerentePage() {
         <div className="md:col-span-2 min-h-0 space-y-4">
           {/* Resumen del día */}
           <section className="mt-1">
-            <h2 className="text-[#2f4858] text-lg font-semibold mb-3">Resumen ejecutivo</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[#2f4858] text-lg font-semibold">Resumen ejecutivo</h2>
+              {loading && (
+                <i className="pi pi-spin pi-spinner text-teal-600 text-sm"></i>
+              )}
+            </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <KpiCard color="emerald" icon="pi pi-dollar" label="Ingresos Hoy" value={resumen.ingresosHoy} />
-              <KpiCard color="teal" icon="pi pi-briefcase" label="Ocupación %" value={resumen.ocupacion} />
-              <KpiCard color="cyan" icon="pi pi-users" label="Pacientes" value={resumen.pacientesHoy} />
-              <KpiCard color="rose" icon="pi pi-bell" label="Alertas" value={resumen.alertas} />
+              <KpiCard color="emerald" icon="pi pi-calendar" label="Turnos Hoy" value={resumen.turnosHoy} />
+              <KpiCard color="teal" icon="pi pi-chart-line" label="Ocupación %" value={resumen.ocupacion} />
+              <KpiCard color="cyan" icon="pi pi-users" label="Pacientes Hoy" value={resumen.pacientesHoy} />
+              <KpiCard color="rose" icon="pi pi-user-plus" label="Profesionales" value={resumen.profesionales} />
             </div>
           </section>
 
@@ -198,24 +244,20 @@ export default function HomeGerentePage() {
         </div>
 
         {/* SIDEBAR DERECHO */}
-        <aside className="md:sticky md:top-4 space-y-3 max-h-[calc(100vh-7rem)] overflow-auto pr-1">
+        <aside className="md:sticky md:top-4 space-y-3 max-h-[calc(100vh-7rem)] overflow-auto pr-1 md:mt-[88px]">
           <Panel title="Alertas estratégicas" icon="pi pi-bell" color="rose">
-            {alertasEstrategicas.map(a => (
-              <li key={a.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
-                <i className={`${a.icon} text-rose-600`}></i>
-                <span>{a.texto}</span>
-              </li>
-            ))}
+            {alertasEstrategicas.length > 0 ? (
+              alertasEstrategicas.map(a => (
+                <li key={a.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
+                  <i className={`${a.icon} text-rose-600`}></i>
+                  <span>{a.texto}</span>
+                </li>
+              ))
+            ) : (
+              <li className="py-1 text-sm text-[#2f4858]/60 italic">No hay alertas</li>
+            )}
           </Panel>
-          <StatsCard title="KPIs Clave" icon="pi pi-chart-bar" items={kpisClave} />
-          <Panel title="Hitos & Reuniones" icon="pi pi-calendar" color="emerald">
-            {hitos.map(h => (
-              <li key={h.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
-                <i className={`${h.icon} text-emerald-600`}></i>
-                <span>{h.texto}</span>
-              </li>
-            ))}
-          </Panel>
+          <ProfessionalRankingCard title="Top profesionales del mes" icon="pi pi-star" profesionales={topProfesionales} />
         </aside>
       </div>
     </div>

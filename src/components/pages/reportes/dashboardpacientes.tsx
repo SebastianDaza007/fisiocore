@@ -333,7 +333,7 @@ type HorarioDemandaData = { hora: string; cantidad: number };
         {/* 🧩 Nuevo Reporte: Concurrencia de pacientes por mes */}
         <div className="mt-10">
             <Card
-                title="Concurrencia de pacientes por mes"
+                title="Concurrencia de pacientes"
                 subTitle={`Últimos ${monthsRange} meses - Año ${new Date().getFullYear()}`}
                 className="rounded-2xl border border-gray-200 bg-white/95 shadow-sm hover:-translate-y-1 hover:shadow-lg"
             >
