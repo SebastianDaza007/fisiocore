@@ -17,6 +17,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
             dni_paciente: true,
             email_paciente: true,
             telefono_paciente: true,
+            enfermedad_cronica: true,
             obras_sociales: {
               select: {
                 nombre_obra_social: true

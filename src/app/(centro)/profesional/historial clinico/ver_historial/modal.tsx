@@ -228,7 +228,7 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Enfermedad Cronica 
+                    Condición Cronica 
                   </label>
                   <p className="text-gray-900">
                     {pacienteInfo.enfermedad_cronica || '-'}
