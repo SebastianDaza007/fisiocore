@@ -168,7 +168,7 @@ export function TurnosUI({
         {/* Paciente - DISEÑO 50/50 */}
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <FaSearch className="text-blue-600" />
+            <FaSearch className="text-teal-700" />
             Seleccionar Paciente
           </h2>
           
@@ -186,7 +186,7 @@ export function TurnosUI({
                   }}
                   onFocus={() => setMostrarOpciones(true)}
                   placeholder="Buscar paciente..."
-                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-900"
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-700 focus:border-teal-700 transition-all bg-white text-gray-900"
                 />
                 <FaSearch className="absolute left-3 top-3.5 text-gray-800" />
               </div>
@@ -196,7 +196,7 @@ export function TurnosUI({
                   {pacientesFiltrados.map((p) => (
                     <li
                       key={p.id}
-                      className="p-3 hover:bg-blue-50 cursor-pointer text-gray-800 border-b border-gray-100 last:border-b-0 transition-colors"
+                      className="p-3 hover:bg-teal-50 cursor-pointer text-gray-800 border-b border-gray-100 last:border-b-0 transition-colors"
                       onClick={() => {
                         setPacienteSeleccionado(p);
                         setBusqueda("");
@@ -214,7 +214,7 @@ export function TurnosUI({
             {/* Botón Registrar - 50% */}
             <button
               onClick={() => setIsDialogOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg flex-1 min-w-0"
+              className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-teal-700 to-teal-800 text-white rounded-lg hover:from-teal-800 hover:to-teal-900 transition-all duration-200 shadow-md hover:shadow-lg flex-1 min-w-0"
             >
               <FaUserPlus size={16} className="flex-shrink-0" />
               <span className="whitespace-nowrap text-sm font-semibold">Registrar Nuevo Paciente</span>
@@ -223,12 +223,12 @@ export function TurnosUI({
 
           {/* Paciente seleccionado */}
           {pacienteSeleccionado && (
-            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="mt-3 p-3 bg-teal-50 border border-teal-200 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-teal-700 rounded-full"></div>
                 <div className="flex-1">
-                  <p className="font-semibold text-green-800 text-sm">{pacienteSeleccionado.nombre}</p>
-                  <p className="text-xs text-green-600">DNI: {pacienteSeleccionado.dni}</p>
+                  <p className="font-semibold text-teal-900 text-sm">{pacienteSeleccionado.nombre}</p>
+                  <p className="text-xs text-teal-700">DNI: {pacienteSeleccionado.dni}</p>
                 </div>
               </div>
             </div>
@@ -238,7 +238,7 @@ export function TurnosUI({
         {/* Datos del turno */}
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <FaCalendarAlt className="text-blue-600" />
+            <FaCalendarAlt className="text-teal-700" />
             Datos del Turno
           </h2>
 
@@ -251,7 +251,7 @@ export function TurnosUI({
               <select
                 value={especialidadSeleccionada}
                 onChange={(e) => setEspecialidadSeleccionada(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-700"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-700 focus:border-teal-700 transition-all bg-white text-gray-700"
               >
                 <option value="">Seleccione una especialidad</option>
                 {especialidades.map((esp) => (
@@ -274,7 +274,7 @@ export function TurnosUI({
                 onChange={(e) =>
                   setProfesionalSeleccionado(e.target.value ? Number(e.target.value) : null)
                 }
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-700"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-700 focus:border-teal-700 transition-all bg-white text-gray-700"
               >
                 <option value="">Todos los profesionales</option>
                 {profesionales
@@ -301,7 +301,7 @@ export function TurnosUI({
                 onChange={(e) =>
                   setTipoConsultaSeleccionada(e.target.value ? Number(e.target.value) : null)
                 }
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-700"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-700 focus:border-teal-700 transition-all bg-white text-gray-700"
               >
                 <option value="">Seleccione el tipo de consulta</option>
                 {tiposConsulta && tiposConsulta.length > 0 ? (
@@ -326,7 +326,7 @@ export function TurnosUI({
               <select
                 value={obraSocialSeleccionada}
                 onChange={(e) => setObraSocialSeleccionada(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-700"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-700 focus:border-teal-700 transition-all bg-white text-gray-700"
                 disabled={!profesionalSeleccionado}
               >
                 <option value="">
@@ -377,7 +377,7 @@ export function TurnosUI({
           <div className="flex gap-3">
             <button
               onClick={handleLimpiar}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 shadow-md hover:shadow-lg font-semibold"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-md hover:shadow-lg font-semibold"
             >
               <FaTrash size={14} />
               Limpiar
@@ -385,7 +385,7 @@ export function TurnosUI({
             <button
               onClick={handleAgendar}
               disabled={!turnoSeleccionado || !pacienteSeleccionado || !tipoConsultaSeleccionada}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg font-semibold"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-teal-700 text-white rounded-lg hover:bg-teal-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg font-semibold"
             >
               <FaCheck size={14} />
               Confirmar Turno
@@ -429,8 +429,8 @@ export function TurnosUI({
                             setTurnoSeleccionado(turno);
                           }
                         }}
-                        className={`border-b border-gray-100 hover:bg-blue-50 transition-colors ${
-                          turnoSeleccionado?.id === turno.id ? 'bg-blue-100' : ''
+                        className={`border-b border-gray-100 hover:bg-teal-50 transition-colors ${
+                          turnoSeleccionado?.id === turno.id ? 'bg-teal-100' : ''
                         } ${turno.estado !== "ocupado" ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                       >
                         <td className="p-3 text-gray-900 text-sm">
@@ -449,7 +449,7 @@ export function TurnosUI({
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             turno.estado === "ocupado"
                               ? "bg-red-100 text-red-800"
-                              : "bg-blue-600 text-white"
+                              : "bg-teal-700 text-white"
                           }`}>
                             {turno.estado}
                           </span>
@@ -461,7 +461,7 @@ export function TurnosUI({
                             disabled={turno.estado === "ocupado"}
                             checked={turnoSeleccionado?.id === turno.id}
                             onChange={() => setTurnoSeleccionado(turno)}
-                            className="w-4 h-4 text-blue-600 focus:ring-blue-500 pointer-events-none"
+                            className="w-4 h-4 text-teal-700 focus:ring-teal-700 pointer-events-none"
                           />
                         </td>
                       </tr>
