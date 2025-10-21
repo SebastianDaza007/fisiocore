@@ -66,6 +66,9 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState<number | number[]>(0);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editNota, setEditNota] = useState<string>("");
+  const [savingNota, setSavingNota] = useState<boolean>(false);
 
   // Función para obtener el color de la obra social
   const getObraSocialClass = (obraSocial: string | undefined) => {
@@ -126,6 +129,39 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
       return () => document.removeEventListener('keydown', handleEsc);
     }
   }, [isOpen, onClose]);
+
+  // Manejo de anotación post turno
+  const startEditNota = (index: number, current: string | undefined) => {
+    setEditingIndex(index);
+    setEditNota(current ?? "");
+  };
+
+  const cancelEditNota = () => {
+    setEditingIndex(null);
+    setEditNota("");
+  };
+
+  const saveNotaPostTurno = async (registroId: number, index: number) => {
+    try {
+      setSavingNota(true);
+      const res = await fetch(`/api/historial_clinico/nota_post_turno/${registroId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nota_post_turno: editNota })
+      });
+      if (!res.ok) throw new Error('No se pudo actualizar la anotación');
+      const json = await res.json();
+      const nuevaNota = json?.data?.nota_post_turno ?? editNota;
+      setRegistros(prev => prev.map((r, i) => i === index ? { ...r, nota_post_turno: nuevaNota } : r));
+      setEditingIndex(null);
+      setEditNota("");
+    } catch (e) {
+      console.error(e);
+      alert('Ocurrió un error al guardar la anotación.');
+    } finally {
+      setSavingNota(false);
+    }
+  };
 
   // ✅ FUNCIONES DE FORMATO CORREGIDAS (VERSIÓN RECOMENDADA)
   const formatFecha = (fechaString: string) => {
@@ -188,7 +224,7 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
 
           <div className="p-6">
             {/* PRIMER BOX: Información Personal */}
-            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-6">
+            {/*<div className="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <IdentificationIcon className="w-5 h-5" />
                 Información Personal
@@ -228,7 +264,7 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Condición Cronica 
+                    Enfermedad Cronica 
                   </label>
                   <p className="text-gray-900">
                     {pacienteInfo.enfermedad_cronica || '-'}
@@ -377,12 +413,48 @@ export const VerHistorialDialog: React.FC<VerHistorialDialogProps> = ({
                           {registro.nota_post_turno && (
                             <div>
                               <div className="flex items-center gap-2 mb-3">
-                                <i className="pi pi-list text-pink-500"></i>
+                                <i className="pi pi-file text-pink-500"></i>
                                 <h4 className="font-semibold text-gray-700">Nota Post Turno</h4>
                               </div>
                               <p className="text-gray-800 bg-pink-50 p-4 rounded-lg border border-pink-100">
                                 {registro.nota_post_turno}
                               </p>
+                            </div>
+                          )}
+                          {/* Editor de anotación */}
+                          {editingIndex === index ? (
+                            <div className="space-y-2">
+                              <textarea
+                                className="w-full border rounded-md p-2 text-sm"
+                                rows={3}
+                                value={editNota}
+                                onChange={(e) => setEditNota(e.target.value)}
+                                placeholder="Escribe una anotación post turno..."
+                              />
+                              <div className="flex items-center gap-2">
+                                <button
+                                  className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm disabled:opacity-60"
+                                  onClick={() => saveNotaPostTurno(registro.id_registro, index)}
+                                  disabled={savingNota}
+                                >
+                                  {savingNota ? 'Guardando...' : 'Guardar'}
+                                </button>
+                                <button
+                                  className="px-3 py-1.5 rounded-md bg-gray-200 text-gray-800 text-sm"
+                                  onClick={cancelEditNota}
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end">
+                              <button
+                                className="px-3 py-1.5 rounded-md bg-green-600 text-white text-sm"
+                                onClick={() => startEditNota(index, registro.nota_post_turno)}
+                              >
+                                Agregar Anotación
+                              </button>
                             </div>
                           )}
 
