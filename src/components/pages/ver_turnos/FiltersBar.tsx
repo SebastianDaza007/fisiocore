@@ -81,7 +81,7 @@ export default function FiltersBar({ onClear, onRefresh, value, options, onChang
         label="Limpiar Filtros"
         icon="pi pi-filter-slash"
         onClick={onClear}
-        severity="secondary"
+        className="p-button-outlined p-button-secondary"
       />
       {onRefresh && (
         <Button

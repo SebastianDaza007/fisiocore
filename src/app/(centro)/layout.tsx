@@ -30,6 +30,7 @@ export default function DashboardLayout({
   // Función para obtener items del sidebar según el rol
   const getSidebarItemsByRole = (rol: string): SidebarItem[] => {
     const baseItems = [
+      { icon: "pi-user", label: "Mi Perfil", path: "/perfil", options: null },
       { icon: "pi-cog", label: "Ajustes", path: "/ajustes", options: null },
     ];
 
@@ -37,6 +38,7 @@ export default function DashboardLayout({
       case 'ADMIN':
         return [
           { icon: "pi-user-plus", label: "Profesionales", path: "/profesional", options: null },
+          { icon: "pi-briefcase", label: "Ver Empleados", path: "/gerente/ver_empleados", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/turnos", options: null },
           { icon: "pi-calendar-plus", label: "Agendar", path: "/administrativo/agendar", options: null },
@@ -47,8 +49,9 @@ export default function DashboardLayout({
 
       case 'GERENTE':
         return [
-          { icon: "pi-home", label: "Home", path: "/gerente", options: null },
+          { icon: "pi-home", label: "Inicio", path: "/gerente", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
+          { icon: "pi-briefcase", label: "Ver Empleados", path: "/gerente/ver_empleados", options: null },
           { icon: "pi-users", label: "Estadisticas pacientes", path: "/gerente/estadisticas-pacientes", options: null },
           { icon: "pi-chart-bar", label: "Estadisticas profesionales", path: "/gerente/estadisticas", options: null },
           ...baseItems
@@ -56,19 +59,20 @@ export default function DashboardLayout({
 
       case 'PROFESIONAL':
         return [
-          { icon: "pi-home", label: "Home", path: "/profesional", options: null },
+          { icon: "pi-home", label: "Inicio", path: "/profesional", options: null },
           { icon: "pi-calendar", label: "Agenda de Turnos", path: "/profesional/agenda_turnos", options: null },
           { icon: "pi-users", label: "Mis Pacientes", path: "/desarrollo", options: null },
-          { icon: "pi-folder-open", label: "Historia Clinica", path: "/desarrollo", options: null },
+          { icon: "pi-chart-bar", label: "Mis Estadísticas", path: "/profesional/reportes", options: null },
           ...baseItems
         ];
 
       case 'ADMINISTRATIVO':
         return [
-          { icon: "pi-home", label: "Home", path: "/administrativo", options: null },
+          { icon: "pi-home", label: "Inicio", path: "/administrativo", options: null },
           { icon: "pi-calendar-plus", label: "Agendar Turno", path: "/administrativo/agendar", options: null },
           { icon: "pi-calendar", label: "Turnos", path: "/administrativo/turnos/ver", options: null },
           { icon: "pi-id-card", label: "Ver Profesionales", path: "/administrativo/ver_profesional", options: null },
+          { icon: "pi-users", label: "Ver Pacientes", path: "/administrativo/ver_pacientes", options: null },
           ...baseItems
         ];
 
@@ -105,6 +109,7 @@ export default function DashboardLayout({
         <DashboardNavbar
           idUsuario={user.id}
           usuario={{ nombre: user.nombre }}
+          rol={user.rol}
           urlLogin="/login"
           urlRegistro="/registro"
           notificaciones={[]}

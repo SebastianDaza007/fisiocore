@@ -10,6 +10,7 @@ interface PacienteInfo {
   dni_paciente: string;
   email_paciente?: string;
   telefono_paciente: string;
+  enfermedad_cronica?: string;
   obras_sociales: {
     nombre_obra_social: string;
   };
@@ -47,7 +48,11 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
   const [turno, setTurno] = useState<TurnoParaCompletar | null>(null);
   const [formData, setFormData] = useState({
     texto_comentario: '',
-    texto_indicacion: ''
+    texto_indicacion: '',
+    objetivos_sesion: '',
+    ejercicios_asignados: '',
+    instrumentos_utilizados: '',
+    nota_post_turno: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +115,11 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
     if (isOpen) {
       setFormData({
         texto_comentario: '',
-        texto_indicacion: ''
+        texto_indicacion: '',
+        objetivos_sesion: '',
+        ejercicios_asignados: '',
+        instrumentos_utilizados: '',
+        nota_post_turno: ''
       });
       setError(null);
     }
@@ -137,8 +146,8 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
     e.preventDefault();
     
     // Validación - ambos campos requeridos
-    if (!formData.texto_comentario.trim() || !formData.texto_indicacion.trim()) {
-      setError('Ambos campos son obligatorios');
+    if (!formData.texto_comentario.trim() || !formData.texto_indicacion.trim()|| !formData.objetivos_sesion.trim()) {
+      setError('Los campos Observaciones, Indicaciones y Objetivos de la Sesión son obligatorios');
       return;
     }
 
@@ -182,7 +191,10 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
           turno_id: turnoId,
           profesional_id: turno?.profesionales.id_profesional,
           texto_comentario: formData.texto_comentario.trim(),
-          texto_indicacion: formData.texto_indicacion.trim()
+          texto_indicacion: formData.texto_indicacion.trim(),
+          objetivos_sesion: formData.objetivos_sesion.trim(),
+          ejercicios_asignados: formData.ejercicios_asignados.trim(),
+          instrumentos_utilizados: formData.instrumentos_utilizados.trim(),
         })
       });
 
@@ -224,7 +236,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
           {/* Header del modal */}
           <div className="border-b border-gray-200 p-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">Completar Turno</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Registrar nuevo historial clinico</h2>
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 text-2xl font-bold transition-colors"
@@ -284,12 +296,20 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                       </label>
                       <p className="text-gray-900">{turno.pacientes.telefono_paciente}</p>
                     </div>
-                    
-                    <div className="md:col-span-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Enfermedad Cronica
+                      </label>
+                      <p className="text-gray-900">
+                        {turno.pacientes.enfermedad_cronica || '-'}
+                      </p>
+                    </div>
+
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Obra Social
                       </label>
-                      <p className={getObraSocialClass(turno.pacientes.obras_sociales?.nombre_obra_social)}>
+                      <p className="text-gray-900">
                         {turno.pacientes.obras_sociales?.nombre_obra_social || 'No especificada'}
                       </p>
                     </div>
@@ -354,6 +374,67 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                       </div>
                     </div>
 
+                    {/* Objetivo de la sesion */}
+                    <div>
+                      <label htmlFor="objetivos_sesion" className="block text-sm font-medium text-gray-700 mb-2">
+                        Objetivos de la Sesión *
+                      </label>
+                        <textarea
+                          id="objetivos_sesion"
+                          name="objetivos_sesion"
+                          value={formData.objetivos_sesion}
+                          onChange={handleChange}
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900"
+                          placeholder="Mejorar movilidad lumbar, Enseñar ejercicios de autocuidado y ejercicios de rotación..."
+                        />
+                      
+                      <div className="text-right text-xs text-gray-500 mt-1">
+                        {formData.objetivos_sesion.length} caracteres
+                      </div>
+                    </div>
+                    {/* Ejercicios Asignados */}
+                    <div>
+                      <label htmlFor="ejercicios_asignados" className='block text-sm font-medium text-gray-700 mb-2'>
+                        Ejercicios Asignados
+                      </label>
+                        <textarea
+                          id="ejercicios_asignados"
+                          name="ejercicios_asignados"
+                          value={formData.ejercicios_asignados}
+                          onChange={handleChange}
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900"
+                          placeholder="• Puente: 3 series de 15 repeticiones
+                          • Estiramiento de gato: 10 repeticiones lentas
+                          • Respiración diafragmática: 5 minutos"
+                        />
+                      <div className="text-right text-xs text-gray-500 mt-1">
+                        {formData.ejercicios_asignados.length} caracteres
+                     </div>
+                    </div>
+                    {/* Instrumentos Utilizados */}
+                    <div>
+                      <label htmlFor="instrumentos_utilizados" className='block text-sm font-medium text-gray-700 mb-2'>
+                        Instrumentos Utilizados
+                      </label>
+                        <textarea
+                          id="instrumentos_utilizados"
+                          name="instrumentos_utilizados"
+                          value={formData.instrumentos_utilizados}
+                          onChange={handleChange}
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900"
+                          placeholder="• Espatula
+                          • Cinta de goma
+                          • Camilla de tracción lumbar
+                          • Electroestimulador TENS"
+                        />
+                        <div className="text-right text-xs text-gray-500 mt-1">
+                          {formData.instrumentos_utilizados.length} caracteres
+                        </div>
+                      </div>
+
                     {/* Botones */}
                     <div className="flex gap-3 pt-4 border-t border-gray-200">
                       <button
@@ -366,7 +447,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                       </button>
                       <button
                         type="submit"
-                        disabled={loading || !formData.texto_comentario.trim() || !formData.texto_indicacion.trim()}
+                        disabled={loading || !formData.texto_comentario.trim() || !formData.texto_indicacion.trim() || !formData.objetivos_sesion.trim()}
                         className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {loading ? (
@@ -378,7 +459,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                             Completando...
                           </span>
                         ) : (
-                          'Completar Turno'
+                          'Registrar'
                         )}
                       </button>
                     </div>

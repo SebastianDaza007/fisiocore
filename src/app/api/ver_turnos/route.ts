@@ -112,15 +112,17 @@ export async function GET(req: NextRequest) {
       const profesionalNombre = `${user?.nombre_usuario ?? ""} ${user?.apellido_usuario ?? ""}`.trim();
 
       // 🔹 Arreglo clave: combinar fecha_turno + hora_turno
-      //const fecha = t.fecha_turno; 
-      //const hora = t.hora_turno;  
+      const fecha = t.fecha_turno;
       // Devuelve siempre la hora exacta guardada en Postgres
       const horaLocal = t.hora_turno.toISOString().substring(11, 16);
 
       return {
-        id:t.id_turno,
+        id: t.id_turno,
+        fecha: fecha, // 👈 agregado para mostrar fecha del turno
         pacienteDni,
         pacienteNombre,
+        pacienteId: t.paciente_id, // 👈 agregado para reprogramar
+        profesionalId: t.profesional_id, // 👈 agregado para reprogramar
         hora: horaLocal,
         especialidad: esp?.nombre_especialidad ?? "",
         profesional: profesionalNombre || "",

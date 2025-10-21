@@ -56,6 +56,7 @@ model pacientes {
   apellido_paciente         String              @db.VarChar(40)
   sexo_paciente             String              @default("No especificado") @db.VarChar(15)   
   email_paciente            String?             @db.VarChar(150)
+  enfermedad_cronica        String?             @db.VarChar(150)
   dni_paciente              String              @db.VarChar(8)
   telefono_paciente         String              @db.VarChar(20)
   fecha_nacimiento_paciente DateTime            @db.Date
@@ -95,6 +96,10 @@ model registros_clinicos {
   profesional_id   Int
   texto_comentario String?
   texto_indicacion String?
+  objetivos_sesion String?
+  ejercicios_asignados String?
+  instrumentos_utilizados String?
+  nota_post_turno   String?
   fecha_registro   DateTime      @db.Timestamp(6)
   pacientes        pacientes     @relation(fields: [paciente_id], references: [id_paciente], onDelete: NoAction, onUpdate: NoAction)
   profesionales    profesionales @relation(fields: [profesional_id], references: [id_profesional], onDelete: NoAction, onUpdate: NoAction)

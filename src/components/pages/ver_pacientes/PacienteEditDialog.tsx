@@ -29,6 +29,10 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
   const [obra, setObra] = useState<string | null>(null);
   const [obraOptions, setObraOptions] = useState<ObraOption[]>([]);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [originalEmail, setOriginalEmail] = useState<string>("");
+  const [originalDomicilio, setOriginalDomicilio] = useState<string>("");
+  const [originalTelefono, setOriginalTelefono] = useState<string>("");
   const [originalObra, setOriginalObra] = useState<string | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [changesPreview, setChangesPreview] = useState<string[]>([]);
@@ -42,41 +46,64 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
 
   useEffect(() => {
     if (!isOpen || !paciente) return;
-    setEmail(paciente.email_paciente ?? "");
-    setDomicilio(paciente.direccion_paciente ?? "");
-    setTelefono(paciente.telefono_paciente ?? "");
 
-    // Cargar obras sociales reales y preseleccionar la del paciente si está disponible
-    const loadObras = async () => {
+    // Cargar datos completos del paciente desde la BD
+    const loadPacienteData = async () => {
       try {
+        setLoading(true);
         const [osRes, pacientesRes] = await Promise.all([
           fetch('/api/obras_sociales'),
           fetch('/api/paciente'),
         ]);
+
+        // Cargar opciones de obras sociales
         const osData = await osRes.json();
         const opts: ObraOption[] = Array.isArray(osData)
-          ? osData.map((o: any) => ({ label: o.nombre_obra_social, value: o.nombre_obra_social }))
+          ? osData.map((o: { nombre_obra_social: string }) => ({ label: o.nombre_obra_social, value: o.nombre_obra_social }))
           : [];
         setObraOptions(opts);
 
-        let currentObra: string | null = null;
+        // Buscar datos completos del paciente
         if (pacientesRes.ok) {
           const list = await pacientesRes.json();
           const found = Array.isArray(list)
-            ? list.find((p: any) => Number(p.id_paciente) === Number(paciente.id_paciente))
+            ? list.find((p: {
+                id_paciente: number;
+                email_paciente?: string | null;
+                direccion_paciente?: string | null;
+                telefono_paciente?: string | null;
+                obras_sociales?: { nombre_obra_social: string };
+              }) => Number(p.id_paciente) === Number(paciente.id_paciente))
             : null;
-          currentObra = found?.obras_sociales?.nombre_obra_social ?? null;
+
+          if (found) {
+            // Cargar datos del paciente desde la BD
+            const emailBD = found.email_paciente ?? "";
+            const domicilioBD = found.direccion_paciente ?? "";
+            const telefonoBD = found.telefono_paciente ?? "";
+            const obraBD = found.obras_sociales?.nombre_obra_social ?? null;
+
+            setEmail(emailBD);
+            setDomicilio(domicilioBD);
+            setTelefono(telefonoBD);
+            setObra(obraBD);
+
+            // Guardar valores originales para comparación
+            setOriginalEmail(emailBD);
+            setOriginalDomicilio(domicilioBD);
+            setOriginalTelefono(telefonoBD);
+            setOriginalObra(obraBD);
+          }
         }
-        setObra(currentObra);
-        setOriginalObra(currentObra);
       } catch (e) {
-        console.error(e);
+        console.error('Error cargando datos del paciente:', e);
         setObraOptions([]);
-        setObra(null);
-        setOriginalObra(null);
+      } finally {
+        setLoading(false);
       }
     };
-    loadObras();
+
+    loadPacienteData();
   }, [isOpen, paciente]);
 
   if (!isOpen || !paciente) return null;
@@ -89,14 +116,15 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
       return t === '' ? null : t;
     };
 
-    const oldEmail = norm(paciente.email_paciente ?? null);
+    // Usar los valores originales cargados desde la BD
+    const oldEmail = norm(originalEmail);
     const newEmail = norm(email);
-    const oldDom = norm(paciente.direccion_paciente ?? null);
+    const oldDom = norm(originalDomicilio);
     const newDom = norm(domicilio);
-    const oldTel = norm(paciente.telefono_paciente ?? null);
+    const oldTel = norm(originalTelefono);
     const newTel = norm(telefono);
-    const oldObra = norm(originalObra ?? null);
-    const newObra = norm(obra ?? null);
+    const oldObra = norm(originalObra);
+    const newObra = norm(obra);
 
     const changes: string[] = [];
     if (oldEmail !== newEmail) changes.push(`- Correo: ${oldEmail ?? '-'} -> ${newEmail ?? '-'}`);
@@ -169,53 +197,66 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
 
         {/* Body */}
         <div className="p-6 space-y-4">
-          <div className="space-y-3">
-            <label className="text-sm text-gray-700">Correo*</label>
-            <span className="p-input-icon-left w-full">
-              <i className="pi pi-envelope text-gray-700" style={{ paddingLeft: '1rem' }} />
-              <InputText
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="correo@paciente"
-                className="w-full"
-                style={{ paddingLeft: '2.5rem' }}
-              />
-            </span>
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <i className="pi pi-spin pi-spinner text-3xl text-teal-600"></i>
+              <span className="ml-3 text-gray-600">Cargando datos...</span>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3">
+                <label className="text-sm text-gray-700">Correo*</label>
+                <span className="p-input-icon-left w-full">
+                  <i className="pi pi-envelope text-gray-700" style={{ paddingLeft: '1rem' }} />
+                  <InputText
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="correo@paciente"
+                    className="w-full"
+                    style={{ paddingLeft: '2.5rem' }}
+                    disabled={loading}
+                  />
+                </span>
+              </div>
 
-          <div className="space-y-3">
-            <label className="text-sm text-gray-700">Domicilio*</label>
-            <InputText
-              value={domicilio}
-              onChange={(e) => setDomicilio(e.target.value)}
-              placeholder="Domicilio del paciente"
-              className="w-full"
-            />
-          </div>
+              <div className="space-y-3">
+                <label className="text-sm text-gray-700">Domicilio*</label>
+                <InputText
+                  value={domicilio}
+                  onChange={(e) => setDomicilio(e.target.value)}
+                  placeholder="Domicilio del paciente"
+                  className="w-full"
+                  disabled={loading}
+                />
+              </div>
 
-          <div className="space-y-3">
-            <label className="text-sm text-gray-700">Teléfono*</label>
-            <InputText
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              placeholder="XXXXXXXXXX"
-              className="w-full"
-            />
-          </div>
+              <div className="space-y-3">
+                <label className="text-sm text-gray-700">Teléfono*</label>
+                <InputText
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  placeholder="XXXXXXXXXX"
+                  className="w-full"
+                  disabled={loading}
+                />
+              </div>
 
-          <div className="space-y-3">
-            <label className="text-sm text-gray-700">Obra social</label>
-            <Dropdown
-              value={obra}
-              options={obraOptions}
-              onChange={(e) => setObra(e.value)}
-              placeholder="Seleccionar"
-              className="w-full"
-              filter
-              showClear
-              emptyMessage="Sin obras sociales"
-            />
-          </div>
+              <div className="space-y-3">
+                <label className="text-sm text-gray-700">Obra social</label>
+                <Dropdown
+                  value={obra}
+                  options={obraOptions}
+                  onChange={(e) => setObra(e.value)}
+                  placeholder="Seleccionar"
+                  className="w-full"
+                  filter
+                  showClear
+                  emptyMessage="Sin obras sociales"
+                  disabled={loading}
+                />
+              </div>
+            </>
+          )}
 
           <div className="pt-2">
             <Button
@@ -241,7 +282,7 @@ export default function PacienteEditDialog({ isOpen, paciente, onClose, onSave }
             icon="pi pi-check"
             className="p-button-success w-full sm:w-1/2"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || loading}
           />
         </div>
       </div>
