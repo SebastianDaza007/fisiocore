@@ -36,47 +36,6 @@ function KpiCard({ color, icon, label, value }: { color: "emerald" | "teal" | "c
   );
 }
 
-function ProfessionalsTodayCard({ title, icon, people }: { title: string; icon: string; people: string[] }) {
-  const count = people.length;
-  return (
-    <div className="rounded-2xl bg-white/60 backdrop-blur-[2px] ring-1 ring-black/5 shadow-sm p-4">
-      <div className="flex items-center justify-between mb-2 text-[#2f4858]">
-        <div className="flex items-center gap-2">
-          <i className={`${icon}`}></i>
-          <h3 className="font-semibold">{title}</h3>
-        </div>
-        <span className="text-sm px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200">{count}</span>
-      </div>
-      <div className="flex flex-wrap gap-2 max-h-24 overflow-auto pr-1">
-        {people.map((p, i) => (
-          <span key={i} className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 text-xs">
-            <span className="grid place-items-center h-5 w-5 rounded-full bg-emerald-200 text-emerald-900 font-medium">
-              {p.split(" ").map(w => w[0]).join("")}
-            </span>
-            {p}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StatsCard({ title, icon, items }: { title: string; icon: string; items: string[] }) {
-  return (
-    <div className="rounded-2xl bg-white/60 backdrop-blur-[2px] ring-1 ring-black/5 shadow-sm p-4">
-      <div className="flex items-center gap-2 mb-2 text-[#2f4858]">
-        <i className={`${icon}`}></i>
-        <h3 className="font-semibold">{title}</h3>
-      </div>
-      <ul className="list-disc pl-5 space-y-1 text-sm text-[#2f4858]">
-        {items.map((it, i) => (
-          <li key={i}>{it}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function Panel({ title, icon, color, children }: { title: string; icon: string; color: "emerald" | "teal" | "rose" | "blue"; children: React.ReactNode; }) {
   const headerColor: Record<string, string> = {
     emerald: "text-emerald-700",
@@ -95,35 +54,59 @@ function Panel({ title, icon, color, children }: { title: string; icon: string; 
   );
 }
 
+interface ResumenData {
+  resumen: {
+    pacientesHoy: number;
+    completados: number;
+    pendientes: number;
+    alertas: number;
+  };
+  proximosTurnos: Array<{ id: number; texto: string; icon: string }>;
+  pacientesEnEspera: Array<{ id: number; texto: string; icon: string }>;
+}
+
 export default function HomeAdministradorPage() {
   const [mounted, setMounted] = React.useState(false);
+  const [data, setData] = React.useState<ResumenData>({
+    resumen: {
+      pacientesHoy: 0,
+      completados: 0,
+      pendientes: 0,
+      alertas: 0,
+    },
+    proximosTurnos: [],
+    pacientesEnEspera: [],
+  });
+  const [loading, setLoading] = React.useState(true);
+
   React.useEffect(() => {
     const t = setTimeout(() => setMounted(true), 30);
     return () => clearTimeout(t);
   }, []);
 
-  // Datos de ejemplo (puedes reemplazarlos por datos reales)
-  const resumen = {
-    turnosHoy: 18,
-    pacientesHoy: 10,
-    Pendientes: 8,
-    alertas: 2,
-  };
+  // Cargar datos del día
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/profesional/home");
+        if (response.ok) {
+          const result = await response.json();
+          setData(result);
+        }
+      } catch (error) {
+        console.error("Error al cargar datos del día:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const avisosProfesionales = [
-    { id: 1, texto: "Cambio de horario - Lautaro P. (15:00 → 16:00)" },
-    { id: 2, texto: "Turno cancelado - Tomas P." },
-    { id: 3, texto: "Cambio de horario - Rodrigo P. (15:30 → 16:30)" },
-  ];
-  const alertasClinicas = [
-    { id: 1, texto: "Indicacion clínica sin Registrar: Jose S.", icon: "pi pi-exclamation-triangle" },
-    { id: 2, texto: "Comentario clínico sin Registrar: María S.", icon: "pi pi-exclamation-triangle" },
-  ];
-  const recordatorios = [
-    { id: 1, texto: "Turno 09:00 - Juan P.", icon: "pi pi-clock" },
-    { id: 2, texto: "Turno 10:30 - Ana G.", icon: "pi pi-clock" },
-    { id: 3, texto: "Turno 12:00 - Pedro L.", icon: "pi pi-clock" },
-  ];
+    fetchData();
+    // Actualizar cada 30 segundos
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const { resumen, proximosTurnos, pacientesEnEspera } = data;
 
   // href genérico: reemplazar cada "#" por el path real cuando esté definido
   const cards = [
@@ -163,11 +146,16 @@ export default function HomeAdministradorPage() {
         <div className="md:col-span-2 min-h-0 space-y-4">
           {/* Resumen del día */}
           <section className="mt-1">
-            <h2 className="text-[#2f4858] text-lg font-semibold mb-3">Resumen del día</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[#2f4858] text-lg font-semibold">Resumen del día</h2>
+              {loading && (
+                <i className="pi pi-spin pi-spinner text-teal-600 text-sm"></i>
+              )}
+            </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <KpiCard color="emerald" icon="pi pi-calendar" label="Pacientes Hoy" value={resumen.turnosHoy} />
-              <KpiCard color="teal" icon="pi pi-users" label="Completados" value={resumen.pacientesHoy} />
-              <KpiCard color="cyan" icon="pi pi-refresh" label="Pendientes" value={resumen.Pendientes} />
+              <KpiCard color="emerald" icon="pi pi-calendar" label="Pacientes Hoy" value={resumen.pacientesHoy} />
+              <KpiCard color="teal" icon="pi pi-users" label="Completados" value={resumen.completados} />
+              <KpiCard color="cyan" icon="pi pi-refresh" label="Pendientes" value={resumen.pendientes} />
               <KpiCard color="rose" icon="pi pi-bell" label="Alertas" value={resumen.alertas} />
             </div>
           </section>
@@ -222,22 +210,29 @@ export default function HomeAdministradorPage() {
 
         {/* SIDEBAR DERECHO */}
         <aside className="md:sticky md:top-4 space-y-3 max-h-[calc(100vh-7rem)] overflow-auto pr-1">
-          <Panel title="Avisos Importantes" icon="pi pi-bell" color="rose">
-            {alertasClinicas.map(a => (
-              <li key={a.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
-                <i className={`${a.icon} text-rose-600`}></i>
-                <span>{a.texto}</span>
-              </li>
-            ))}
+          <Panel title="Sala de espera" icon="pi pi-users" color="teal">
+            {pacientesEnEspera.length > 0 ? (
+              pacientesEnEspera.map(p => (
+                <li key={p.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
+                  <i className={`${p.icon} text-teal-600`}></i>
+                  <span>{p.texto}</span>
+                </li>
+              ))
+            ) : (
+              <li className="py-1 text-sm text-[#2f4858]/60 italic">No hay pacientes esperando</li>
+            )}
           </Panel>
-          <StatsCard title="Avisos de horarios" icon="pi pi-calendar-times" items={avisosProfesionales.map(a => a.texto)} />
-          <Panel title="Turnos próximos" icon="pi pi-clock" color="emerald">
-            {recordatorios.map(r => (
-              <li key={r.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
-                <i className={`${r.icon} text-emerald-600`}></i>
-                <span>{r.texto}</span>
-              </li>
-            ))}
+          <Panel title="Próximos turnos" icon="pi pi-clock" color="emerald">
+            {proximosTurnos.length > 0 ? (
+              proximosTurnos.map(r => (
+                <li key={r.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
+                  <i className={`${r.icon} text-emerald-600`}></i>
+                  <span>{r.texto}</span>
+                </li>
+              ))
+            ) : (
+              <li className="py-1 text-sm text-[#2f4858]/60 italic">No hay turnos próximos hoy</li>
+            )}
           </Panel>
         </aside>
       </div>

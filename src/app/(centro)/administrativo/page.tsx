@@ -48,31 +48,19 @@ function ProfessionalsTodayCard({ title, icon, people }: { title: string; icon: 
         <span className="text-sm px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200">{count}</span>
       </div>
       <div className="flex flex-wrap gap-2 max-h-24 overflow-auto pr-1">
-        {people.map((p, i) => (
-          <span key={i} className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 text-xs">
-            <span className="grid place-items-center h-5 w-5 rounded-full bg-emerald-200 text-emerald-900 font-medium">
-              {p.split(" ").map(w => w[0]).join("")}
+        {people.length > 0 ? (
+          people.map((p, i) => (
+            <span key={i} className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 text-xs">
+              <span className="grid place-items-center h-5 w-5 rounded-full bg-emerald-200 text-emerald-900 font-medium">
+                {p.split(" ").map(w => w[0]).join("")}
+              </span>
+              {p}
             </span>
-            {p}
-          </span>
-        ))}
+          ))
+        ) : (
+          <span className="text-sm text-[#2f4858]/60 italic">No hay profesionales con turnos hoy</span>
+        )}
       </div>
-    </div>
-  );
-}
-
-function StatsCard({ title, icon, items }: { title: string; icon: string; items: string[] }) {
-  return (
-    <div className="rounded-2xl bg-white/60 backdrop-blur-[2px] ring-1 ring-black/5 shadow-sm p-4">
-      <div className="flex items-center gap-2 mb-2 text-[#2f4858]">
-        <i className={`${icon}`}></i>
-        <h3 className="font-semibold">{title}</h3>
-      </div>
-      <ul className="list-disc pl-5 space-y-1 text-sm text-[#2f4858]">
-        {items.map((it, i) => (
-          <li key={i}>{it}</li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -94,38 +82,61 @@ function Panel({ title, icon, color, children }: { title: string; icon: string; 
   );
 }
 
+interface ResumenData {
+  resumen: {
+    turnosHoy: number;
+    pacientesHoy: number;
+    canceladosOPendientes: number;
+    alertas: number;
+  };
+  recordatorios: Array<{ id: number; texto: string; icon: string }>;
+  alertasImportantes: Array<{ id: number; texto: string; icon: string }>;
+  profesionalesHoy: string[];
+}
+
 export default function HomeAdministradorPage() {
   const [mounted, setMounted] = React.useState(false);
+  const [data, setData] = React.useState<ResumenData>({
+    resumen: {
+      turnosHoy: 0,
+      pacientesHoy: 0,
+      canceladosOPendientes: 0,
+      alertas: 0,
+    },
+    recordatorios: [],
+    alertasImportantes: [],
+    profesionalesHoy: [],
+  });
+  const [loading, setLoading] = React.useState(true);
+
   React.useEffect(() => {
     const t = setTimeout(() => setMounted(true), 30);
     return () => clearTimeout(t);
   }, []);
 
-  // Datos de ejemplo (puedes reemplazarlos por datos reales)
-  const resumen = {
-    turnosHoy: 18,
-    pacientesHoy: 16,
-    canceladosOPendientes: 3,
-    alertas: 2,
-  };
+  // Cargar datos del día
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/home");
+        if (response.ok) {
+          const result = await response.json();
+          setData(result);
+        }
+      } catch (error) {
+        console.error("Error al cargar datos del día:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const recordatorios = [
-    { id: 1, texto: "Turno 09:00 - Juan P.", icon: "pi pi-clock" },
-    { id: 2, texto: "Turno 10:30 - Ana G.", icon: "pi pi-clock" },
-    { id: 3, texto: "Turno 12:00 - Pedro L.", icon: "pi pi-clock" },
-  ];
-  const deudas = [
-    { id: 1, texto: "María S. - Saldo $12.000" },
-    { id: 2, texto: "Luis R. - Documentación DNI" },
-  ];
-  const avisosProfesionales = [
-    { id: 1, texto: "Cambio de horario - Dra. Torres (14:00 → 15:00)" },
-  ];
-  const alertasImportantes = [
-    { id: 1, texto: "Nuevo paciente registrado: Carla M.", icon: "pi pi-user-plus" },
-    { id: 2, texto: "Profesional ausente: Lic. Gómez", icon: "pi pi-exclamation-triangle" },
-  ];
-  const profesionalesHoy = ["Lic. Gómez", "Dra. Torres", "Lic. Ruiz", "Dr. Pérez"];
+    fetchData();
+    // Actualizar cada 30 segundos
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const { resumen, recordatorios, alertasImportantes, profesionalesHoy } = data;
 
   // href genérico: reemplazar cada "#" por el path real cuando esté definido
   const cards = [
@@ -166,7 +177,12 @@ export default function HomeAdministradorPage() {
         <div className="md:col-span-2 min-h-0 space-y-4">
           {/* Resumen del día */}
           <section className="mt-1">
-            <h2 className="text-[#2f4858] text-lg font-semibold mb-3">Resumen del día</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[#2f4858] text-lg font-semibold">Resumen del día</h2>
+              {loading && (
+                <i className="pi pi-spin pi-spinner text-teal-600 text-sm"></i>
+              )}
+            </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <KpiCard color="emerald" icon="pi pi-calendar" label="Turnos hoy" value={resumen.turnosHoy} />
               <KpiCard color="teal" icon="pi pi-users" label="Pacientes" value={resumen.pacientesHoy} />
@@ -228,29 +244,31 @@ export default function HomeAdministradorPage() {
 
         {/* SIDEBAR DERECHO */}
         <aside className="md:sticky md:top-4 space-y-3 max-h-[calc(100vh-7rem)] overflow-auto pr-1">
-          <Panel title="Recordatorios próximos" icon="pi pi-clock" color="emerald">
-            {recordatorios.map(r => (
-              <li key={r.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
-                <i className={`${r.icon} text-emerald-600`}></i>
-                <span>{r.texto}</span>
-              </li>
-            ))}
+          <Panel title="Próximos turnos" icon="pi pi-clock" color="emerald">
+            {recordatorios.length > 0 ? (
+              recordatorios.map(r => (
+                <li key={r.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
+                  <i className={`${r.icon} text-emerald-600`}></i>
+                  <span>{r.texto}</span>
+                </li>
+              ))
+            ) : (
+              <li className="py-1 text-sm text-[#2f4858]/60 italic">No hay turnos próximos hoy</li>
+            )}
           </Panel>
-          <Panel title="Alertas importantes" icon="pi pi-bell" color="rose">
-            {alertasImportantes.map(a => (
-              <li key={a.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
-                <i className={`${a.icon} text-rose-600`}></i>
-                <span>{a.texto}</span>
-              </li>
-            ))}
+          <Panel title="Sala de espera" icon="pi pi-users" color="teal">
+            {alertasImportantes.length > 0 ? (
+              alertasImportantes.map(a => (
+                <li key={a.id} className="flex items-center gap-2 py-1 text-sm text-[#2f4858] truncate">
+                  <i className={`${a.icon} text-teal-600`}></i>
+                  <span>{a.texto}</span>
+                </li>
+              ))
+            ) : (
+              <li className="py-1 text-sm text-[#2f4858]/60 italic">No hay pacientes esperando</li>
+            )}
           </Panel>
-          <Panel title="Pacientes con deudas / docs" icon="pi pi-wallet" color="teal">
-            {deudas.map(d => (
-              <li key={d.id} className="py-1 text-sm text-[#2f4858] truncate">{d.texto}</li>
-            ))}
-          </Panel>
-          <StatsCard title="Avisos de horarios" icon="pi pi-calendar-times" items={avisosProfesionales.map(a => a.texto)} />
-          <ProfessionalsTodayCard title="Profesionales disponibles hoy" icon="pi pi-verified" people={profesionalesHoy} />
+          <ProfessionalsTodayCard title="Profesionales con turnos hoy" icon="pi pi-users" people={profesionalesHoy} />
         </aside>
       </div>
     </div>
