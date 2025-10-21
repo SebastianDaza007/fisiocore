@@ -57,34 +57,38 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fetching, setFetching] = useState(false);
+  const [enfermedadCronica, setEnfermedadCronica] = useState('');
+  const [guardandoEnfermedad, setGuardandoEnfermedad] = useState(false);
+  const [editandoEnfermedad, setEditandoEnfermedad] = useState(false);
 
   const getObraSocialClass = (obraSocial: string | undefined) => {
-  const baseClasses = "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white";
-  
-  if (!obraSocial) {
-    return `${baseClasses} bg-gray-500`;
-  }
-  
-  const obraSocialLower = obraSocial.toLowerCase();
-  
-  if (obraSocialLower.includes('osde')) {
-    return `${baseClasses} bg-yellow-500`; // OSDE - Amarillo
-  } else if (obraSocialLower.includes('particular') || obraSocialLower.includes('privada')) {
-    return `${baseClasses} bg-blue-500`; // Particular - Azul
-  } else if (obraSocialLower.includes('swiss')) {
-    return `${baseClasses} bg-red-500`; // Swiss Medical - Rojo
-  } else if (obraSocialLower.includes('galeno')) {
-    return `${baseClasses} bg-green-500`; // Galeno - Verde
-  } else if (obraSocialLower.includes('omint')) {
-    return `${baseClasses} bg-purple-500`; // Omint - Púrpura
-  } else if (obraSocialLower.includes('medifé')) {
-    return `${baseClasses} bg-orange-500`; // Medifé - Naranja
-  } else if (obraSocialLower.includes('sancor')) {
-    return `${baseClasses} bg-teal-500`; // Sancor - Verde azulado
-  } else {
-    return `${baseClasses} bg-indigo-500`; // Otras - Azul índigo
-  }
-};
+    const baseClasses = "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white";
+    
+    if (!obraSocial) {
+      return `${baseClasses} bg-gray-500`;
+    }
+    
+    const obraSocialLower = obraSocial.toLowerCase();
+    
+    if (obraSocialLower.includes('osde')) {
+      return `${baseClasses} bg-yellow-500`;
+    } else if (obraSocialLower.includes('particular') || obraSocialLower.includes('privada')) {
+      return `${baseClasses} bg-blue-500`;
+    } else if (obraSocialLower.includes('swiss')) {
+      return `${baseClasses} bg-red-500`;
+    } else if (obraSocialLower.includes('galeno')) {
+      return `${baseClasses} bg-green-500`;
+    } else if (obraSocialLower.includes('omint')) {
+      return `${baseClasses} bg-purple-500`;
+    } else if (obraSocialLower.includes('medifé')) {
+      return `${baseClasses} bg-orange-500`;
+    } else if (obraSocialLower.includes('sancor')) {
+      return `${baseClasses} bg-teal-500`;
+    } else {
+      return `${baseClasses} bg-indigo-500`;
+    }
+  };
+
   // Fetch datos del turno
   useEffect(() => {
     const fetchTurno = async () => {
@@ -99,6 +103,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
         
         const turnoData = await response.json();
         setTurno(turnoData);
+        setEnfermedadCronica(turnoData.pacientes.enfermedad_cronica || '');
       } catch (err) {
         console.error('Error fetching turno:', err);
         setError('Error al cargar los datos del turno');
@@ -146,7 +151,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
     e.preventDefault();
     
     // Validación - ambos campos requeridos
-    if (!formData.texto_comentario.trim() || !formData.texto_indicacion.trim()|| !formData.objetivos_sesion.trim()) {
+    if (!formData.texto_comentario.trim() || !formData.texto_indicacion.trim() || !formData.objetivos_sesion.trim()) {
       setError('Los campos Observaciones, Indicaciones y Objetivos de la Sesión son obligatorios');
       return;
     }
@@ -296,13 +301,82 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                       </label>
                       <p className="text-gray-900">{turno.pacientes.telefono_paciente}</p>
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Enfermedad Cronica
+                        Condición Crónica
                       </label>
-                      <p className="text-gray-900">
-                        {turno.pacientes.enfermedad_cronica || '-'}
-                      </p>
+                      <div className="flex gap-2 items-start">
+                        {editandoEnfermedad ? (
+                          <div className="flex gap-2 items-start w-full">
+                            <textarea
+                              value={enfermedadCronica}
+                              onChange={(e) => setEnfermedadCronica(e.target.value)}
+                              rows={2}
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900"
+                              placeholder="Ingresar enfermedades crónicas del paciente..."
+                            />
+                            <div className="flex gap-1">
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  setGuardandoEnfermedad(true);
+                                  try {
+                                    const res = await fetch(`/api/paciente`, {
+                                      method: 'PUT',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        id_paciente: turno?.pacientes.id_paciente,
+                                        enfermedad_cronica: enfermedadCronica
+                                      })
+                                    });
+                                    
+                                    if (!res.ok) {
+                                      const errorText = await res.text();
+                                      throw new Error(`Error ${res.status}: ${errorText}`);
+                                    }
+                                    
+                                    
+                                    setEditandoEnfermedad(false);
+                                  } catch (error: any) {
+                                    console.error('Error:', error);
+                                    setError('Error al actualizar enfermedad crónica: ' + error.message);
+                                  } finally {
+                                    setGuardandoEnfermedad(false);
+                                  }
+                                }}
+                                disabled={guardandoEnfermedad}
+                                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEnfermedadCronica(turno?.pacientes.enfermedad_cronica || '');
+                                  setEditandoEnfermedad(false);
+                                }}
+                                className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="flex-1 text-gray-900 py-2">
+                              {enfermedadCronica || '-'}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setEditandoEnfermedad(true)}
+                              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                            >
+                              ✏️
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
 
                     <div>
@@ -393,6 +467,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                         {formData.objetivos_sesion.length} caracteres
                       </div>
                     </div>
+
                     {/* Ejercicios Asignados */}
                     <div>
                       <label htmlFor="ejercicios_asignados" className='block text-sm font-medium text-gray-700 mb-2'>
@@ -413,6 +488,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                         {formData.ejercicios_asignados.length} caracteres
                      </div>
                     </div>
+
                     {/* Instrumentos Utilizados */}
                     <div>
                       <label htmlFor="instrumentos_utilizados" className='block text-sm font-medium text-gray-700 mb-2'>
