@@ -200,16 +200,6 @@ type HorarioDemandaData = { hora: string; cantidad: number };
 
         {/* Filtros (NO se exportan al PDF) */}
         <div className="bg-white/95 rounded-2xl border border-gray-200 shadow-sm p-5 mb-8 flex flex-wrap gap-4 items-end backdrop-blur-sm">
-            <div className="flex-1 min-w-[220px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Obra Social</label>
-            <Dropdown
-                value={obraSocial}
-                options={obrasSociales}
-                onChange={(e) => setObraSocial(e.value)}
-                placeholder="Seleccionar"
-                className="w-full"
-            />
-            </div>
 
             <div className="flex-1 min-w-[220px]">
             <label className="block text-sm font-medium text-gray-700 mb-1">Rango de fechas</label>
