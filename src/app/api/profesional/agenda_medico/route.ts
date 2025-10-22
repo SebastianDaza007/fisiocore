@@ -15,13 +15,15 @@ export async function GET(req: Request) {
       where: {
         fecha_turno: new Date(fecha),
         profesional_id: Number(profesionalId),
-        estado_turno_id: 5
+        estado_turno_id: {
+          in: [2, 5] // CONFIRMADO (2) y EN ESPERA (5)
+        }
       },
       include: {
-        pacientes: { 
+        pacientes: {
           include: {
             obras_sociales: true,
-          } 
+          }
         },
         tipos_consulta: true,
       },
