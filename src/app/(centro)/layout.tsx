@@ -31,7 +31,6 @@ export default function DashboardLayout({
   const getSidebarItemsByRole = (rol: string): SidebarItem[] => {
     const baseItems = [
       { icon: "pi-user", label: "Mi Perfil", path: "/perfil", options: null },
-      { icon: "pi-cog", label: "Ajustes", path: "/ajustes", options: null },
     ];
 
     switch (rol) {

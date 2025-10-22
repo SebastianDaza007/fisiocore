@@ -265,8 +265,8 @@ export default function TurnosPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm mx-4 transform transition-all duration-300 scale-100">
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
@@ -275,7 +275,7 @@ export default function TurnosPage() {
                 El turno para {pacienteSeleccionado?.nombre} ha sido agendado exitosamente.
               </p>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-600 h-2 rounded-full animate-progress"></div>
+                <div className="bg-teal-700 h-2 rounded-full animate-progress"></div>
               </div>
               <p className="text-sm text-gray-500 mt-2">Cerrando automáticamente...</p>
             </div>

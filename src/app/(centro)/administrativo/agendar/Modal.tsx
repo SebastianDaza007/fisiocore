@@ -208,8 +208,8 @@ export const RegistrarPacienteDialog: React.FC<RegistrarPacienteDialogProps> = (
           <div className="p-6">
             {message && (
               <div className={`p-4 rounded-lg mb-6 ${
-                message.type === 'success' 
-                  ? 'bg-green-50 border border-green-200 text-green-700' 
+                message.type === 'success'
+                  ? 'bg-teal-50 border border-teal-200 text-teal-700'
                   : 'bg-red-50 border border-red-200 text-red-700'
               }`}>
                 <p className="font-medium">{message.text}</p>
@@ -407,7 +407,7 @@ export const RegistrarPacienteDialog: React.FC<RegistrarPacienteDialogProps> = (
                 <button 
                   type="submit" 
                   disabled={loading} 
-                  className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 bg-teal-700 text-white rounded-lg hover:bg-teal-800 transition duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center">

@@ -153,7 +153,8 @@ export default function Miagenda() {
     const fechaISO = date.toISOString().split("T")[0];
     const res = await fetch(`/api/profesional/agenda_medico?fecha=${fechaISO}&profesionalId=${user.profesionalId}`);
     const data = await res.json();
-    setTurnos(data.filter((t: { estado_turno_id: number }) => t.estado_turno_id === 5));
+    // Mostrar turnos EN ESPERA (5) y CONFIRMADOS (2)
+    setTurnos(data.filter((t: { estado_turno_id: number }) => t.estado_turno_id === 5 || t.estado_turno_id === 2));
   };
 
   // 📌 Fetch de turnos con polling
@@ -228,6 +229,7 @@ export default function Miagenda() {
         tipoConsulta: turno?.tipos_consulta?.nombre_tipo_consulta || '-',
         obraSocial: turno?.pacientes?.obras_sociales?.nombre_obra_social || '-',
         isEmpty: !turno,
+        isConfirmado: turno?.estado_turno_id === 2, // Nuevo campo para identificar turnos confirmados
       });
     }
 
@@ -381,14 +383,18 @@ export default function Miagenda() {
             value={turnosData}
             tableStyle={{ minWidth: '50rem' }}
             className="pt-2"
-            rowClassName={(data) => data.isEmpty ? 'bg-gray-100' : ''}
+            rowClassName={(data) => {
+              if (data.isEmpty) return 'bg-gray-100';
+              if (data.isConfirmado) return 'bg-gray-50 opacity-60';
+              return '';
+            }}
           >
             <Column
               field="horario"
               header="Horario"
               style={{ width: '120px' }}
               body={(rowData) => (
-                <span className={`font-semibold ${rowData.isEmpty ? 'text-gray-400' : 'text-teal-700'}`}>
+                <span className={`font-semibold ${rowData.isEmpty ? 'text-gray-400' : rowData.isConfirmado ? 'text-gray-400' : 'text-teal-700'}`}>
                   {rowData.horario}
                 </span>
               )}
@@ -397,7 +403,7 @@ export default function Miagenda() {
               field="paciente"
               header="Paciente"
               body={(rowData) => (
-                <span className={rowData.isEmpty ? 'text-gray-400 italic' : ''}>
+                <span className={rowData.isEmpty ? 'text-gray-400 italic' : rowData.isConfirmado ? 'text-gray-400' : ''}>
                   {rowData.isEmpty ? 'Disponible' : rowData.paciente}
                 </span>
               )}
@@ -406,7 +412,7 @@ export default function Miagenda() {
               field="tipoConsulta"
               header="Tipo de consulta"
               body={(rowData) => (
-                <span className={rowData.isEmpty ? 'text-gray-400' : ''}>
+                <span className={rowData.isEmpty || rowData.isConfirmado ? 'text-gray-400' : ''}>
                   {rowData.isEmpty ? '-' : rowData.tipoConsulta}
                 </span>
               )}
@@ -415,7 +421,7 @@ export default function Miagenda() {
               field="obraSocial"
               header="Obra social"
               body={(rowData) => (
-                <span className={rowData.isEmpty ? 'text-gray-400' : ''}>
+                <span className={rowData.isEmpty || rowData.isConfirmado ? 'text-gray-400' : ''}>
                   {rowData.isEmpty ? '-' : rowData.obraSocial}
                 </span>
               )}
@@ -427,6 +433,29 @@ export default function Miagenda() {
                 if (rowData.isEmpty) {
                   return (
                     <span className="text-gray-400 text-sm italic">Sin turno</span>
+                  );
+                }
+
+                // Si es turno confirmado (paciente no presente aún)
+                if (rowData.isConfirmado) {
+                  return (
+                    <div className="flex gap-2">
+                      {/* Botones deshabilitados para turnos confirmados */}
+                      <Button
+                        icon="pi pi-folder-open"
+                        className="p-button-text p-button-info"
+                        disabled
+                        tooltip="Paciente aún no presente"
+                        tooltipOptions={{ position: 'top' }}
+                      />
+                      <Button
+                        icon="pi pi-check"
+                        className="p-button-outlined p-button-success"
+                        disabled
+                        tooltip="Paciente aún no presente"
+                        tooltipOptions={{ position: 'top' }}
+                      />
+                    </div>
                   );
                 }
 
