@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
-import { Button } from 'primereact/button';
 import { FilterMatchMode } from 'primereact/api';
 import { DataTableFilterMeta } from 'primereact/datatable';
 import PacienteFilter from '../../../../components/pages/ver_pacientes/PacienteFilter';
@@ -95,12 +94,6 @@ export default function VerPacientesPage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">Gestión de pacientes</h1>
           </div>
-          <Button
-            icon="pi pi-user-plus"
-            label="Dar de alta paciente"
-            className="p-button-success shadow-sm text-sm md:text-base w-full sm:w-auto"
-            onClick={() => console.log('Ir a alta de paciente')}
-          />
         </div>
 
         <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">

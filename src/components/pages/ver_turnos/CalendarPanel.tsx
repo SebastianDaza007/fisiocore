@@ -78,10 +78,17 @@ export default function CalendarPanel({ value, onChange }: Props) {
     const base = "w-9 h-9 flex items-center justify-center rounded-full text-sm transition-colors";
     let classes = "text-gray-700";
     if (isOtherMonth) classes += " opacity-40";
-    if (isSelected) classes += " bg-sky-600 text-white shadow";
-    else if (isToday) classes += " ring-2 ring-sky-300";
+    if (isSelected) classes += " text-white shadow";
+    else if (isToday) classes += " ring-2 ring-teal-300";
 
-    return <div className={`${base} ${classes}`}>{date.day}</div>;
+    return (
+      <div
+        className={`${base} ${classes}`}
+        style={isSelected ? { backgroundColor: "#0C645A" } : undefined}
+      >
+        {date.day}
+      </div>
+    );
   };
   return (
     <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-4 text-gray-800">

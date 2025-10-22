@@ -60,6 +60,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
   const [enfermedadCronica, setEnfermedadCronica] = useState('');
   const [guardandoEnfermedad, setGuardandoEnfermedad] = useState(false);
   const [editandoEnfermedad, setEditandoEnfermedad] = useState(false);
+  const [contrayendo, setContrayendo] = useState(false);
 
   const getObraSocialClass = (obraSocial: string | undefined) => {
     const baseClasses = "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white";
@@ -278,14 +279,14 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                         {turno.pacientes.nombre_paciente} {turno.pacientes.apellido_paciente}
                       </p>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         DNI
                       </label>
                       <p className="text-gray-900">{turno.pacientes.dni_paciente}</p>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Email
@@ -294,7 +295,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                         {turno.pacientes.email_paciente || 'No especificado'}
                       </p>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Teléfono
@@ -302,13 +303,13 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                       <p className="text-gray-900">{turno.pacientes.telefono_paciente}</p>
                     </div>
 
-                    <div>
+                    <div className={`transition-all duration-300 ease-in-out ${editandoEnfermedad ? "md:col-span-2" : ""}`}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Condición Crónica
                       </label>
                       <div className="flex gap-2 items-start">
                         {editandoEnfermedad ? (
-                          <div className="flex gap-2 items-start w-full">
+                          <div className={`flex gap-2 items-start w-full ${contrayendo ? 'animate-contractOut' : 'animate-expandIn'}`}>
                             <textarea
                               value={enfermedadCronica}
                               onChange={(e) => setEnfermedadCronica(e.target.value)}
@@ -316,7 +317,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900"
                               placeholder="Ingresar enfermedades crónicas del paciente..."
                             />
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 flex-shrink-0">
                               <button
                                 type="button"
                                 onClick={async () => {
@@ -330,14 +331,18 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                                         enfermedad_cronica: enfermedadCronica
                                       })
                                     });
-                                    
+
                                     if (!res.ok) {
                                       const errorText = await res.text();
                                       throw new Error(`Error ${res.status}: ${errorText}`);
                                     }
-                                    
-                                    
-                                    setEditandoEnfermedad(false);
+
+                                    // Activar animación de contracción
+                                    setContrayendo(true);
+                                    setTimeout(() => {
+                                      setEditandoEnfermedad(false);
+                                      setContrayendo(false);
+                                    }, 300);
                                   } catch (error: any) {
                                     console.error('Error:', error);
                                     setError('Error al actualizar enfermedad crónica: ' + error.message);
@@ -346,7 +351,7 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                                   }
                                 }}
                                 disabled={guardandoEnfermedad}
-                                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+                                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 text-sm"
                               >
                                 ✓
                               </button>
@@ -354,9 +359,14 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                                 type="button"
                                 onClick={() => {
                                   setEnfermedadCronica(turno?.pacientes.enfermedad_cronica || '');
-                                  setEditandoEnfermedad(false);
+                                  // Activar animación de contracción
+                                  setContrayendo(true);
+                                  setTimeout(() => {
+                                    setEditandoEnfermedad(false);
+                                    setContrayendo(false);
+                                  }, 300);
                                 }}
-                                className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm"
+                                className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 text-sm"
                               >
                                 ✕
                               </button>
@@ -370,9 +380,10 @@ export const CompletarTurnoDialog: React.FC<CompletarTurnoDialogProps> = ({
                             <button
                               type="button"
                               onClick={() => setEditandoEnfermedad(true)}
-                              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                              className="px-3 py-2 rounded-lg transition-all duration-200 text-sm flex-shrink-0 hover:bg-teal-700 hover:scale-105 active:scale-95"
+                              style={{ backgroundColor: '#0C645A', color: 'white' }}
                             >
-                              ✏️
+                              <i className="pi pi-pencil"></i>
                             </button>
                           </>
                         )}
